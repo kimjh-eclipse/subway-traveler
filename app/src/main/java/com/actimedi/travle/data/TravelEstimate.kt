@@ -9,7 +9,10 @@ import kotlin.math.sqrt
 
 /** How a travel time was arrived at — surfaced so the UI never passes a guess off as fact. */
 enum class EstimateBasis {
-    /** Counted the stations along the line. Most trustworthy. */
+    /** 서울교통공사 실측 역간 시간을 그대로 더했다. 가장 믿을 만하다. */
+    MEASURED,
+
+    /** 실측이 없는 구간이 섞여 평균 역당 시간으로 메웠다. */
     STATIONS,
 
     /** Straight-line distance at an average speed — used for buses and odd hops. */
@@ -36,6 +39,11 @@ data class TravelEstimate(val minutes: Int, val basis: EstimateBasis)
  */
 object TravelTimes {
 
+    /**
+     * 실측이 없는 구간에 쓰는 역당 시간(초).
+     * 서울교통공사 1~8호선 264개 구간의 평균이 1분 32초였다.
+     */
+    const val SECONDS_PER_HOP = 92
     const val MINUTES_PER_HOP = 2
     const val DEFAULT_TRANSFER_WAIT = 4
     const val DEFAULT_STAY_MINUTES = 30
@@ -54,11 +62,20 @@ object TravelTimes {
         val from = network.findStation(fromName)
         val to = network.findStation(toName)
         if (from == null || to == null) return TravelEstimate(FALLBACK_MINUTES, EstimateBasis.FALLBACK)
-        if (from == to) return TravelEstimate(0, EstimateBasis.STATIONS)
+        if (from == to) return TravelEstimate(0, EstimateBasis.MEASURED)
 
         network.stationsBetween(line, from, to)?.let { run ->
+            var seconds = 0
+            var measured = 0
             val hops = (run.size - 1).coerceAtLeast(1)
-            return TravelEstimate(hops * MINUTES_PER_HOP, EstimateBasis.STATIONS)
+            run.zipWithNext { a, b ->
+                val known = network.secondsBetweenAdjacent(a, b)
+                if (known != null) measured++
+                seconds += known ?: SECONDS_PER_HOP
+            }
+            val minutes = Math.round(seconds / 60.0).toInt().coerceAtLeast(1)
+            val basis = if (measured == hops) EstimateBasis.MEASURED else EstimateBasis.STATIONS
+            return TravelEstimate(minutes, basis)
         }
 
         val a = network.stations[from]

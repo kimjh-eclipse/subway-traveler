@@ -34,7 +34,24 @@ data class SubwayNetwork(
     val source: String = "",
     val stations: List<SubwayStation> = emptyList(),
     val lines: List<SubwayLine> = emptyList(),
+    /**
+     * 실측 역간 소요시간. `[역A, 역B, 초]`이며 방향은 구분하지 않는다.
+     * 서울교통공사 1~8호선만 있어 나머지 노선은 추정으로 메운다.
+     */
+    val times: List<List<Int>> = emptyList(),
+    val timeSource: String = "",
 ) {
+    /** (작은 인덱스, 큰 인덱스) → 초. 조회가 잦아 한 번만 만든다. */
+    private val edgeSeconds: Map<Long, Int> by lazy {
+        times.associate { (a, b, seconds) -> edgeKey(a, b) to seconds }
+    }
+
+    /** 두 역이 이웃일 때의 실측 소요시간(초). 자료가 없으면 null. */
+    fun secondsBetweenAdjacent(a: Int, b: Int): Int? = edgeSeconds[edgeKey(a, b)]
+
+    private fun edgeKey(a: Int, b: Int): Long =
+        minOf(a, b).toLong() * 100_000L + maxOf(a, b).toLong()
+
     /** Station name → index. Built once; lookups happen per rendered route. */
     private val byName: Map<String, Int> by lazy {
         stations.withIndex().associate { (i, s) -> s.name to i }

@@ -25,8 +25,6 @@
     <string name="nav_settings">設定</string>
 
     <string name="empty_filtered">この条件に合う区間はありません。</string>
-    <string name="placeholder_title">準備中</string>
-    <string name="placeholder_settings">設定画面はまだ準備中です。</string>
 
     <string name="new_route">新しいルート</string>
     <string name="route_empty_title">ルートがまだありません</string>
@@ -128,4 +126,14 @@
         <item>金曜日</item><item>土曜日</item><item>日曜日</item>
     </string-array>
     <string name="line_needs_transfer">直通の路線がありません。乗り換えが必要な区間なので、ルート検索から埋めてください。</string>
+    <string name="about_network_title">路線データ</string>
+    <string name="about_network_body">© OpenStreetMap contributors · ODbL 1.0
+首都圏676駅、24路線。</string>
+    <string name="about_times_title">駅間の所要時間</string>
+    <string name="about_times_body">ソウル交通公社「駅間距離および所要時間」· 公共ヌリ第1類型
+1〜8号線の264区間は実測値、その他の路線は平均（1駅あたり1分32秒）で補った目安です。</string>
+    <string name="about_fares_title">運賃</string>
+    <string name="about_fares_body">首都圏統合運賃をもとにした目安です。営業距離表がないため座標距離で近似しており、実際の運賃と異なる場合があります。</string>
+    <string name="about_fonts_title">フォント</string>
+    <string name="about_fonts_body">SUIT, SUITE · SIL Open Font License 1.1</string>
 </resources>

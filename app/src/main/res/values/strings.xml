@@ -25,8 +25,6 @@
     <string name="nav_settings">설정</string>
 
     <string name="empty_filtered">해당 조건에 맞는 구간이 없습니다.</string>
-    <string name="placeholder_title">준비 중</string>
-    <string name="placeholder_settings">설정 화면은 아직 준비 중입니다.</string>
 
     <!-- 첫 화면 · 빈 상태 -->
     <string name="new_route">새 경로</string>
@@ -139,4 +137,14 @@
         <item>금요일</item><item>토요일</item><item>일요일</item>
     </string-array>
     <string name="line_needs_transfer">직결 노선이 없습니다. 갈아타야 하는 구간이니 길찾기로 채워 보세요.</string>
+    <string name="about_network_title">노선도 데이터</string>
+    <string name="about_network_body">© OpenStreetMap contributors · ODbL 1.0
+수도권 676개 역, 24개 노선.</string>
+    <string name="about_times_title">역간 소요시간</string>
+    <string name="about_times_body">서울교통공사 「역간거리 및 소요시간」 · 공공누리 제1유형
+1~8호선 264개 구간은 실측값이고, 나머지 노선은 평균(역당 1분 32초)으로 메운 예상치입니다.</string>
+    <string name="about_fares_title">요금</string>
+    <string name="about_fares_body">수도권 통합운임 기준으로 계산한 예상치입니다. 영업거리표가 없어 좌표 거리로 근사하며, 실제 요금과 다를 수 있습니다.</string>
+    <string name="about_fonts_title">글꼴</string>
+    <string name="about_fonts_body">SUIT, SUITE · SIL Open Font License 1.1</string>
 </resources>

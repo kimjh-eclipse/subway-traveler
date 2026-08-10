@@ -38,8 +38,8 @@ data class SearchResult(
  */
 object RouteSearch {
 
-    /** 최소 환승 탐색에서 환승 한 번에 매기는 벌점(분). */
-    const val TRANSFER_WEIGHT = 120
+    /** 최소 환승 탐색에서 환승 한 번에 매기는 벌점(초). */
+    const val TRANSFER_WEIGHT = 120 * 60
 
     private data class Node(val station: Int, val line: String?)
 
@@ -52,7 +52,7 @@ object RouteSearch {
         val start = Node(from, null)
 
         val cost = mutableMapOf(start to 0)
-        val minutes = mutableMapOf(start to 0)
+        val seconds = mutableMapOf(start to 0)
         val transfers = mutableMapOf(start to 0)
         val cameFrom = mutableMapOf<Node, Pair<Node, String>>()
         val queue = PriorityQueue<Pair<Int, Node>>(compareBy { it.first })
@@ -69,16 +69,18 @@ object RouteSearch {
 
             adjacency[node.station].orEmpty().forEach { edge ->
                 val changed = node.line != null && node.line != edge.line
-                val rideMinutes = TravelTimes.MINUTES_PER_HOP
-                val waitMinutes = if (changed) TravelTimes.DEFAULT_TRANSFER_WAIT else 0
+                // 실측 역간 시간이 있으면 그것을, 없으면 평균으로 메운다.
+                val rideSeconds = network.secondsBetweenAdjacent(node.station, edge.to)
+                    ?: TravelTimes.SECONDS_PER_HOP
+                val waitSeconds = if (changed) TravelTimes.DEFAULT_TRANSFER_WAIT * 60 else 0
                 val penalty = if (changed && goal == SearchGoal.FEWEST_TRANSFERS) TRANSFER_WEIGHT else 0
 
                 val next = Node(edge.to, edge.line)
-                val nextCost = spent + rideMinutes + waitMinutes + penalty
+                val nextCost = spent + rideSeconds + waitSeconds + penalty
                 if (nextCost >= (cost[next] ?: Int.MAX_VALUE)) return@forEach
 
                 cost[next] = nextCost
-                minutes[next] = (minutes[node] ?: 0) + rideMinutes + waitMinutes
+                seconds[next] = (seconds[node] ?: 0) + rideSeconds + waitSeconds
                 transfers[next] = (transfers[node] ?: 0) + if (changed) 1 else 0
                 cameFrom[next] = node to edge.line
                 queue += nextCost to next
@@ -89,7 +91,7 @@ object RouteSearch {
         return SearchResult(
             goal = goal,
             legs = rebuild(cameFrom, end),
-            minutes = minutes[end] ?: 0,
+            minutes = Math.round((seconds[end] ?: 0) / 60.0).toInt(),
             transfers = transfers[end] ?: 0,
         )
     }

@@ -25,8 +25,6 @@
     <string name="nav_settings">Settings</string>
 
     <string name="empty_filtered">Nothing matches this filter.</string>
-    <string name="placeholder_title">Coming soon</string>
-    <string name="placeholder_settings">Settings are not ready yet.</string>
 
     <string name="new_route">New route</string>
     <string name="route_empty_title">No routes yet</string>
@@ -128,4 +126,14 @@
         <item>Friday</item><item>Saturday</item><item>Sunday</item>
     </string-array>
     <string name="line_needs_transfer">No single line connects these two. You will need to change — use Find a way.</string>
+    <string name="about_network_title">Network data</string>
+    <string name="about_network_body">© OpenStreetMap contributors · ODbL 1.0
+676 stations, 24 lines across the Seoul metropolitan area.</string>
+    <string name="about_times_title">Station-to-station times</string>
+    <string name="about_times_body">Seoul Metro “Inter-station distance and travel time” · KOGL Type 1
+264 segments on lines 1–8 are measured; other lines fall back to the average of 1 min 32 s per station.</string>
+    <string name="about_fares_title">Fares</string>
+    <string name="about_fares_body">Estimated from the metropolitan integrated fare table. Without an official distance table the distance is approximated from coordinates, so the real fare may differ.</string>
+    <string name="about_fonts_title">Fonts</string>
+    <string name="about_fonts_body">SUIT, SUITE · SIL Open Font License 1.1</string>
 </resources>

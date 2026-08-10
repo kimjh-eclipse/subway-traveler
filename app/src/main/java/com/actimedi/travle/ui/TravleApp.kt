@@ -46,7 +46,7 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.actimedi.travle.R
 import com.actimedi.travle.data.toDraft
-import com.actimedi.travle.ui.common.PlaceholderScreen
+import com.actimedi.travle.ui.common.AboutScreen
 import com.actimedi.travle.ui.editor.RouteEditorScreen
 import com.actimedi.travle.ui.history.HistoryScreen
 import com.actimedi.travle.ui.map.RouteMapScreen
@@ -191,7 +191,7 @@ fun TravleApp(viewModel: TravleViewModel = viewModel()) {
                     },
                 )
 
-                TravleTab.SETTINGS -> PlaceholderScreen(bodyRes = R.string.placeholder_settings)
+                TravleTab.SETTINGS -> AboutScreen()
             }
         }
         BottomNav(selected = tab, onSelect = { tab = it })

@@ -35,8 +35,9 @@ class RouteSearchTest {
     @Test
     fun `fastest takes the short hop even though it means changing`() {
         val result = RouteSearch.find(network, "가", "바", SearchGoal.FASTEST)!!
-        // 2호선 한 정거장 + 환승 + 3호선 한 정거장 = 2 + 4 + 2 = 8분
-        assertEquals(8, result.minutes)
+        // 2정거장 + 환승 대기 4분. 역당 시간은 실측이 없어 평균으로 메운다.
+        val expected = (2 * TravelTimes.SECONDS_PER_HOP + TravelTimes.DEFAULT_TRANSFER_WAIT * 60) / 60
+        assertEquals(expected, result.minutes)
         assertEquals(1, result.transfers)
         assertEquals(listOf("2호선", "3호선"), result.legs.map { it.line })
     }
@@ -46,8 +47,8 @@ class RouteSearchTest {
         val result = RouteSearch.find(network, "가", "바", SearchGoal.FEWEST_TRANSFERS)!!
         assertEquals(0, result.transfers)
         assertEquals(listOf("1호선"), result.legs.map { it.line })
-        // 5정거장 × 2분 = 10분. 빠른 길보다 느리지만 갈아타지 않는다.
-        assertEquals(10, result.minutes)
+        // 5정거장을 내리 간다. 빠른 길보다 느리지만 갈아타지 않는다.
+        assertEquals(Math.round(5.0 * TravelTimes.SECONDS_PER_HOP / 60).toInt(), result.minutes)
         assertTrue(result.minutes > RouteSearch.find(network, "가", "바", SearchGoal.FASTEST)!!.minutes)
     }
 
