@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">원데이 노선도</string>
+
+    <string name="eyebrow">ONE DAY ROUTE</string>
+    <string name="stat_total">총 소요</string>
+    <string name="stat_move">이동·환승</string>
+    <string name="stat_stay">체류</string>
+
+    <string name="filter_all">전체 노선</string>
+    <string name="filter_move">이동만</string>
+    <string name="filter_stay">체류만</string>
+
+    <string name="detail_arrive">도착</string>
+    <string name="detail_depart">출발</string>
+    <string name="detail_cumulative">누적 시간</string>
+
+    <string name="finish_mark">끝</string>
+
+    <string name="nav_route">노선</string>
+    <string name="nav_log">기록</string>
+    <string name="nav_settings">설정</string>
+
+    <string name="empty_filtered">해당 조건에 맞는 구간이 없습니다.</string>
+    <string name="placeholder_title">준비 중</string>
+    <string name="placeholder_settings">설정 화면은 아직 준비 중입니다.</string>
+
+    <!-- 첫 화면 · 빈 상태 -->
+    <string name="new_route">새 경로</string>
+    <string name="route_empty_title">아직 경로가 없습니다</string>
+    <string name="route_empty_body">새 경로를 만들면 여기에 하루 일정이 노선도로 그려집니다.</string>
+
+    <!-- 기록 -->
+    <string name="history_subtitle">저장된 경로 %1$d개</string>
+    <string name="history_empty">아직 만든 경로가 없습니다.\n새 경로를 추가해 보세요.</string>
+    <string name="history_showing">보는 중</string>
+    <string name="history_counts">정거장 %1$d구간 · 체류 %2$d곳 · %3$s</string>
+
+    <!-- 경로 만들기 -->
+    <string name="editor_title">새 경로 만들기</string>
+    <string name="editor_cancel">취소</string>
+    <string name="editor_save">저장</string>
+    <string name="editor_confirm">확인</string>
+    <string name="editor_name">경로 이름</string>
+    <string name="editor_name_hint">예) 교동마을 → 서울 한 바퀴</string>
+    <string name="editor_day">요일 (선택)</string>
+    <string name="editor_day_hint">예) 토요일</string>
+    <string name="editor_stops">정거장</string>
+    <string name="editor_stops_hint">출발지부터 순서대로 추가하세요. 시각은 출발 시각에서 자동으로 계산됩니다. 체류는 머무는 시간을, 환승은 갈아타는 대기 시간만 정하면 됩니다.</string>
+    <string name="editor_travel">이동 시간</string>
+    <string name="editor_stay">머무는 시간</string>
+    <string name="editor_wait">환승 대기</string>
+    <string name="editor_estimated">예상</string>
+    <string name="editor_reset">예상값으로</string>
+    <string name="editor_badge_start">출발</string>
+    <string name="editor_badge_index">%1$d</string>
+    <string name="editor_line">타고 온 노선</string>
+    <string name="editor_line_hint">예) 2호선, 신분당선, 26-2번</string>
+    <string name="editor_place">역 · 장소</string>
+    <string name="editor_place_hint">예) 강남역</string>
+    <string name="editor_arrive">도착</string>
+    <string name="editor_start_time">출발 시각</string>
+    <string name="editor_depart">출발</string>
+    <string name="editor_kind_stay">체류</string>
+    <string name="editor_kind_transfer">환승</string>
+    <string name="editor_memo">메모 (선택)</string>
+    <string name="editor_memo_hint">예) 점심 — 신당동 떡볶이</string>
+    <string name="editor_add_stop">경유지 추가</string>
+    <string name="editor_delete_stop">이 정거장 삭제</string>
+    <string name="editor_pick_on_map">노선도</string>
+
+
+    <!-- 노선도 -->
+    <string name="open_map">노선도</string>
+    <string name="nearby_food">주변 맛집 찾기</string>
+    <string name="open_google_maps">구글맵</string>
+    <string name="open_naver_map">네이버지도</string>
+</resources>

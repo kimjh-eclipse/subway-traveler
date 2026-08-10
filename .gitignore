@@ -1,0 +1,11 @@
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+.DS_Store
+
+# 서명 비밀 — 절대 커밋 금지
+keystore.properties
+*.keystore
+*.jks

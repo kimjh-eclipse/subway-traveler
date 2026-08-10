@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Route glyph: start dot -> rail -> end dot, inside the 72dp adaptive-icon safe zone. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- vertical rail -->
+    <path
+        android:fillColor="#1E5AF0"
+        android:pathData="M49,36 h10 a5,5 0 0 1 5,5 v26 a5,5 0 0 1 -5,5 h-10 a5,5 0 0 1 -5,-5 v-26 a5,5 0 0 1 5,-5 z" />
+
+    <!-- start node -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,26 m-10,0 a10,10 0 1,0 20,0 a10,10 0 1,0 -20,0 z" />
+    <path
+        android:fillColor="#38D2FF"
+        android:pathData="M54,26 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 z" />
+
+    <!-- end node -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,82 m-10,0 a10,10 0 1,0 20,0 a10,10 0 1,0 -20,0 z" />
+    <path
+        android:fillColor="#FFCF2C"
+        android:pathData="M54,82 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 z" />
+</vector>
