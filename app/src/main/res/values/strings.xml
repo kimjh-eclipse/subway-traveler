@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">원데이 노선도</string>
+    <string name="app_name">지하철 여행자</string>
 
     <string name="eyebrow">ONE DAY ROUTE</string>
     <string name="stat_total">총 소요</string>
