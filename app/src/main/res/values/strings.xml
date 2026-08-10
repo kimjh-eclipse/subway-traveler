@@ -55,7 +55,8 @@
     <string name="editor_badge_start">출발</string>
     <string name="editor_badge_index">%1$d</string>
     <string name="editor_line">타고 온 노선</string>
-    <string name="editor_line_hint">예) 2호선, 신분당선, 26-2번</string>
+    <string name="editor_line_hint">예) 26-2번, 도보 — 지하철이 아닌 구간</string>
+    <string name="editor_line_choose">타고 온 노선 (여러 노선이 지납니다)</string>
     <string name="editor_place">역 · 장소</string>
     <string name="editor_place_hint">예) 강남역</string>
     <string name="editor_arrive">도착</string>

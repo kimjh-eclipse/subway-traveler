@@ -189,6 +189,7 @@ fun RouteEditorScreen(
                 StopCard(
                     stop = stop,
                     index = index,
+                    previousName = draft.stops.getOrNull(index - 1)?.name,
                     isLast = index == draft.stops.lastIndex,
                     scheduled = scheduled.getOrNull(index),
                     network = network,
@@ -291,6 +292,7 @@ private fun EditorTopBar(canSave: Boolean, onCancel: () -> Unit, onSave: () -> U
 private fun StopCard(
     stop: RouteStop,
     index: Int,
+    previousName: String?,
     isLast: Boolean,
     scheduled: ScheduledStop?,
     network: SubwayNetwork,
@@ -302,7 +304,12 @@ private fun StopCard(
 ) {
     val isFirst = index == 0
     val shape = RoundedCornerShape(22.dp)
-    val resolved = remember(stop.name, network) { network.findStation(stop.name) }
+    // Lines that can carry you straight from the previous stop to this one.
+    val lineCandidates = remember(previousName, stop.name, network) {
+        val from = previousName?.let { network.findStation(it) }
+        val to = network.findStation(stop.name)
+        if (from == null || to == null) emptyList() else network.linesBetween(from, to)
+    }
 
     Column(
         modifier = Modifier
@@ -351,30 +358,11 @@ private fun StopCard(
         }
 
         if (!isFirst) {
-            BrandTextField(
-                value = stop.line,
-                onValueChange = { onChange(stop.copy(line = it, lineIsManual = it.isNotBlank())) },
-                label = stringResource(R.string.editor_line),
-                placeholder = stringResource(R.string.editor_line_hint),
+            LineField(
+                stop = stop,
+                candidates = lineCandidates,
+                onChange = onChange,
             )
-            // The lines that actually serve the chosen station, one tap away.
-            resolved?.let { index ->
-                val lines = network.stations[index].lines
-                if (lines.isNotEmpty()) {
-                    Row(
-                        modifier = Modifier.horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    ) {
-                        lines.forEach { line ->
-                            LineChip(
-                                line = line,
-                                isSelected = normalizeLineName(stop.line) == line,
-                                onClick = { onChange(stop.copy(line = line, lineIsManual = true)) },
-                            )
-                        }
-                    }
-                }
-            }
         }
 
         StationNameField(
@@ -524,6 +512,57 @@ private fun StationNameField(
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+/**
+ * How the leg was travelled.
+ *
+ * With both stations known the line is derivable, so this is a choice rather than
+ * a typing job: one candidate needs no interaction at all, several become chips.
+ * The free-text box is only for legs the rail network cannot explain — a bus, a
+ * walk, a place that is not a station.
+ */
+@Composable
+private fun LineField(
+    stop: RouteStop,
+    candidates: List<String>,
+    onChange: (RouteStop) -> Unit,
+) {
+    if (candidates.isEmpty()) {
+        BrandTextField(
+            value = stop.line,
+            onValueChange = { onChange(stop.copy(line = it, lineIsManual = it.isNotBlank())) },
+            label = stringResource(R.string.editor_line),
+            placeholder = stringResource(R.string.editor_line_hint),
+        )
+        return
+    }
+
+    Column {
+        Text(
+            text = stringResource(
+                if (candidates.size == 1) R.string.editor_line else R.string.editor_line_choose,
+            ),
+            fontFamily = SuitFamily,
+            fontWeight = FontWeight.Medium,
+            fontSize = 11.sp,
+            lineHeight = 11.sp,
+            color = RouteColor.DetailLabel,
+        )
+        Spacer(Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            candidates.forEach { line ->
+                LineChip(
+                    line = line,
+                    isSelected = normalizeLineName(stop.line) == line,
+                    onClick = { onChange(stop.copy(line = line, lineIsManual = true)) },
+                )
             }
         }
     }
