@@ -54,7 +54,7 @@ import androidx.compose.ui.res.stringResource
 import com.actimedi.travle.R
 import com.actimedi.travle.data.ClockTime
 import com.actimedi.travle.data.RouteDraft
-import com.actimedi.travle.data.DaysOfWeek
+import com.actimedi.travle.data.DraftProblem
 import com.actimedi.travle.data.RouteStop
 import com.actimedi.travle.data.ScheduledStop
 import com.actimedi.travle.data.SearchGoal
@@ -67,6 +67,9 @@ import com.actimedi.travle.data.normalizeLineName
 import com.actimedi.travle.data.schedule
 import com.actimedi.travle.data.validate
 import com.actimedi.travle.data.withAutoLines
+import androidx.compose.ui.res.stringArrayResource
+import com.actimedi.travle.ui.common.durationText
+import com.actimedi.travle.ui.common.problemText
 import com.actimedi.travle.ui.map.LineChip
 import com.actimedi.travle.ui.map.StationPickerScreen
 import com.actimedi.travle.ui.theme.AmColor
@@ -282,7 +285,7 @@ fun RouteEditorScreen(
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         validation.messages.forEach { message ->
                             Text(
-                                text = "· $message",
+                                text = "· " + problemText(message),
                                 fontFamily = SuitFamily,
                                 fontWeight = FontWeight.Medium,
                                 fontSize = 12.sp,
@@ -364,7 +367,7 @@ private fun StopCard(
     scheduled: ScheduledStop?,
     network: SubwayNetwork,
     canDelete: Boolean,
-    error: String?,
+    error: DraftProblem?,
     onChange: (RouteStop) -> Unit,
     onDelete: () -> Unit,
     onOpenMap: () -> Unit,
@@ -373,11 +376,13 @@ private fun StopCard(
     val isFirst = index == 0
     val shape = RoundedCornerShape(22.dp)
     // Lines that can carry you straight from the previous stop to this one.
-    val lineCandidates = remember(previousName, stop.name, network) {
-        val from = previousName?.let { network.findStation(it) }
-        val to = network.findStation(stop.name)
+    val from = remember(previousName, network) { previousName?.let { network.findStation(it) } }
+    val to = remember(stop.name, network) { network.findStation(stop.name) }
+    val lineCandidates = remember(from, to, network) {
         if (from == null || to == null) emptyList() else network.linesBetween(from, to)
     }
+    // 양쪽 다 역이면 노선은 도출 가능한 문제다 — 직결이 없다면 답은 환승이지 타이핑이 아니다.
+    val bothOnRail = from != null && to != null
 
     Column(
         modifier = Modifier
@@ -438,23 +443,11 @@ private fun StopCard(
             LineField(
                 stop = stop,
                 candidates = lineCandidates,
+                bothOnRail = bothOnRail,
+                canSearch = !previousName.isNullOrBlank(),
                 onChange = onChange,
+                onSearchRoute = onSearchRoute,
             )
-            if (!previousName.isNullOrBlank()) {
-                Text(
-                    text = stringResource(R.string.search_open),
-                    fontFamily = SuitFamily,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 12.sp,
-                    lineHeight = 12.sp,
-                    color = AmColor.Blue,
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .background(RouteColor.StayBadgeFill)
-                        .clickable(onClick = onSearchRoute)
-                        .padding(horizontal = 14.dp, vertical = 9.dp),
-                )
-            }
         }
 
         if (!isFirst) {
@@ -510,7 +503,7 @@ private fun StopCard(
 
         if (error != null) {
             Text(
-                text = error,
+                text = problemText(error),
                 fontFamily = SuitFamily,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 11.5.sp,
@@ -614,15 +607,35 @@ private fun StationNameField(
 private fun LineField(
     stop: RouteStop,
     candidates: List<String>,
+    bothOnRail: Boolean,
+    canSearch: Boolean,
     onChange: (RouteStop) -> Unit,
+    onSearchRoute: () -> Unit,
 ) {
     if (candidates.isEmpty()) {
-        BrandTextField(
-            value = stop.line,
-            onValueChange = { onChange(stop.copy(line = it, lineIsManual = it.isNotBlank())) },
-            label = stringResource(R.string.editor_line),
-            placeholder = stringResource(R.string.editor_line_hint),
-        )
+        if (bothOnRail) {
+            // 두 역 다 노선망에 있는데 직결이 없다 — 갈아타야 한다는 뜻이므로
+            // 손으로 적게 하지 않고 길찾기로 보낸다.
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = stringResource(R.string.line_needs_transfer),
+                    fontFamily = SuitFamily,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 11.5.sp,
+                    lineHeight = 16.sp,
+                    color = RouteColor.StayLabel,
+                )
+                SearchButton(onSearchRoute)
+            }
+        } else {
+            // 버스·도보처럼 노선망 밖의 구간에서만 직접 적는다.
+            BrandTextField(
+                value = stop.line,
+                onValueChange = { onChange(stop.copy(line = it, lineIsManual = it.isNotBlank())) },
+                label = stringResource(R.string.editor_line),
+                placeholder = stringResource(R.string.editor_line_hint),
+            )
+        }
         return
     }
 
@@ -650,7 +663,28 @@ private fun LineField(
                 )
             }
         }
+        if (canSearch) {
+            Spacer(Modifier.height(8.dp))
+            SearchButton(onSearchRoute)
+        }
     }
+}
+
+@Composable
+private fun SearchButton(onClick: () -> Unit) {
+    Text(
+        text = stringResource(R.string.search_open),
+        fontFamily = SuitFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 12.sp,
+        lineHeight = 12.sp,
+        color = AmColor.Blue,
+        modifier = Modifier
+            .clip(CircleShape)
+            .background(RouteColor.StayBadgeFill)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 9.dp),
+    )
 }
 
 /** Read-only arrival/departure, so the computed schedule is visible while editing. */
@@ -734,7 +768,7 @@ private fun MinuteStepper(
             }
             Spacer(Modifier.height(5.dp))
             Text(
-                text = "${minutes}분",
+                text = durationText(minutes),
                 fontFamily = SuitFamily,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
@@ -795,7 +829,7 @@ private fun DayOfWeekPicker(selected: String, onSelect: (String) -> Unit) {
             modifier = Modifier.horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            DaysOfWeek.forEach { day ->
+            stringArrayResource(R.array.days_of_week).forEach { day ->
                 val isSelected = selected == day
                 Text(
                     text = day.first().toString(),

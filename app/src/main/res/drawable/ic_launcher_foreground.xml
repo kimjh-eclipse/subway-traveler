@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  순환 노선 위 네 정거장과 가운데 전동차 — 사용자가 준 아이콘 시안의 벡터 재현.
-  어댑티브 아이콘 안전 영역(가운데 66dp 원) 안에 링과 정거장 점이 모두 들어간다.
+  순환 노선 위 네 정거장과 가운데 전동차 — 사용자 시안의 벡터 재현.
+
+  라벤더는 배경 레이어(ic_launcher_background)가 캔버스 전체를 채운다.
+  런처는 108dp 캔버스의 중앙 72dp만 원형으로 잘라 보여주므로, 정거장 점의
+  바깥 끝(반지름 35.5dp)을 잘리는 경계(36dp) 바로 안까지 붙여 시안처럼
+  링이 아이콘을 가득 채우게 한다. 모든 요소는 (54,54) 중심에 대칭이다.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
@@ -9,76 +13,70 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- 시안의 라벤더는 링 안쪽에만 — 배경 레이어 전체에 깔면 런처의 원형 마스크
-         바깥까지 번져 링이 두 겹으로 보인다. -->
-    <path
-        android:fillColor="#DCE4F8"
-        android:pathData="M54,54 m-28.5,0 a28.5,28.5 0 1,0 57,0 a28.5,28.5 0 1,0 -57,0 Z" />
-
-    <!-- 순환선: 사분면마다 노선색 하나씩 -->
+    <!-- 순환선: 사분면마다 노선색 하나씩 (1호선·신분당선·수인분당선·9호선) -->
     <path
         android:strokeColor="#0052A4"
-        android:strokeWidth="7"
-        android:pathData="M29,54 A25,25 0 0 1 54,29" />
+        android:strokeWidth="8"
+        android:pathData="M27.5,54 A26.5,26.5 0 0 1 54,27.5" />
     <path
         android:strokeColor="#D4003B"
-        android:strokeWidth="7"
-        android:pathData="M54,29 A25,25 0 0 1 79,54" />
+        android:strokeWidth="8"
+        android:pathData="M54,27.5 A26.5,26.5 0 0 1 80.5,54" />
     <path
         android:strokeColor="#F5A200"
-        android:strokeWidth="7"
-        android:pathData="M79,54 A25,25 0 0 1 54,79" />
+        android:strokeWidth="8"
+        android:pathData="M80.5,54 A26.5,26.5 0 0 1 54,80.5" />
     <path
         android:strokeColor="#BDB092"
-        android:strokeWidth="7"
-        android:pathData="M54,79 A25,25 0 0 1 29,54" />
+        android:strokeWidth="8"
+        android:pathData="M54,80.5 A26.5,26.5 0 0 1 27.5,54" />
 
-    <!-- 정거장 4곳: 흰 테두리 원 + 노선색 점 -->
+    <!-- 정거장 4곳: 흰 원 + 노선색 점 -->
     <path
         android:fillColor="#FFFFFF"
         android:strokeColor="#C7CFDF"
         android:strokeWidth="0.8"
-        android:pathData="M54,29 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0 Z
-            M79,54 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0 Z
-            M54,79 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0 Z
-            M29,54 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0 Z" />
+        android:pathData="M54,27.5 m-9,0 a9,9 0 1,0 18,0 a9,9 0 1,0 -18,0 Z
+            M80.5,54 m-9,0 a9,9 0 1,0 18,0 a9,9 0 1,0 -18,0 Z
+            M54,80.5 m-9,0 a9,9 0 1,0 18,0 a9,9 0 1,0 -18,0 Z
+            M27.5,54 m-9,0 a9,9 0 1,0 18,0 a9,9 0 1,0 -18,0 Z" />
     <path
         android:fillColor="#0052A4"
-        android:pathData="M54,29 m-4.2,0 a4.2,4.2 0 1,0 8.4,0 a4.2,4.2 0 1,0 -8.4,0 Z" />
+        android:pathData="M54,27.5 m-4.7,0 a4.7,4.7 0 1,0 9.4,0 a4.7,4.7 0 1,0 -9.4,0 Z" />
     <path
         android:fillColor="#D4003B"
-        android:pathData="M79,54 m-4.2,0 a4.2,4.2 0 1,0 8.4,0 a4.2,4.2 0 1,0 -8.4,0 Z" />
+        android:pathData="M80.5,54 m-4.7,0 a4.7,4.7 0 1,0 9.4,0 a4.7,4.7 0 1,0 -9.4,0 Z" />
     <path
         android:fillColor="#F5A200"
-        android:pathData="M54,79 m-4.2,0 a4.2,4.2 0 1,0 8.4,0 a4.2,4.2 0 1,0 -8.4,0 Z" />
+        android:pathData="M54,80.5 m-4.7,0 a4.7,4.7 0 1,0 9.4,0 a4.7,4.7 0 1,0 -9.4,0 Z" />
     <path
         android:fillColor="#BDB092"
-        android:pathData="M29,54 m-4.2,0 a4.2,4.2 0 1,0 8.4,0 a4.2,4.2 0 1,0 -8.4,0 Z" />
+        android:pathData="M27.5,54 m-4.7,0 a4.7,4.7 0 1,0 9.4,0 a4.7,4.7 0 1,0 -9.4,0 Z" />
 
-    <!-- 전동차 발 (차체 뒤에 깔림) -->
+    <!-- 전동차 발 (차체 뒤에 깔림) — 차체와 같은 축으로 좌우 대칭 -->
     <path
         android:fillColor="#AEB8CC"
         android:pathData="M46.5,64 h4 a1.5,1.5 0 0 1 1.5,1.5 v2 a1.5,1.5 0 0 1 -1.5,1.5 h-4 a1.5,1.5 0 0 1 -1.5,-1.5 v-2 a1.5,1.5 0 0 1 1.5,-1.5 Z
             M57.5,64 h4 a1.5,1.5 0 0 1 1.5,1.5 v2 a1.5,1.5 0 0 1 -1.5,1.5 h-4 a1.5,1.5 0 0 1 -1.5,-1.5 v-2 a1.5,1.5 0 0 1 1.5,-1.5 Z" />
 
-    <!-- 전동차 차체 -->
+    <!-- 전동차 차체: x 43.5~64.5 (중심 54), y 39.5~66.5 -->
     <path
         android:fillColor="#FFFFFF"
         android:strokeColor="#B9C2D4"
         android:strokeWidth="0.8"
         android:pathData="M43.5,50 a10.5,10.5 0 0 1 10.5,-10 a10.5,10.5 0 0 1 10.5,10 v13.5 a3,3 0 0 1 -3,3 h-15 a3,3 0 0 1 -3,-3 Z" />
 
-    <!-- 지붕 슬롯 -->
+    <!-- 지붕 슬롯 (중심 54) -->
     <path
         android:fillColor="#BBD4F2"
         android:pathData="M50.5,42.8 h7 a1.2,1.2 0 0 1 1.2,1.2 a1.2,1.2 0 0 1 -1.2,1.2 h-7 a1.2,1.2 0 0 1 -1.2,-1.2 a1.2,1.2 0 0 1 1.2,-1.2 Z" />
 
-    <!-- 앞유리 -->
+    <!-- 앞유리 (x 44.6~63.4, 중심 54) -->
     <path
         android:fillColor="#B9D2F0"
         android:pathData="M47,47.5 h14 a2.4,2.4 0 0 1 2.4,2.4 v5.2 a2.4,2.4 0 0 1 -2.4,2.4 h-14 a2.4,2.4 0 0 1 -2.4,-2.4 v-5.2 a2.4,2.4 0 0 1 2.4,-2.4 Z" />
 
-    <!-- 전조등 -->
+    <!-- 전조등 (54±4.4) -->
     <path
         android:fillColor="#F6AC0F"
         android:pathData="M49.6,61.2 m-2,0 a2,2 0 1,0 4,0 a2,2 0 1,0 -4,0 Z

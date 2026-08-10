@@ -31,7 +31,7 @@ import com.actimedi.travle.data.RouteSearch
 import com.actimedi.travle.data.SearchGoal
 import com.actimedi.travle.data.SearchResult
 import com.actimedi.travle.data.SubwayNetwork
-import com.actimedi.travle.data.formatDuration
+import com.actimedi.travle.ui.common.durationText
 import com.actimedi.travle.ui.theme.AmColor
 import com.actimedi.travle.ui.theme.RouteColor
 import com.actimedi.travle.ui.theme.SuitFamily
@@ -146,7 +146,7 @@ private fun SearchOptionCard(result: SearchResult, onClick: () -> Unit) {
                 modifier = Modifier.weight(1f),
             )
             Text(
-                text = formatDuration(result.minutes),
+                text = durationText(result.minutes),
                 fontFamily = SuitFamily,
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp,

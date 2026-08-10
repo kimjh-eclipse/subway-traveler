@@ -49,7 +49,7 @@ data class RouteDraft(
     val origin: String get() = stops.firstOrNull()?.name.orEmpty()
 }
 
-val DaysOfWeek = listOf("월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일")
+/** 요일은 리소스(R.array.days_of_week)에서 읽는다 — 로케일마다 표기가 다르다. */
 
 /** A stop with its computed clock times. */
 data class ScheduledStop(
@@ -128,25 +128,33 @@ fun RouteDraft.toSegments(network: SubwayNetwork): List<RouteSegment> {
     return out
 }
 
-/** Problems that block saving: a banner list plus per-stop messages for inline display. */
+/** 저장을 막는 문제. 문구가 아니라 종류만 담아 번역은 UI에 맡긴다. */
+enum class DraftProblem {
+    BLANK_TITLE,
+    TOO_FEW_STOPS,
+    BLANK_STOP_NAME,
+    BLANK_LINE,
+    PAST_MIDNIGHT,
+}
+
 data class DraftValidation(
-    val messages: List<String> = emptyList(),
-    val stopErrors: Map<String, String> = emptyMap(),
+    val messages: List<DraftProblem> = emptyList(),
+    val stopErrors: Map<String, DraftProblem> = emptyMap(),
 ) {
     val isValid: Boolean get() = messages.isEmpty() && stopErrors.isEmpty()
 }
 
 fun RouteDraft.validate(network: SubwayNetwork = SubwayNetwork()): DraftValidation {
-    val messages = mutableListOf<String>()
-    val stopErrors = mutableMapOf<String, String>()
+    val messages = mutableListOf<DraftProblem>()
+    val stopErrors = mutableMapOf<String, DraftProblem>()
 
-    if (title.isBlank()) messages += "경로 이름을 입력하세요."
-    if (stops.size < 2) messages += "경유지를 1곳 이상 추가하세요."
+    if (title.isBlank()) messages += DraftProblem.BLANK_TITLE
+    if (stops.size < 2) messages += DraftProblem.TOO_FEW_STOPS
 
     stops.forEachIndexed { index, stop ->
         val problem = when {
-            stop.name.isBlank() -> "역·장소 이름을 입력하세요."
-            index > 0 && stop.line.isBlank() -> "여기까지 타고 온 노선을 입력하세요."
+            stop.name.isBlank() -> DraftProblem.BLANK_STOP_NAME
+            index > 0 && stop.line.isBlank() -> DraftProblem.BLANK_LINE
             else -> null
         }
         if (problem != null) stopErrors[stop.id] = problem
@@ -154,7 +162,7 @@ fun RouteDraft.validate(network: SubwayNetwork = SubwayNetwork()): DraftValidati
 
     if (stops.size >= 2 && stopErrors.isEmpty()) {
         val end = schedule(network).last().departure
-        if (end.minuteOfDay >= 24 * 60) messages += "일정이 자정을 넘습니다. 시간을 줄여 보세요."
+        if (end.minuteOfDay >= 24 * 60) messages += DraftProblem.PAST_MIDNIGHT
     }
 
     return DraftValidation(messages, stopErrors)

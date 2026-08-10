@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Subway Traveler</string>
+
+    <string name="eyebrow">ONE DAY ROUTE</string>
+    <string name="stat_total">Total</string>
+    <string name="stat_move">Riding</string>
+    <string name="stat_stay">Stops</string>
+
+    <string name="filter_all">All</string>
+    <string name="filter_move">Rides</string>
+    <string name="filter_stay">Stays</string>
+
+    <string name="detail_arrive">Arrive</string>
+    <string name="detail_depart">Depart</string>
+    <string name="detail_cumulative">Elapsed</string>
+
+    <string name="finish_mark">End</string>
+    <string name="fare_estimated">est.</string>
+    <string name="fare_rides">%1$d subway rides</string>
+    <string name="fare_excluded">%1$s excluded</string>
+
+    <string name="nav_route">Route</string>
+    <string name="nav_log">History</string>
+    <string name="nav_settings">Settings</string>
+
+    <string name="empty_filtered">Nothing matches this filter.</string>
+    <string name="placeholder_title">Coming soon</string>
+    <string name="placeholder_settings">Settings are not ready yet.</string>
+
+    <string name="new_route">New route</string>
+    <string name="route_empty_title">No routes yet</string>
+    <string name="route_empty_body">Create a route and your day will be drawn here as a transit map.</string>
+
+    <string name="history_subtitle">%1$d saved routes</string>
+    <string name="history_empty">You haven\'t made any routes yet.\nTry adding one.</string>
+    <string name="history_showing">Showing</string>
+    <string name="history_counts">%1$d rides · %2$d stays · %3$s</string>
+    <string name="route_edit">Edit</string>
+    <string name="route_delete">Delete</string>
+    <string name="delete_title">Delete this route?</string>
+    <string name="delete_body">“%1$s” will be deleted. This cannot be undone.</string>
+    <string name="delete_confirm">Delete</string>
+    <string name="editor_title_edit">Edit route</string>
+
+    <string name="editor_title">New route</string>
+    <string name="editor_cancel">Cancel</string>
+    <string name="editor_save">Save</string>
+    <string name="editor_confirm">OK</string>
+    <string name="editor_name">Route name</string>
+    <string name="editor_name_hint">e.g. Gyodong → around Seoul</string>
+    <string name="editor_day">Day (optional)</string>
+    <string name="editor_day_hint">e.g. Saturday</string>
+    <string name="editor_stops">Stops</string>
+    <string name="editor_stops_hint">Add stops in order from where you set off. Times are worked out from the departure time. For a stay, set how long you linger; for a transfer, just the wait.</string>
+    <string name="editor_travel">Ride time</string>
+    <string name="editor_stay">Time here</string>
+    <string name="editor_wait">Transfer wait</string>
+    <string name="editor_estimated">est.</string>
+    <string name="editor_reset">Use estimate</string>
+    <string name="editor_badge_start">Start</string>
+    <string name="editor_badge_index">%1$d</string>
+    <string name="editor_line">Line taken</string>
+    <string name="editor_line_hint">e.g. Bus 26-2, on foot — not a rail leg</string>
+    <string name="editor_line_choose">Line taken (several serve this pair)</string>
+    <string name="editor_place">Station · place</string>
+    <string name="editor_place_hint">e.g. Gangnam</string>
+    <string name="editor_arrive">Arrive</string>
+    <string name="editor_start_time">Departure time</string>
+    <string name="editor_depart">Depart</string>
+    <string name="editor_kind_stay">Stay</string>
+    <string name="editor_kind_transfer">Transfer</string>
+    <string name="editor_memo">Note (optional)</string>
+    <string name="editor_memo_hint">e.g. Lunch — tteokbokki</string>
+    <string name="editor_add_stop">Add a stop</string>
+    <string name="editor_delete_stop">Remove this stop</string>
+    <string name="editor_pick_on_map">Map</string>
+
+    <string name="search_open">Find a way</string>
+    <string name="search_title">How do you get there?</string>
+    <string name="search_fastest">Fastest</string>
+    <string name="search_fewest_transfers">Fewest transfers</string>
+    <string name="search_summary">%1$d transfers · %2$d stations</string>
+    <string name="search_none">No route found between these two stations. Check the names.</string>
+    <string name="search_note">Choosing one adds the transfer stations as stops. There is no timetable, so times are estimates.</string>
+
+    <string name="open_map">Map</string>
+    <string name="nearby_food">Find somewhere to eat</string>
+    <string name="open_google_maps">Google Maps</string>
+    <string name="open_naver_map">Naver Map</string>
+
+    <string name="dur_minutes">%1$d min</string>
+    <string name="dur_hours">%1$d h</string>
+    <string name="dur_hours_minutes">%1$d h %2$d min</string>
+    <string name="fare_amount">₩%1$s</string>
+
+    <string name="header_departure">Departs %1$s</string>
+    <string name="finish_arrival">%1$s · Arrive %2$s</string>
+    <string name="finish_counts">%1$d transfers · %2$d rides · %3$d stays</string>
+    <string name="wait_chip">%1$d min wait</string>
+
+    <string name="map_this_route">This route</string>
+    <string name="map_whole">Whole network</string>
+    <string name="map_close">Close</string>
+    <string name="map_stations">%1$d stations</string>
+    <string name="map_straight">%1$d drawn straight</string>
+    <string name="map_offmap">%1$d off the map</string>
+
+    <string name="picker_title">Pick a station on the map</string>
+    <string name="picker_hint">Zoom in, then tap a station</string>
+    <string name="picker_empty">Tap a station and it will show up here.</string>
+    <string name="picker_use">Use this station</string>
+    <string name="picker_line_optional">Line taken (optional)</string>
+
+    <string name="history_span">%1$s → %2$s · %3$s total</string>
+    <string name="history_builtin">Built in</string>
+
+    <string name="invalid_title">Give the route a name.</string>
+    <string name="invalid_too_few_stops">Add at least one stop.</string>
+    <string name="invalid_blank_name">Enter a station or place name.</string>
+    <string name="invalid_blank_line">Enter the line you took to get here.</string>
+    <string name="invalid_past_midnight">The day runs past midnight. Try trimming some time.</string>
+
+    <string name="nearby_food_query">restaurants</string>
+
+    <string-array name="days_of_week">
+        <item>Monday</item><item>Tuesday</item><item>Wednesday</item><item>Thursday</item>
+        <item>Friday</item><item>Saturday</item><item>Sunday</item>
+    </string-array>
+    <string name="line_needs_transfer">No single line connects these two. You will need to change — use Find a way.</string>
+</resources>

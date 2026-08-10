@@ -28,11 +28,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.actimedi.travle.data.SubwayNetwork
+import com.actimedi.travle.R
 import com.actimedi.travle.ui.theme.AmColor
 import com.actimedi.travle.ui.theme.RouteColor
 import com.actimedi.travle.ui.theme.SuitFamily
@@ -99,7 +101,7 @@ fun StationPickerScreen(
         ) {
             Column(Modifier.weight(1f)) {
                 Text(
-                    text = "노선도에서 역 선택",
+                    text = stringResource(R.string.picker_title),
                     fontFamily = SuiteFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 15.sp,
@@ -107,7 +109,7 @@ fun StationPickerScreen(
                 )
                 Spacer(Modifier.height(3.dp))
                 Text(
-                    text = "확대한 뒤 역을 누르세요",
+                    text = stringResource(R.string.picker_hint),
                     fontFamily = SuitFamily,
                     fontWeight = FontWeight.Medium,
                     fontSize = 11.5.sp,
@@ -115,7 +117,7 @@ fun StationPickerScreen(
                 )
             }
             Text(
-                text = "취소",
+                text = stringResource(R.string.editor_cancel),
                 fontFamily = SuitFamily,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 13.sp,
@@ -140,7 +142,7 @@ fun StationPickerScreen(
                 },
             )
             Box(modifier = Modifier.align(Alignment.BottomStart).padding(16.dp)) {
-                MapChip("전체 노선도") { camera.frame(boundsOf(projected)) }
+                MapChip(stringResource(R.string.map_whole)) { camera.frame(boundsOf(projected)) }
             }
             Attribution(
                 text = network.source,
@@ -176,7 +178,7 @@ private fun SelectionBar(
     ) {
         if (selected == null) {
             Text(
-                text = "역을 선택하면 여기에 표시됩니다.",
+                text = stringResource(R.string.picker_empty),
                 fontFamily = SuitFamily,
                 fontWeight = FontWeight.Medium,
                 fontSize = 13.sp,
@@ -196,7 +198,7 @@ private fun SelectionBar(
                 modifier = Modifier.weight(1f),
             )
             Text(
-                text = "이 역 사용",
+                text = stringResource(R.string.picker_use),
                 fontFamily = SuitFamily,
                 fontWeight = FontWeight.Bold,
                 fontSize = 13.sp,
@@ -212,7 +214,7 @@ private fun SelectionBar(
         if (station.lines.isNotEmpty()) {
             Spacer(Modifier.height(10.dp))
             Text(
-                text = "타고 온 노선 (선택)",
+                text = stringResource(R.string.picker_line_optional),
                 fontFamily = SuitFamily,
                 fontWeight = FontWeight.Medium,
                 fontSize = 11.sp,

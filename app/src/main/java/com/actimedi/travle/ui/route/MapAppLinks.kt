@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
+import com.actimedi.travle.R
 
 /**
  * Hands a place off to an installed map app to look for somewhere to eat.
@@ -17,10 +18,9 @@ import android.util.Log
 object MapAppLinks {
 
     private const val TAG = "MapAppLinks"
-    private const val KEYWORD = "맛집"
 
     fun openGoogleMaps(context: Context, place: String, lat: Double?, lon: Double?) {
-        val query = Uri.encode("$place $KEYWORD")
+        val query = Uri.encode("$place ${context.getString(R.string.nearby_food_query)}")
         val candidates = buildList {
             if (lat != null && lon != null) add("geo:$lat,$lon?q=$query")
             add("https://www.google.com/maps/search/?api=1&query=$query")
@@ -29,7 +29,7 @@ object MapAppLinks {
     }
 
     fun openNaverMap(context: Context, place: String, lat: Double?, lon: Double?) {
-        val query = Uri.encode("$place $KEYWORD")
+        val query = Uri.encode("$place ${context.getString(R.string.nearby_food_query)}")
         val candidates = buildList {
             // Naver's scheme requires the caller's package name.
             add("nmap://search?query=$query&appname=${context.packageName}")

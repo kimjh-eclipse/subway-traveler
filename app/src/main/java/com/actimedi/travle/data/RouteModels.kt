@@ -166,13 +166,5 @@ fun List<TimelineEntry>.filterBy(filter: RouteFilter): List<TimelineEntry> = whe
     RouteFilter.STAY -> filter { it.segment is RouteSegment.Stay }
 }
 
-/** "8분", "1시간", "1시간 10분" */
-fun formatDuration(minutes: Int): String {
-    if (minutes < 60) return "${minutes}분"
-    val hours = minutes / 60
-    val rest = minutes % 60
-    return if (rest == 0) "${hours}시간" else "${hours}시간 ${rest}분"
-}
-
 /** "13:28" — used for the header chips, where a fixed width reads better. */
 fun formatClockSpan(minutes: Int): String = "%d:%02d".format(minutes / 60, minutes % 60)

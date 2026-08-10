@@ -23,12 +23,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.actimedi.travle.data.Route
 import com.actimedi.travle.data.SubwayNetwork
+import com.actimedi.travle.R
 import com.actimedi.travle.ui.theme.AmColor
 import com.actimedi.travle.ui.theme.RouteColor
 import com.actimedi.travle.ui.theme.SuitFamily
@@ -76,8 +78,8 @@ fun RouteMapScreen(
                 modifier = Modifier.align(Alignment.BottomStart).padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                MapChip("이 경로") { camera.frame(routeBounds) }
-                MapChip("전체 노선도") { camera.frame(boundsOf(projected)) }
+                MapChip(stringResource(R.string.map_this_route)) { camera.frame(routeBounds) }
+                MapChip(stringResource(R.string.map_whole)) { camera.frame(boundsOf(projected)) }
             }
 
             Attribution(
@@ -107,12 +109,15 @@ private fun MapTopBar(route: Route, mapped: MappedRoute, onClose: () -> Unit) {
             )
             Spacer(Modifier.height(3.dp))
             Text(
-                text = buildString {
-                    append("역 ${mapped.stops.size}곳")
-                    val approx = mapped.legs.count { it.isStraightHop }
-                    if (approx > 0) append(" · 직선 표시 ${approx}구간")
-                    if (mapped.unmatched.isNotEmpty()) append(" · 지도 밖 ${mapped.unmatched.size}곳")
-                },
+                text = listOfNotNull(
+                    stringResource(R.string.map_stations, mapped.stops.size),
+                    mapped.legs.count { it.isStraightHop }
+                        .takeIf { it > 0 }
+                        ?.let { stringResource(R.string.map_straight, it) },
+                    mapped.unmatched.size
+                        .takeIf { it > 0 }
+                        ?.let { stringResource(R.string.map_offmap, it) },
+                ).joinToString(" · "),
                 fontFamily = SuitFamily,
                 fontWeight = FontWeight.Medium,
                 fontSize = 11.5.sp,
@@ -120,7 +125,7 @@ private fun MapTopBar(route: Route, mapped: MappedRoute, onClose: () -> Unit) {
             )
         }
         Text(
-            text = "닫기",
+            text = stringResource(R.string.map_close),
             fontFamily = SuitFamily,
             fontWeight = FontWeight.Bold,
             fontSize = 13.sp,

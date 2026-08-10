@@ -54,10 +54,10 @@ class RouteModelsTest {
     }
 
     @Test
-    fun `duration formatting drops empty minute parts`() {
-        assertEquals("8분", formatDuration(8))
-        assertEquals("1시간", formatDuration(60))
-        assertEquals("1시간 10분", formatDuration(70))
+    fun `clock spans read as hours and minutes`() {
+        // 사람이 읽는 시간 표기는 로케일 리소스가 맡는다. 여기서는 자릿수만 본다.
         assertEquals("13:28", formatClockSpan(808))
+        assertEquals("0:08", formatClockSpan(8))
+        assertEquals("1:00", formatClockSpan(60))
     }
 }

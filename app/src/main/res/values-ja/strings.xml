@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">地下鉄トラベラー</string>
+
+    <string name="eyebrow">ONE DAY ROUTE</string>
+    <string name="stat_total">合計</string>
+    <string name="stat_move">乗車・乗換</string>
+    <string name="stat_stay">滞在</string>
+
+    <string name="filter_all">すべて</string>
+    <string name="filter_move">移動のみ</string>
+    <string name="filter_stay">滞在のみ</string>
+
+    <string name="detail_arrive">到着</string>
+    <string name="detail_depart">出発</string>
+    <string name="detail_cumulative">経過時間</string>
+
+    <string name="finish_mark">終</string>
+    <string name="fare_estimated">目安</string>
+    <string name="fare_rides">地下鉄 %1$d回乗車</string>
+    <string name="fare_excluded">%1$s を除く</string>
+
+    <string name="nav_route">ルート</string>
+    <string name="nav_log">履歴</string>
+    <string name="nav_settings">設定</string>
+
+    <string name="empty_filtered">この条件に合う区間はありません。</string>
+    <string name="placeholder_title">準備中</string>
+    <string name="placeholder_settings">設定画面はまだ準備中です。</string>
+
+    <string name="new_route">新しいルート</string>
+    <string name="route_empty_title">ルートがまだありません</string>
+    <string name="route_empty_body">ルートを作ると、一日の予定がここに路線図として描かれます。</string>
+
+    <string name="history_subtitle">保存済みルート %1$d件</string>
+    <string name="history_empty">まだルートがありません。\n新しく追加してみてください。</string>
+    <string name="history_showing">表示中</string>
+    <string name="history_counts">乗車 %1$d区間 · 滞在 %2$dか所 · %3$s</string>
+    <string name="route_edit">編集</string>
+    <string name="route_delete">削除</string>
+    <string name="delete_title">ルートを削除しますか？</string>
+    <string name="delete_body">「%1$s」を削除します。元に戻せません。</string>
+    <string name="delete_confirm">削除</string>
+    <string name="editor_title_edit">ルートを編集</string>
+
+    <string name="editor_title">新しいルート</string>
+    <string name="editor_cancel">キャンセル</string>
+    <string name="editor_save">保存</string>
+    <string name="editor_confirm">OK</string>
+    <string name="editor_name">ルート名</string>
+    <string name="editor_name_hint">例）キョドン → ソウル一周</string>
+    <string name="editor_day">曜日（任意）</string>
+    <string name="editor_day_hint">例）土曜日</string>
+    <string name="editor_stops">停車地</string>
+    <string name="editor_stops_hint">出発地から順に追加してください。時刻は出発時刻から自動で計算されます。滞在は滞在時間を、乗換は待ち時間だけ決めれば大丈夫です。</string>
+    <string name="editor_travel">移動時間</string>
+    <string name="editor_stay">滞在時間</string>
+    <string name="editor_wait">乗換の待ち時間</string>
+    <string name="editor_estimated">目安</string>
+    <string name="editor_reset">目安に戻す</string>
+    <string name="editor_badge_start">出発</string>
+    <string name="editor_badge_index">%1$d</string>
+    <string name="editor_line">乗ってきた路線</string>
+    <string name="editor_line_hint">例）26-2番バス、徒歩 — 鉄道以外の区間</string>
+    <string name="editor_line_choose">乗ってきた路線（複数の路線が通ります）</string>
+    <string name="editor_place">駅・場所</string>
+    <string name="editor_place_hint">例）江南</string>
+    <string name="editor_arrive">到着</string>
+    <string name="editor_start_time">出発時刻</string>
+    <string name="editor_depart">出発</string>
+    <string name="editor_kind_stay">滞在</string>
+    <string name="editor_kind_transfer">乗換</string>
+    <string name="editor_memo">メモ（任意）</string>
+    <string name="editor_memo_hint">例）昼食 — トッポッキ</string>
+    <string name="editor_add_stop">停車地を追加</string>
+    <string name="editor_delete_stop">この停車地を削除</string>
+    <string name="editor_pick_on_map">路線図</string>
+
+    <string name="search_open">ルート検索</string>
+    <string name="search_title">どう行きますか？</string>
+    <string name="search_fastest">最短ルート</string>
+    <string name="search_fewest_transfers">乗換最少</string>
+    <string name="search_summary">乗換 %1$d回 · 駅 %2$d個</string>
+    <string name="search_none">この2駅を結ぶ経路が見つかりません。駅名をご確認ください。</string>
+    <string name="search_note">選ぶと乗換駅が停車地として追加されます。時刻表がないため所要時間は目安です。</string>
+
+    <string name="open_map">路線図</string>
+    <string name="nearby_food">周辺のグルメを探す</string>
+    <string name="open_google_maps">Google マップ</string>
+    <string name="open_naver_map">Naver マップ</string>
+
+    <string name="dur_minutes">%1$d分</string>
+    <string name="dur_hours">%1$d時間</string>
+    <string name="dur_hours_minutes">%1$d時間 %2$d分</string>
+    <string name="fare_amount">%1$sウォン</string>
+
+    <string name="header_departure">%1$s 出発</string>
+    <string name="finish_arrival">%1$s · %2$s 到着</string>
+    <string name="finish_counts">乗換 %1$d回 · 乗車 %2$d区間 · 滞在 %3$dか所</string>
+    <string name="wait_chip">乗換待ち %1$d分</string>
+
+    <string name="map_this_route">このルート</string>
+    <string name="map_whole">全路線図</string>
+    <string name="map_close">閉じる</string>
+    <string name="map_stations">駅 %1$dか所</string>
+    <string name="map_straight">直線表示 %1$d区間</string>
+    <string name="map_offmap">地図外 %1$dか所</string>
+
+    <string name="picker_title">路線図から駅を選ぶ</string>
+    <string name="picker_hint">拡大して駅をタップしてください</string>
+    <string name="picker_empty">駅を選ぶとここに表示されます。</string>
+    <string name="picker_use">この駅を使う</string>
+    <string name="picker_line_optional">乗ってきた路線（任意）</string>
+
+    <string name="history_span">%1$s → %2$s · 合計 %3$s</string>
+    <string name="history_builtin">標準搭載</string>
+
+    <string name="invalid_title">ルート名を入力してください。</string>
+    <string name="invalid_too_few_stops">停車地を1か所以上追加してください。</string>
+    <string name="invalid_blank_name">駅・場所の名前を入力してください。</string>
+    <string name="invalid_blank_line">ここまで乗ってきた路線を入力してください。</string>
+    <string name="invalid_past_midnight">予定が深夜0時を過ぎます。時間を減らしてみてください。</string>
+
+    <string name="nearby_food_query">グルメ</string>
+
+    <string-array name="days_of_week">
+        <item>月曜日</item><item>火曜日</item><item>水曜日</item><item>木曜日</item>
+        <item>金曜日</item><item>土曜日</item><item>日曜日</item>
+    </string-array>
+    <string name="line_needs_transfer">直通の路線がありません。乗り換えが必要な区間なので、ルート検索から埋めてください。</string>
+</resources>

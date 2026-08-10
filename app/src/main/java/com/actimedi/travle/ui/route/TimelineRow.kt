@@ -48,9 +48,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Canvas
 import com.actimedi.travle.R
 import com.actimedi.travle.data.RouteSegment
+import com.actimedi.travle.ui.common.durationText
 import com.actimedi.travle.data.SubwayNetwork
 import com.actimedi.travle.data.TimelineEntry
-import com.actimedi.travle.data.formatDuration
 import com.actimedi.travle.ui.theme.AmColor
 import com.actimedi.travle.ui.theme.RouteColor
 import com.actimedi.travle.ui.theme.lineColorFor
@@ -220,7 +220,7 @@ private fun MoveRow(segment: RouteSegment.Move) {
             modifier = Modifier.weight(1f),
         )
         Text(
-            text = formatDuration(segment.minutes),
+            text = durationText(segment.minutes),
             fontFamily = SuitFamily,
             fontWeight = FontWeight.SemiBold,
             fontSize = 12.sp,
@@ -286,7 +286,7 @@ private fun StayCard(
                 )
             }
             Text(
-                text = formatDuration(segment.minutes),
+                text = durationText(segment.minutes),
                 fontFamily = SuitFamily,
                 fontWeight = FontWeight.Bold,
                 fontSize = 12.sp,
@@ -322,7 +322,7 @@ private fun StayCard(
                     )
                     DetailStat(
                         label = stringResource(R.string.detail_cumulative),
-                        value = formatDuration(entry.cumulativeMinutes),
+                        value = durationText(entry.cumulativeMinutes),
                         valueColor = AmColor.Blue,
                         modifier = Modifier.weight(1f),
                     )
@@ -427,7 +427,7 @@ private fun WaitChip(minutes: Int) {
                 .background(RouteColor.WaitDot),
         )
         Text(
-            text = "환승 대기 ${minutes}분",
+            text = stringResource(R.string.wait_chip, minutes),
             fontFamily = SuitFamily,
             fontWeight = FontWeight.SemiBold,
             fontSize = 11.5.sp,

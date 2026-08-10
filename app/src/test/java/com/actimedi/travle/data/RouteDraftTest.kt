@@ -111,6 +111,10 @@ class RouteDraftTest {
             stops = draft.stops.mapIndexed { i, s -> if (i == 1) s.copy(line = "") else s },
         )
         assertFalse(blankLine.validate(network).isValid)
+        assertEquals(
+            DraftProblem.BLANK_LINE,
+            blankLine.validate(network).stopErrors[blankLine.stops[1].id],
+        )
 
         // 자정을 넘기면 막는다.
         val tooLong = draft.copy(

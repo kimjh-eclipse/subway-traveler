@@ -174,6 +174,3 @@ private fun legDistanceKm(
         ?: return Fares.distanceKm(network.stations[fromIndex], network.stations[toIndex])
     return run.zipWithNext { a, b -> Fares.distanceKm(network.stations[a], network.stations[b]) }.sum()
 }
-
-/** "5,600원" */
-fun formatWon(amount: Int): String = "%,d원".format(amount)

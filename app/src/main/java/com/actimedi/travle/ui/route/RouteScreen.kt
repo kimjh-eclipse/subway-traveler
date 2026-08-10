@@ -63,8 +63,8 @@ import com.actimedi.travle.data.RouteSummary
 import com.actimedi.travle.data.SeoulOneDayRoute
 import com.actimedi.travle.data.FareEstimate
 import com.actimedi.travle.data.SubwayNetwork
+import com.actimedi.travle.ui.common.wonText
 import com.actimedi.travle.data.estimateFare
-import com.actimedi.travle.data.formatWon
 import com.actimedi.travle.data.TimelineEntry
 import com.actimedi.travle.data.filterBy
 import com.actimedi.travle.data.formatClockSpan
@@ -364,7 +364,7 @@ private fun ExpandedHeaderContent(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "$startTime 출발",
+                text = stringResource(R.string.header_departure, startTime),
                 fontFamily = SuitFamily,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 12.sp,
@@ -591,7 +591,11 @@ private fun FinishCard(summary: RouteSummary, fare: FareEstimate) {
         }
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "${summary.finishTime.format()} · ${summary.finishPlace} 도착",
+                text = stringResource(
+                    R.string.finish_arrival,
+                    summary.finishTime.format(),
+                    summary.finishPlace,
+                ),
                 fontFamily = SuiteFamily,
                 fontWeight = FontWeight.Bold,
                 fontSize = 15.sp,
@@ -600,8 +604,12 @@ private fun FinishCard(summary: RouteSummary, fare: FareEstimate) {
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "환승 ${summary.transferCount}회 · 정거장 ${summary.legCount}구간 · " +
-                    "체류 ${summary.stayCount}곳",
+                text = stringResource(
+                    R.string.finish_counts,
+                    summary.transferCount,
+                    summary.legCount,
+                    summary.stayCount,
+                ),
                 fontFamily = SuitFamily,
                 fontWeight = FontWeight.Medium,
                 fontSize = 12.5.sp,
@@ -625,7 +633,7 @@ private fun FinishCard(summary: RouteSummary, fare: FareEstimate) {
 private fun FareLine(fare: FareEstimate) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(
-            text = formatWon(fare.total),
+            text = wonText(fare.total),
             fontFamily = SuitFamily,
             fontWeight = FontWeight.Bold,
             fontSize = 14.sp,

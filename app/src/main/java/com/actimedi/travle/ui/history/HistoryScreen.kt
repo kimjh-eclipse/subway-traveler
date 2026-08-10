@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -47,7 +48,6 @@ import com.actimedi.travle.ui.theme.SuitFamily
 import com.actimedi.travle.ui.theme.SuiteFamily
 import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.Locale
 
 /** Every route made so far, newest first. Tapping one opens it on the 노선 tab. */
 @Composable
@@ -226,17 +226,15 @@ private fun HistoryCard(
 
         Spacer(Modifier.height(8.dp))
         Text(
-            text = buildString {
-                append(route.startTime.format())
-                append(" → ")
-                append(route.endTime.format())
-                append(" · 총 ")
-                append(formatClockSpan(summary.totalMinutes))
-                if (route.dayOfWeek.isNotBlank()) {
-                    append(" · ")
-                    append(route.dayOfWeek)
-                }
-            },
+            text = listOfNotNull(
+                stringResource(
+                    R.string.history_span,
+                    route.startTime.format(),
+                    route.endTime.format(),
+                    formatClockSpan(summary.totalMinutes),
+                ),
+                route.dayOfWeek.takeIf { it.isNotBlank() },
+            ).joinToString(" · "),
             fontFamily = SuitFamily,
             fontWeight = FontWeight.SemiBold,
             fontSize = 12.5.sp,
@@ -284,7 +282,12 @@ private fun CardAction(label: String, color: Color, onClick: () -> Unit) {
     )
 }
 
-private val createdAtFormat = SimpleDateFormat("yyyy.MM.dd", Locale.KOREA)
-
-private fun formattedCreatedAt(createdAt: Long): String =
-    if (createdAt <= 0L) "기본 제공" else createdAtFormat.format(Date(createdAt))
+/** 기기 로케일의 날짜 표기를 따른다. */
+@Composable
+private fun formattedCreatedAt(createdAt: Long): String {
+    if (createdAt <= 0L) return stringResource(R.string.history_builtin)
+    val locale = LocalConfiguration.current.locales[0]
+    return remember(createdAt, locale) {
+        SimpleDateFormat("yyyy.MM.dd", locale).format(Date(createdAt))
+    }
+}

@@ -92,4 +92,51 @@
     <string name="nearby_food">주변 맛집 찾기</string>
     <string name="open_google_maps">구글맵</string>
     <string name="open_naver_map">네이버지도</string>
+
+    <!-- 형식 -->
+    <string name="dur_minutes">%1$d분</string>
+    <string name="dur_hours">%1$d시간</string>
+    <string name="dur_hours_minutes">%1$d시간 %2$d분</string>
+    <string name="fare_amount">%1$s원</string>
+
+    <!-- 노선 화면 -->
+    <string name="header_departure">%1$s 출발</string>
+    <string name="finish_arrival">%1$s · %2$s 도착</string>
+    <string name="finish_counts">환승 %1$d회 · 정거장 %2$d구간 · 체류 %3$d곳</string>
+    <string name="wait_chip">환승 대기 %1$d분</string>
+
+    <!-- 노선도 -->
+    <string name="map_this_route">이 경로</string>
+    <string name="map_whole">전체 노선도</string>
+    <string name="map_close">닫기</string>
+    <string name="map_stations">역 %1$d곳</string>
+    <string name="map_straight">직선 표시 %1$d구간</string>
+    <string name="map_offmap">지도 밖 %1$d곳</string>
+
+    <!-- 역 선택 -->
+    <string name="picker_title">노선도에서 역 선택</string>
+    <string name="picker_hint">확대한 뒤 역을 누르세요</string>
+    <string name="picker_empty">역을 선택하면 여기에 표시됩니다.</string>
+    <string name="picker_use">이 역 사용</string>
+    <string name="picker_line_optional">타고 온 노선 (선택)</string>
+
+    <!-- 기록 -->
+    <string name="history_span">%1$s → %2$s · 총 %3$s</string>
+    <string name="history_builtin">기본 제공</string>
+
+    <!-- 검증 -->
+    <string name="invalid_title">경로 이름을 입력하세요.</string>
+    <string name="invalid_too_few_stops">경유지를 1곳 이상 추가하세요.</string>
+    <string name="invalid_blank_name">역·장소 이름을 입력하세요.</string>
+    <string name="invalid_blank_line">여기까지 타고 온 노선을 입력하세요.</string>
+    <string name="invalid_past_midnight">일정이 자정을 넘습니다. 시간을 줄여 보세요.</string>
+
+    <!-- 지도 앱 검색어 -->
+    <string name="nearby_food_query">맛집</string>
+
+    <string-array name="days_of_week">
+        <item>월요일</item><item>화요일</item><item>수요일</item><item>목요일</item>
+        <item>금요일</item><item>토요일</item><item>일요일</item>
+    </string-array>
+    <string name="line_needs_transfer">직결 노선이 없습니다. 갈아타야 하는 구간이니 길찾기로 채워 보세요.</string>
 </resources>
