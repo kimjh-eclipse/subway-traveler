@@ -1,180 +1,143 @@
-# 원데이 노선도 (travle)
+# subway-traveler · 지하철 여행기
 
-Android app built from the Claude Design project
-`서울 원데이 노선도.dc.html` — a one-day Seoul transit itinerary rendered as a
-vertical timeline.
+수도권 지하철로 하루를 도는 일정을 짜고, 노선도 위에서 확인하는 안드로이드 앱.
 
-## Stack
+Claude Design 프로젝트 `서울 원데이 노선도.dc.html` 목업에서 출발해, 경로 작성과
+전체 노선도 뷰까지 확장했다.
 
 | | |
 |---|---|
-| Language | Kotlin |
+| 언어 | Kotlin |
 | UI | Jetpack Compose (Material 3) |
 | AGP / Gradle | 9.3.1 / 9.5.0 |
 | minSdk / targetSdk / compileSdk | 26 / 36 / 36 |
 
-AGP 9 ships built-in Kotlin support, so the module applies only
-`com.android.application` and the Compose compiler plugin.
+## 화면
 
-Two pins worth knowing about:
+**노선** — 가장 최근에 만든 경로를 세로 타임라인으로 보여준다. 아래로 스크롤하면
+헤더가 펼친 높이의 1/4까지 접히고, 남는 공간은 목록이 가져간다. 접혔을 때는 노선명과
+총 소요만 남는다. 체류 카드를 누르면 도착·출발·누적 시간과 함께 구글맵·네이버지도로
+주변 맛집을 찾는 버튼이 나온다.
 
-- **compileSdk stays at 36.** The next AndroidX releases (core-ktx 1.19,
-  lifecycle 2.11, activity 1.13, Compose BOM 2026.06.01) all refuse to compile
-  against anything below 37. Bump `compileSdk` and those four versions together
-  once the `android-37` platform is installed.
-- **The launcher icon lives in `mipmap-anydpi-v26`.** Lint's `ObsoleteSdkInt`
-  suggests dropping the `-v26` because minSdk is already 26, but doing so breaks
-  `processReleaseResources` (`resource mipmap/ic_launcher not found`) while the
-  debug variant still links. Leave the qualifier in place.
+**기록** — 저장된 경로가 최신순으로 쌓인다. 누르면 노선 탭이 그 경로로 바뀐다.
 
-## Build & run
+**노선도** — 수도권 676개 역·24개 노선 위에 이 경로를 겹쳐 그린다. 핀치 줌과 드래그로
+움직인다.
+
+## 경로 만들기
+
+편집기는 **시각을 거의 입력하지 않는다.** 출발 시각 하나만 정하면 나머지는 앞 구간에서
+계산된다.
+
+| 정거장 | 입력하는 것 | 계산되는 것 |
+|---|---|---|
+| 출발지 | 역·장소 | — |
+| 체류 | 머무는 시간 | 도착·출발 시각 |
+| 환승 | 환승 대기 (기본 4분) | 도착·출발 시각 |
+
+- **체류**는 타임라인에 카드가 되고, 메모가 설명으로 들어간다.
+- **환승**은 두 이동 사이에 틈을 남기고, 타임라인이 그것을 `환승 대기 N분`으로 읽는다.
+  입력에서 출발 시각을 빼되 계산에는 남겨, 하루 통계에서 대기 시간이 사라지지 않게 했다.
+- 마지막 정거장에는 체류·대기를 붙이지 않는다. 도착했으므로 없는 시간을 만들지 않는다.
+
+역 이름은 **초성으로도 검색**된다 (`ㄱㄴㄱㅊ` → 강남구청). 노선도에서 직접 눌러 고를
+수도 있고, 그때 그 역을 지나는 노선이 칩으로 뜬다. **타고 온 노선은 앞뒤 역에서 자동으로
+도출**하며, 직접 고르면 그 뒤로는 건드리지 않는다.
+
+### 소요시간은 추정치다
+
+번들 데이터에 시각표가 없다. OpenStreetMap은 기하 정보를 담지 노선 시각표를 담지 않는다.
+그래서 이동 시간은 모델로 뽑는다 — 노선 위 정거장 수 × 2분(서울 지하철 평균, 정차 포함),
+노선을 특정할 수 없으면 직선거리 ÷ 32km/h에 굴곡 보정 1.25를 곱한다. 화면에는 `예상`
+배지를 달고, 값이 틀리면 그 구간만 직접 덮어쓸 수 있다.
+
+## 데이터
+
+경로는 `filesDir/routes.json`에 저장한다 (임시 파일 경유 전체 재작성). 노선 색은 저장하지
+않고 노선 이름에서 파생하므로, 저장 데이터는 텍스트만 갖는다. 첫 실행 시 목업의 서울 경로가
+시드로 들어가 앱이 비어 있지 않다.
+
+## 구조
+
+```
+app/src/main/java/com/actimedi/travle/
+  MainActivity.kt                edge-to-edge 호스트
+  data/
+    RouteModels.kt               ClockTime, RouteSegment, 합계·타임라인 파생
+    RouteDraft.kt                편집기의 정거장 모델 → 구간, 일정 계산, 검증
+    TravelEstimate.kt            소요시간 추정 모델
+    SubwayMap.kt                 수도권 노선망, 역 검색(초성), 노선 도출
+    RouteStore.kt                routes.json 영속화
+    SeoulOneDayRoute.kt          목업 RAW 배열을 그대로 옮긴 시드 경로
+  ui/
+    TravleApp.kt                 탭 셸(노선 / 기록 / 설정) + 상태바 외형
+    TravleViewModel.kt           저장된 경로, 선택, 영속화
+    theme/                       ActiMedi 색·타이포 토큰, 노선색 조회
+    route/                       RouteScreen, TimelineRow, 지도앱 연동
+    history/HistoryScreen.kt     저장된 경로 목록
+    editor/RouteEditorScreen.kt  경로 편집기
+    map/                         노선도 뷰, 역 선택, 경로 투영
+```
+
+## 빌드
 
 ```bash
-JAVA_HOME=/Library/Java/JavaVirtualMachines/zulu-21.jdk/Contents/Home ./gradlew :app:assembleDebug
+./gradlew :app:assembleDebug
 ```
 
 ```bash
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 
-`local.properties` points at the local SDK and is git-ignored.
+`local.properties`가 로컬 SDK 경로를 가리키며 git에서 제외된다.
 
-### Release signing
+### 릴리즈 서명
 
-`app/build.gradle.kts` reads signing credentials from a git-ignored
-`keystore.properties` at the repo root (see `keystore.properties.example`) —
-same convention as the `19` project. `storeFile` resolves relative to the `app/`
-module directory, so the keystore lives at `app/upload-keystore.keystore`.
+`app/build.gradle.kts`가 저장소 루트의 `keystore.properties`(git 제외)에서 서명 정보를
+읽는다. `keystore.properties.example`을 복사해 채우면 된다. `storeFile`은 `app/` 모듈
+기준 상대 경로로 해석되므로 키스토어는 `app/`에 둔다.
 
-If `keystore.properties` is missing, the release variant builds **unsigned**
-rather than silently falling back to the debug key.
+파일이 없으면 release는 **서명 없이** 빌드된다. 디버그 키로 조용히 대체하지 않는다.
 
-```bash
-./gradlew :app:assembleRelease   # → app/build/outputs/apk/release/app-release.apk
-```
-
-`keystore.properties`, `*.keystore` and `*.jks` are all git-ignored. Back the
-keystore up somewhere outside the repo — losing it means never being able to
-ship an update to an app signed with it.
-
-## Layout
-
-```
-app/src/main/java/com/actimedi/travle/
-  MainActivity.kt              edge-to-edge host
-  data/
-    RouteModels.kt             ClockTime, RouteSegment, summary + timeline derivation
-    RouteDraft.kt              the editor's stop model → segments, plus validation
-    RouteStore.kt              routes.json in internal storage
-    SeoulOneDayRoute.kt        the itinerary, transcribed from the design's RAW array
-  ui/
-    TravleApp.kt               tab shell (노선 / 기록 / 설정) + status-bar appearance
-    TravleViewModel.kt         saved routes, selection, persistence
-    theme/                     ActiMedi color + type tokens, line-colour lookup
-    route/                     RouteScreen, TimelineRow
-    history/HistoryScreen.kt   every saved route, newest first
-    editor/RouteEditorScreen.kt  build a route from stops
-    common/PlaceholderScreen.kt
-```
-
-## Creating routes
-
-The 노선 tab opens on the **most recently created** route; 기록 lists them all and
-tapping one switches the 노선 tab to it. 새 경로 opens the editor.
-
-The editor works in **stops**, not segments, because that is how a trip is
-planned. Each stop carries a station/place name, the line taken to reach it,
-arrival and departure times, and a 체류/환승 switch:
-
-- **체류** — becomes a card on the timeline, with the memo as its label.
-- **환승** — leaves a gap between two consecutive rides, which the timeline reads
-  back as a 환승 대기 chip.
-
-`RouteDraft.toSegments()` performs that expansion: a ride runs from the previous
-stop's departure to this stop's arrival, so the two stop kinds fall out of the
-same rule. `RouteDraft.validate()` blocks saving on a blank name, a single stop,
-a missing line, departing before arriving, or arriving before the previous stop
-left — the last two are the mistakes that would otherwise produce a nonsensical
-timeline.
-
-Routes are stored as JSON in `filesDir/routes.json` (whole-file rewrite via a
-temp file). Line colours are **not** stored — `lineColorFor()` derives them from
-the line name, so a saved route only carries text. The design's route is seeded
-on first launch so the app is never empty.
-
-## Collapsing header
-
-Scrolling the timeline down collapses the header to **1/4 of its expanded
-height**, handing the recovered space to the list. `RouteScreen` drives this
-with a `NestedScrollConnection` using `exitUntilCollapsed` semantics: a
-downward scroll is consumed by the header before the list moves, and the header
-only re-expands once the list is back at the top.
-
-The expanded content (departure time, day, eyebrow, title, three stat chips)
-fades out over the first ~half of the collapse and drifts upward slightly for
-parallax. What remains is the route title on one line plus the **총 소요** total
-in a pill — the two things worth keeping when space is scarce.
-
-The natural expanded height is measured once via `onSizeChanged` on a child
-using `wrapContentHeight(unbounded = true)`, so the content keeps its real
-height while the clipping parent shrinks around it. The status-bar inset is
-outside the collapsing box and is never reclaimed.
-
-## Design fidelity notes
-
-The screen is a one-for-one port of the mockup — gradient header, segmented
-filter, timeline rails, expandable stay cards, transfer-wait chips, closing
-summary card and bottom nav. Four deliberate deviations:
-
-1. **Header totals are computed, not hardcoded.** The mockup's chips read
-   `13:28 / 6:27 / 7:01`, which do not add up. Derived from the same route data
-   they are `13:28 / 6:19 / 7:09`; 이동·환승 includes transfer waiting, so the
-   three values reconcile exactly (`이동·환승 + 체류 = 총 소요`). The closing card's
-   arrival time, transfer/leg/stay counts are likewise derived.
-2. **The fake status bar became route metadata.** The mockup drew a phone chrome
-   (`07:00`, a battery outline, `토요일`). The app has a real status bar, so that
-   row now reads `07:00 출발` / `토요일`.
-3. **Move rows are not tappable.** The mockup wired a toggle to them but had no
-   expanded state to show, so tapping did nothing. Only stay cards expand.
-4. **기록 / 설정 tabs are placeholders.** The design only covers the 노선 tab.
-
-The `→` in the header title renders as a shaft-less chevron. That is SUITE's own
-`U+2192` glyph, not a fallback — the browser mockup renders it identically.
-
-## Third-party data & licences
-
-- **Subway network** — `app/src/main/assets/subway_map.json` is derived from
-  OpenStreetMap, © OpenStreetMap contributors, licensed **ODbL 1.0**. The
-  attribution is shown on every screen that draws the map, as the licence
-  requires. Two 공항철도 stops (디지털미디어시티, 홍대입구) missing from the
-  upstream relation were added back; see the generator notes in the commit.
-- **Fonts** — SUIT and SUITE are distributed under the **SIL Open Font License
-  1.1**, which permits bundling them in an application.
-
-## Fonts
-
-`SUIT` (body) and `SUITE` (display) from the ActiMedi brand kit are bundled in
-`app/src/main/res/font/`. Only SUITE Bold is distributed, so the display family
-exposes a single weight; the mockup's 800-weight headings render as SUITE Bold.
-
-## Data
-
-`SeoulOneDayRoute` is seed data compiled into the app. There is no routing API,
-no persistence and no live departure times behind it — the same static
-itinerary the design carried.
-
-## Tests
+## 테스트
 
 ```bash
-JAVA_HOME=/Library/Java/JavaVirtualMachines/zulu-21.jdk/Contents/Home ./gradlew :app:testDebugUnitTest
+./gradlew :app:testDebugUnitTest
 ```
 
-18 tests across four classes:
+20개 테스트:
 
-- `RouteModelsTest` — derived totals, transfer-wait detection, filter
-  partitioning, duration formatting.
-- `RouteDraftTest` — stop→segment expansion, 체류 vs 환승 behaviour, and every
-  validation rule.
-- `RouteSerializationTest` — the JSON round trip, both segment kinds included.
-- `LineColorTest` — the name→colour lookup reproduces every colour the mockup
-  assigned, and 인천1호선 is not swallowed by the 1호선 rule.
+- `RouteModelsTest` — 파생 합계, 환승 대기 판정, 필터 분할, 시간 포맷
+- `RouteDraftTest` — 출발 시각 하나에서 전개되는 일정, 체류/환승 동작, 추정값 덮어쓰기,
+  노선 자동 도출, 검증 규칙
+- `RouteSerializationTest` — JSON 왕복
+- `LineColorTest` — 이름→색 조회가 목업의 색을 그대로 재현하는지, 인천1호선이 1호선
+  규칙에 먹히지 않는지
+
+## 알려진 제약
+
+- **compileSdk는 36에 고정.** 다음 AndroidX 릴리즈(core-ktx 1.19, lifecycle 2.11,
+  activity 1.13, Compose BOM 2026.06.01)가 모두 37 이상을 요구한다. `android-37`
+  플랫폼을 설치한 뒤 함께 올려야 한다.
+- **런처 아이콘은 `mipmap-anydpi-v26`에 둔다.** lint의 `ObsoleteSdkInt`는 minSdk가
+  26이니 `-v26`을 떼라고 하지만, 그러면 `processReleaseResources`가 깨진다.
+- 설정 탭은 아직 비어 있다.
+
+## 목업과 다르게 한 것
+
+1. **헤더 합계를 계산한다.** 목업의 `13:28 / 6:27 / 7:01`은 서로 맞지 않는다. 같은 데이터에서
+   계산하면 `13:28 / 6:19 / 7:09`이고, 이동·환승에 환승 대기를 포함시켜
+   `이동·환승 + 체류 = 총 소요`가 정확히 맞는다.
+2. **가짜 상태바를 노선 메타 정보로 바꿨다.** 목업이 그린 폰 크롬 자리에 실제 상태바가 있다.
+3. **이동 행은 탭되지 않는다.** 목업은 토글을 걸어놨지만 펼칠 내용이 없었다.
+
+헤더 제목의 `→`가 화살대 없는 꺾쇠로 보이는 것은 SUITE 자체의 `U+2192` 글리프다. 브라우저
+목업도 동일하게 렌더링한다.
+
+## 서드파티 데이터·라이선스
+
+- **노선망** — `app/src/main/assets/subway_map.json`은 OpenStreetMap에서 파생했다.
+  © OpenStreetMap contributors, **ODbL 1.0**. 라이선스 요구대로 지도를 그리는 모든 화면에
+  출처를 표시한다. 상류 관계에서 빠져 있던 공항철도의 디지털미디어시티·홍대입구는
+  소속만 보정해 되살렸다.
+- **폰트** — SUIT, SUITE는 **SIL Open Font License 1.1**로 배포되어 앱에 동봉할 수 있다.
