@@ -16,6 +16,9 @@
     <string name="detail_cumulative">누적 시간</string>
 
     <string name="finish_mark">끝</string>
+    <string name="fare_estimated">예상</string>
+    <string name="fare_rides">지하철 %1$d회 승차</string>
+    <string name="fare_excluded">%1$s 제외</string>
 
     <string name="nav_route">노선</string>
     <string name="nav_log">기록</string>
@@ -74,6 +77,13 @@
     <string name="editor_memo_hint">예) 점심 — 신당동 떡볶이</string>
     <string name="editor_add_stop">경유지 추가</string>
     <string name="editor_delete_stop">이 정거장 삭제</string>
+    <string name="search_open">길찾기</string>
+    <string name="search_title">어떻게 갈까요?</string>
+    <string name="search_fastest">최단 경로</string>
+    <string name="search_fewest_transfers">최소 환승</string>
+    <string name="search_summary">환승 %1$d회 · 정거장 %2$d개</string>
+    <string name="search_none">두 역을 잇는 길을 찾지 못했습니다. 역 이름을 확인해 주세요.</string>
+    <string name="search_note">고르면 갈아타는 역이 환승 정거장으로 추가됩니다. 시각표가 없어 소요 시간은 예상치입니다.</string>
     <string name="editor_pick_on_map">노선도</string>
 
 

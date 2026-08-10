@@ -61,7 +61,10 @@ import com.actimedi.travle.data.Route
 import com.actimedi.travle.data.RouteFilter
 import com.actimedi.travle.data.RouteSummary
 import com.actimedi.travle.data.SeoulOneDayRoute
+import com.actimedi.travle.data.FareEstimate
 import com.actimedi.travle.data.SubwayNetwork
+import com.actimedi.travle.data.estimateFare
+import com.actimedi.travle.data.formatWon
 import com.actimedi.travle.data.TimelineEntry
 import com.actimedi.travle.data.filterBy
 import com.actimedi.travle.data.formatClockSpan
@@ -98,6 +101,7 @@ fun RouteScreen(
 ) {
     val summary = remember(route) { route.summarize() }
     val timeline = remember(route) { route.toTimeline() }
+    val fare = remember(route, network) { route.estimateFare(network) }
 
     var filter by rememberSaveable(route.id) { mutableStateOf(RouteFilter.ALL) }
     var expandedIndex by rememberSaveable(route.id) { mutableStateOf(-1) }
@@ -161,6 +165,7 @@ fun RouteScreen(
                 expandedIndex = expandedIndex,
                 onToggle = { index -> expandedIndex = if (expandedIndex == index) -1 else index },
                 network = network,
+                fare = fare,
                 modifier = Modifier.weight(1f),
             )
         }
@@ -518,6 +523,7 @@ private fun RouteTimeline(
     expandedIndex: Int,
     onToggle: (Int) -> Unit,
     network: SubwayNetwork,
+    fare: FareEstimate,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -549,7 +555,7 @@ private fun RouteTimeline(
 
         item {
             Spacer(Modifier.height(8.dp))
-            FinishCard(summary)
+            FinishCard(summary, fare)
             // Clears the floating 새 경로 button.
             Spacer(Modifier.height(64.dp))
         }
@@ -557,7 +563,7 @@ private fun RouteTimeline(
 }
 
 @Composable
-private fun FinishCard(summary: RouteSummary) {
+private fun FinishCard(summary: RouteSummary, fare: FareEstimate) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -602,6 +608,55 @@ private fun FinishCard(summary: RouteSummary) {
                 lineHeight = 17.5.sp,
                 color = RouteColor.StayLabel,
             )
+
+            if (!fare.isEmpty) {
+                Spacer(Modifier.height(8.dp))
+                FareLine(fare)
+            }
         }
+    }
+}
+
+/**
+ * 하루 지하철 요금. 영업거리표가 없어 좌표로 근사하므로 '예상'을 붙인다.
+ * 체류할 때마다 개찰구를 나가므로 승차 횟수가 곧 요금이 부과된 횟수다.
+ */
+@Composable
+private fun FareLine(fare: FareEstimate) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(
+            text = formatWon(fare.total),
+            fontFamily = SuitFamily,
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp,
+            lineHeight = 14.sp,
+            color = AmColor.Blue,
+        )
+        Text(
+            text = stringResource(R.string.fare_estimated),
+            fontFamily = SuitFamily,
+            fontWeight = FontWeight.Bold,
+            fontSize = 10.sp,
+            lineHeight = 10.sp,
+            color = RouteColor.WaitText,
+            modifier = Modifier
+                .clip(CircleShape)
+                .background(RouteColor.WaitFill)
+                .padding(horizontal = 6.dp, vertical = 3.dp),
+        )
+        Text(
+            text = buildString {
+                append(stringResource(R.string.fare_rides, fare.rideCount))
+                if (fare.skippedLines.isNotEmpty()) {
+                    append(" · ")
+                    append(stringResource(R.string.fare_excluded, fare.skippedLines.joinToString(", ")))
+                }
+            },
+            fontFamily = SuitFamily,
+            fontWeight = FontWeight.Medium,
+            fontSize = 11.5.sp,
+            lineHeight = 15.sp,
+            color = RouteColor.StayLabel,
+        )
     }
 }

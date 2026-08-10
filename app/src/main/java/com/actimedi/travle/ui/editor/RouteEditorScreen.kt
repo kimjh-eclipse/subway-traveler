@@ -57,6 +57,9 @@ import com.actimedi.travle.data.RouteDraft
 import com.actimedi.travle.data.DaysOfWeek
 import com.actimedi.travle.data.RouteStop
 import com.actimedi.travle.data.ScheduledStop
+import com.actimedi.travle.data.SearchGoal
+import com.actimedi.travle.data.SearchResult
+import com.actimedi.travle.data.RouteSearch
 import com.actimedi.travle.data.TravelTimes
 import com.actimedi.travle.data.StopKind
 import com.actimedi.travle.data.SubwayNetwork
@@ -84,6 +87,7 @@ fun RouteEditorScreen(
     var draft by remember(initialDraft) { mutableStateOf(initialDraft ?: RouteDraft()) }
     var isPickingStartTime by remember { mutableStateOf(false) }
     var pickerStopId by remember { mutableStateOf<String?>(null) }
+    var searchStopId by remember { mutableStateOf<String?>(null) }
     val validation = draft.validate(network)
     val scheduled = remember(draft, network) { draft.schedule(network) }
 
@@ -120,6 +124,56 @@ fun RouteEditorScreen(
             },
         )
         return
+    }
+
+    // 길찾기 결과는 환승역들을 정거장으로 펼쳐 넣는다 — 갈아타는 역도 들르는 곳이다.
+    fun applySearch(stopId: String, result: SearchResult) {
+        val index = draft.stops.indexOfFirst { it.id == stopId }
+        if (index < 0 || result.legs.isEmpty()) return
+        val target = draft.stops[index]
+        val expanded = result.legs.mapIndexed { legIndex, leg ->
+            val endName = network.stations[leg.stations.last()].name
+            val ride = leg.hops * TravelTimes.MINUTES_PER_HOP
+            if (legIndex == result.legs.lastIndex) {
+                target.copy(
+                    name = endName,
+                    line = leg.line,
+                    lineIsManual = true,
+                    travelMinutesOverride = ride,
+                )
+            } else {
+                RouteStop(
+                    name = endName,
+                    line = leg.line,
+                    lineIsManual = true,
+                    kind = StopKind.TRANSFER,
+                    pauseMinutes = TravelTimes.DEFAULT_TRANSFER_WAIT,
+                    travelMinutesOverride = ride,
+                )
+            }
+        }
+        draft = draft.copy(
+            stops = draft.stops.toMutableList().apply {
+                removeAt(index)
+                addAll(index, expanded)
+            },
+        )
+    }
+
+    searchStopId?.let { stopId ->
+        val index = draft.stops.indexOfFirst { it.id == stopId }
+        val from = draft.stops.getOrNull(index - 1)?.name.orEmpty()
+        val to = draft.stops.getOrNull(index)?.name.orEmpty()
+        RouteSearchDialog(
+            network = network,
+            from = from,
+            to = to,
+            onDismiss = { searchStopId = null },
+            onPick = { result ->
+                applySearch(stopId, result)
+                searchStopId = null
+            },
+        )
     }
 
     Column(
@@ -209,6 +263,7 @@ fun RouteEditorScreen(
                             .withAutoLines(network)
                     },
                     onOpenMap = { pickerStopId = stop.id },
+                    onSearchRoute = { searchStopId = stop.id },
                 )
             }
 
@@ -313,6 +368,7 @@ private fun StopCard(
     onChange: (RouteStop) -> Unit,
     onDelete: () -> Unit,
     onOpenMap: () -> Unit,
+    onSearchRoute: () -> Unit,
 ) {
     val isFirst = index == 0
     val shape = RoundedCornerShape(22.dp)
@@ -384,6 +440,21 @@ private fun StopCard(
                 candidates = lineCandidates,
                 onChange = onChange,
             )
+            if (!previousName.isNullOrBlank()) {
+                Text(
+                    text = stringResource(R.string.search_open),
+                    fontFamily = SuitFamily,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.sp,
+                    lineHeight = 12.sp,
+                    color = AmColor.Blue,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(RouteColor.StayBadgeFill)
+                        .clickable(onClick = onSearchRoute)
+                        .padding(horizontal = 14.dp, vertical = 9.dp),
+                )
+            }
         }
 
         if (!isFirst) {
