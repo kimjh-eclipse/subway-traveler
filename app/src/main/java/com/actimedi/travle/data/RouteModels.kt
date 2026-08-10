@@ -74,6 +74,11 @@ data class Route(
     /** Epoch millis, used only to order the history list. */
     val createdAt: Long,
     val segments: List<RouteSegment>,
+    /**
+     * Where the day starts. The first stop produces no segment of its own when
+     * you leave straight away, so without this the origin would be lost.
+     */
+    val origin: String = "",
 ) {
     val startTime: ClockTime get() = segments.first().start
     val endTime: ClockTime get() = segments.last().end

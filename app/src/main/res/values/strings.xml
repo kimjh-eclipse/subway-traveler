@@ -34,6 +34,12 @@
     <string name="history_subtitle">저장된 경로 %1$d개</string>
     <string name="history_empty">아직 만든 경로가 없습니다.\n새 경로를 추가해 보세요.</string>
     <string name="history_showing">보는 중</string>
+    <string name="route_edit">수정</string>
+    <string name="route_delete">삭제</string>
+    <string name="delete_title">경로를 삭제할까요?</string>
+    <string name="delete_body">“%1$s”을(를) 삭제합니다. 되돌릴 수 없습니다.</string>
+    <string name="delete_confirm">삭제</string>
+    <string name="editor_title_edit">경로 수정</string>
     <string name="history_counts">정거장 %1$d구간 · 체류 %2$d곳 · %3$s</string>
 
     <!-- 경로 만들기 -->

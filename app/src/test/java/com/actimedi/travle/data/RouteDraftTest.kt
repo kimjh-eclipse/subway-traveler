@@ -138,4 +138,37 @@ class RouteDraftTest {
         )
         assertEquals("직접입력", pinned.withAutoLines(network).stops[1].line)
     }
+
+    @Test
+    fun `reopening a saved route reproduces it exactly`() {
+        val saved = draft.toRoute(network, now = 1L)
+        val reopened = saved.toDraft().toRoute(network, now = 1L, id = saved.id)
+
+        assertEquals(saved.segments, reopened.segments)
+        assertEquals(saved.origin, reopened.origin)
+        assertEquals(saved.startTime, reopened.startTime)
+        assertEquals(saved.summarize(), reopened.summarize())
+    }
+
+    @Test
+    fun `a route that lingers at its origin survives the round trip`() {
+        // 시드 경로처럼 출발지에서 머물다 가는 형태.
+        val lingering = draft.copy(
+            stops = draft.stops.mapIndexed { i, s -> if (i == 0) s.copy(pauseMinutes = 8) else s },
+        )
+        val saved = lingering.toRoute(network, now = 1L)
+        val firstStay = saved.segments.first() as RouteSegment.Stay
+        assertEquals("가역", firstStay.place)
+        assertEquals(8, firstStay.minutes)
+
+        val reopened = saved.toDraft().toRoute(network, now = 1L, id = saved.id)
+        assertEquals(saved.segments, reopened.segments)
+    }
+
+    @Test
+    fun `the origin is kept even when you leave straight away`() {
+        val saved = draft.toRoute(network, now = 1L)
+        assertEquals("가역", saved.origin)
+        assertEquals("가역", saved.toDraft().stops.first().name)
+    }
 }

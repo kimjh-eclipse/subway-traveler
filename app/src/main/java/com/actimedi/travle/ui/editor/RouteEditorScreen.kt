@@ -78,8 +78,10 @@ fun RouteEditorScreen(
     onCancel: () -> Unit,
     onSave: (RouteDraft) -> Unit,
     modifier: Modifier = Modifier,
+    /** Non-null when reopening a saved route rather than starting a new one. */
+    initialDraft: RouteDraft? = null,
 ) {
-    var draft by remember { mutableStateOf(RouteDraft()) }
+    var draft by remember(initialDraft) { mutableStateOf(initialDraft ?: RouteDraft()) }
     var isPickingStartTime by remember { mutableStateOf(false) }
     var pickerStopId by remember { mutableStateOf<String?>(null) }
     val validation = draft.validate(network)
@@ -128,6 +130,11 @@ fun RouteEditorScreen(
             .imePadding(),
     ) {
         EditorTopBar(
+            titleRes = if (initialDraft == null) {
+                R.string.editor_title
+            } else {
+                R.string.editor_title_edit
+            },
             canSave = validation.isValid,
             onCancel = onCancel,
             onSave = { onSave(draft) },
@@ -246,7 +253,12 @@ fun RouteEditorScreen(
 }
 
 @Composable
-private fun EditorTopBar(canSave: Boolean, onCancel: () -> Unit, onSave: () -> Unit) {
+private fun EditorTopBar(
+    titleRes: Int,
+    canSave: Boolean,
+    onCancel: () -> Unit,
+    onSave: () -> Unit,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -265,7 +277,7 @@ private fun EditorTopBar(canSave: Boolean, onCancel: () -> Unit, onSave: () -> U
                 .padding(horizontal = 10.dp, vertical = 8.dp),
         )
         Text(
-            text = stringResource(R.string.editor_title),
+            text = stringResource(titleRes),
             fontFamily = SuiteFamily,
             fontWeight = FontWeight.Bold,
             fontSize = 16.sp,
@@ -357,20 +369,22 @@ private fun StopCard(
             }
         }
 
-        if (!isFirst) {
-            LineField(
-                stop = stop,
-                candidates = lineCandidates,
-                onChange = onChange,
-            )
-        }
-
         StationNameField(
             value = stop.name,
             network = network,
             onValueChange = { onChange(stop.copy(name = it)) },
             onOpenMap = onOpenMap,
         )
+
+        // The line only becomes answerable once the station is known, so it stays
+        // hidden until then rather than offering an empty box to type into.
+        if (!isFirst && stop.name.isNotBlank()) {
+            LineField(
+                stop = stop,
+                candidates = lineCandidates,
+                onChange = onChange,
+            )
+        }
 
         if (!isFirst) {
             // Ride time is estimated from the line; the user only steps in when it is wrong.

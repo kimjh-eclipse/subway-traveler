@@ -65,11 +65,27 @@ class TravleViewModel(application: Application) : AndroidViewModel(application) 
     /** Saves a freshly drawn route and makes it the one on show. */
     fun addRoute(draft: RouteDraft) {
         val route = draft.toRoute(network = network, now = System.currentTimeMillis())
-        val updated = listOf(route) + routes
-        routes = updated
-        selectedRouteId = route.id
+        persist(listOf(route) + routes, select = route.id)
+    }
+
+    /** Rewrites an existing route in place, keeping its id and its spot in history. */
+    fun updateRoute(id: String, draft: RouteDraft) {
+        val existing = routes.firstOrNull { it.id == id } ?: return
+        val route = draft.toRoute(network = network, now = existing.createdAt, id = id)
+        persist(routes.map { if (it.id == id) route else it }, select = id)
+    }
+
+    fun deleteRoute(id: String) {
+        val remaining = routes.filterNot { it.id == id }
+        val nextSelection = if (selectedRouteId == id) remaining.firstOrNull()?.id else selectedRouteId
+        persist(remaining, select = nextSelection)
+    }
+
+    private fun persist(next: List<Route>, select: String?) {
+        routes = next
+        selectedRouteId = select
         viewModelScope.launch {
-            withContext(Dispatchers.IO) { store.save(updated) }
+            withContext(Dispatchers.IO) { store.save(next) }
         }
     }
 }

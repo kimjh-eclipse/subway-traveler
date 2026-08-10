@@ -75,6 +75,7 @@ object RouteColor {
     val NavInactiveIcon = Color(0xFFC7CBD6)
 
     val CardShadow = Color(0xFF0C1E6B)
+    val Destructive = Color(0xFFE5484D)
 }
 
 /**

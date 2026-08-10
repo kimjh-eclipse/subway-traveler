@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.actimedi.travle.R
+import com.actimedi.travle.data.toDraft
 import com.actimedi.travle.ui.common.PlaceholderScreen
 import com.actimedi.travle.ui.editor.RouteEditorScreen
 import com.actimedi.travle.ui.history.HistoryScreen
@@ -101,15 +102,24 @@ private enum class TravleTab(val labelRes: Int) {
 fun TravleApp(viewModel: TravleViewModel = viewModel()) {
     var tab by rememberSaveable { mutableStateOf(TravleTab.ROUTE) }
     var isEditorOpen by rememberSaveable { mutableStateOf(false) }
+    /** Id of the route being edited; null means the editor is creating a new one. */
+    var editingRouteId by rememberSaveable { mutableStateOf<String?>(null) }
     var isMapOpen by rememberSaveable { mutableStateOf(false) }
 
     if (isEditorOpen) {
+        val editing = editingRouteId?.let { id -> viewModel.routes.firstOrNull { it.id == id } }
         RouteEditorScreen(
             network = viewModel.network,
-            onCancel = { isEditorOpen = false },
-            onSave = { draft ->
-                viewModel.addRoute(draft)
+            initialDraft = editing?.toDraft(),
+            onCancel = {
                 isEditorOpen = false
+                editingRouteId = null
+            },
+            onSave = { draft ->
+                val id = editingRouteId
+                if (id == null) viewModel.addRoute(draft) else viewModel.updateRoute(id, draft)
+                isEditorOpen = false
+                editingRouteId = null
                 tab = TravleTab.ROUTE
             },
         )
@@ -145,7 +155,10 @@ fun TravleApp(viewModel: TravleViewModel = viewModel()) {
                     when {
                         route != null -> RouteScreen(
                             route = route,
-                            onCreateRoute = { isEditorOpen = true },
+                            onCreateRoute = {
+                                editingRouteId = null
+                                isEditorOpen = true
+                            },
                             network = viewModel.network,
                             onOpenMap = { isMapOpen = true }.takeIf {
                                 viewModel.network.stations.isNotEmpty()
@@ -153,7 +166,10 @@ fun TravleApp(viewModel: TravleViewModel = viewModel()) {
                         )
                         // Nothing to show yet, and nothing to say until the disk read lands.
                         viewModel.isLoading -> Box(Modifier.fillMaxSize())
-                        else -> EmptyRouteScreen(onCreateRoute = { isEditorOpen = true })
+                        else -> EmptyRouteScreen(onCreateRoute = {
+                            editingRouteId = null
+                            isEditorOpen = true
+                        })
                     }
                 }
 
@@ -164,7 +180,15 @@ fun TravleApp(viewModel: TravleViewModel = viewModel()) {
                         viewModel.selectRoute(id)
                         tab = TravleTab.ROUTE
                     },
-                    onCreateRoute = { isEditorOpen = true },
+                    onEdit = { id ->
+                        editingRouteId = id
+                        isEditorOpen = true
+                    },
+                    onDelete = viewModel::deleteRoute,
+                    onCreateRoute = {
+                        editingRouteId = null
+                        isEditorOpen = true
+                    },
                 )
 
                 TravleTab.SETTINGS -> PlaceholderScreen(bodyRes = R.string.placeholder_settings)

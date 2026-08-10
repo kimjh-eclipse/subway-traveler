@@ -22,9 +22,12 @@ data class RouteStop(
     val kind: StopKind = StopKind.STAY,
     /**
      * 체류 → how long you stay. 환승 → how long you wait for the connection.
-     * Unused on the first stop, which only has a departure time.
+     * On the first stop it is how long you linger before setting off.
+     *
+     * Defaults to zero so that a bare [RouteStop] never invents time; the editor
+     * sets a sensible stay when it appends one (see [RouteDraft.nextStopDefault]).
      */
-    val pauseMinutes: Int = TravelTimes.DEFAULT_STAY_MINUTES,
+    val pauseMinutes: Int = 0,
     /** Set only when the user corrects the estimated ride time. */
     val travelMinutesOverride: Int? = null,
     val memo: String = "",
@@ -37,9 +40,13 @@ data class RouteDraft(
     val dayOfWeek: String = "",
     /** When you leave the first stop. The one clock time in the whole editor. */
     val startTime: ClockTime = ClockTime.of(9, 0),
+    // The origin has no pause control; it only carries one when a route made
+    // elsewhere (the seed) lingers there, and round-tripping must not lose it.
     val stops: List<RouteStop> = listOf(RouteStop()),
 ) {
-    fun nextStopDefault() = RouteStop()
+    fun nextStopDefault() = RouteStop(pauseMinutes = TravelTimes.DEFAULT_STAY_MINUTES)
+
+    val origin: String get() = stops.firstOrNull()?.name.orEmpty()
 }
 
 val DaysOfWeek = listOf("월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일")
@@ -68,7 +75,9 @@ fun RouteDraft.schedule(network: SubwayNetwork): List<ScheduledStop> {
 
     stops.forEachIndexed { index, stop ->
         if (index == 0) {
-            out += ScheduledStop(stop, 0, null, startTime, startTime)
+            val departure = ClockTime(startTime.minuteOfDay + stop.pauseMinutes.coerceAtLeast(0))
+            out += ScheduledStop(stop, 0, null, startTime, departure)
+            clock = departure
             return@forEachIndexed
         }
 
@@ -106,7 +115,7 @@ fun RouteDraft.toSegments(network: SubwayNetwork): List<RouteSegment> {
             )
         }
         val pause = item.departure - item.arrival
-        if (index > 0 && item.stop.kind == StopKind.STAY && pause > 0) {
+        if (item.stop.kind == StopKind.STAY && pause > 0) {
             out += RouteSegment.Stay(
                 place = item.stop.name.trim(),
                 label = item.stop.memo.trim(),
@@ -152,13 +161,62 @@ fun RouteDraft.validate(network: SubwayNetwork = SubwayNetwork()): DraftValidati
 }
 
 /** Builds a saveable route. Call only when [validate] passes. */
-fun RouteDraft.toRoute(network: SubwayNetwork, now: Long): Route = Route(
-    id = UUID.randomUUID().toString(),
+fun RouteDraft.toRoute(
+    network: SubwayNetwork,
+    now: Long,
+    id: String = UUID.randomUUID().toString(),
+): Route = Route(
+    id = id,
     title = title.trim(),
     dayOfWeek = dayOfWeek.trim(),
     createdAt = now,
     segments = toSegments(network),
+    origin = origin.trim(),
 )
+
+/**
+ * Turns a saved route back into something the editor can work on.
+ *
+ * Ride times come back as overrides rather than estimates: the saved route is
+ * what the user decided, so reopening it must not silently re-time the day. The
+ * `예상값으로` button puts any leg back under the estimate.
+ */
+fun Route.toDraft(): RouteDraft {
+    val stops = mutableListOf<RouteStop>()
+    val leadingStay = segments.firstOrNull() as? RouteSegment.Stay
+
+    stops += RouteStop(
+        name = origin.ifBlank { leadingStay?.place.orEmpty() },
+        pauseMinutes = leadingStay?.minutes ?: 0,
+        memo = leadingStay?.label.orEmpty(),
+    )
+
+    segments.forEachIndexed { index, segment ->
+        if (segment !is RouteSegment.Move) return@forEachIndexed
+        val following = segments.getOrNull(index + 1)
+        val stay = following as? RouteSegment.Stay
+        val nextMove = segments.drop(index + 1).filterIsInstance<RouteSegment.Move>().firstOrNull()
+
+        stops += RouteStop(
+            name = segment.destination,
+            line = segment.line,
+            lineIsManual = true,
+            travelMinutesOverride = segment.minutes,
+            kind = if (stay != null) StopKind.STAY else StopKind.TRANSFER,
+            pauseMinutes = stay?.minutes
+                ?: nextMove?.let { (it.start - segment.end).coerceAtLeast(0) }
+                ?: 0,
+            memo = stay?.label.orEmpty(),
+        )
+    }
+
+    return RouteDraft(
+        title = title,
+        dayOfWeek = dayOfWeek,
+        startTime = startTime,
+        stops = stops,
+    )
+}
 
 /**
  * Fills in the line for each leg from the stations either side of it.
