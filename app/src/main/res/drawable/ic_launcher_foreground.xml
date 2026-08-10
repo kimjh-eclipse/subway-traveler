@@ -9,6 +9,12 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
+    <!-- 시안의 라벤더는 링 안쪽에만 — 배경 레이어 전체에 깔면 런처의 원형 마스크
+         바깥까지 번져 링이 두 겹으로 보인다. -->
+    <path
+        android:fillColor="#DCE4F8"
+        android:pathData="M54,54 m-28.5,0 a28.5,28.5 0 1,0 57,0 a28.5,28.5 0 1,0 -57,0 Z" />
+
     <!-- 순환선: 사분면마다 노선색 하나씩 -->
     <path
         android:strokeColor="#0052A4"
@@ -23,7 +29,7 @@
         android:strokeWidth="7"
         android:pathData="M79,54 A25,25 0 0 1 54,79" />
     <path
-        android:strokeColor="#E6186C"
+        android:strokeColor="#BDB092"
         android:strokeWidth="7"
         android:pathData="M54,79 A25,25 0 0 1 29,54" />
 
@@ -46,7 +52,7 @@
         android:fillColor="#F5A200"
         android:pathData="M54,79 m-4.2,0 a4.2,4.2 0 1,0 8.4,0 a4.2,4.2 0 1,0 -8.4,0 Z" />
     <path
-        android:fillColor="#E6186C"
+        android:fillColor="#BDB092"
         android:pathData="M29,54 m-4.2,0 a4.2,4.2 0 1,0 8.4,0 a4.2,4.2 0 1,0 -8.4,0 Z" />
 
     <!-- 전동차 발 (차체 뒤에 깔림) -->
