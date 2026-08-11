@@ -28,6 +28,7 @@ import com.actimedi.travle.R
 import com.actimedi.travle.data.Arrival
 import com.actimedi.travle.data.ArrivalResult
 import com.actimedi.travle.data.RealtimeArrivals
+import com.actimedi.travle.data.SubwayNetwork
 import com.actimedi.travle.ui.theme.AmColor
 import com.actimedi.travle.ui.theme.RouteColor
 import com.actimedi.travle.ui.theme.SuitFamily
@@ -43,16 +44,19 @@ import com.actimedi.travle.ui.theme.lineColorFor
 @Composable
 fun ArrivalsPanel(
     stationName: String,
+    network: SubwayNetwork,
     modifier: Modifier = Modifier,
     maxRows: Int = 3,
     /** 여행 중일 때만 실시간을 부른다. 계획 중에는 부르지 않는다. */
     live: Boolean = true,
 ) {
-    var state by remember(stationName, live) { mutableStateOf<ArrivalResult?>(null) }
+    // 노선망 이름과 API 이름이 어긋나는 역이 45곳 있다 — 물어보기 전에 바꿔 둔다.
+    val apiName = remember(stationName, network) { network.realtimeNameFor(stationName) }
+    var state by remember(apiName, live) { mutableStateOf<ArrivalResult?>(null) }
 
-    LaunchedEffect(stationName, live) {
+    LaunchedEffect(apiName, live) {
         state = null
-        if (live && stationName.isNotBlank()) state = RealtimeArrivals.forStation(stationName)
+        if (live && apiName.isNotBlank()) state = RealtimeArrivals.forStation(apiName)
     }
 
     if (!live) return

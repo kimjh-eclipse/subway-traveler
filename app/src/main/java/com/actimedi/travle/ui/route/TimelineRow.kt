@@ -342,7 +342,7 @@ private fun StayCard(
 
                 if (live && network.findStation(segment.place) != null) {
                     Spacer(Modifier.height(12.dp))
-                    ArrivalsPanel(stationName = segment.place, maxRows = 2, live = true)
+                    ArrivalsPanel(stationName = segment.place, network = network, maxRows = 2, live = true)
                 }
 
                 Spacer(Modifier.height(12.dp))
@@ -447,7 +447,7 @@ private fun TransferWait(minutes: Int, station: String?, network: SubwayNetwork,
         )
         if (canQuery && expanded) {
             Spacer(Modifier.height(8.dp))
-            ArrivalsPanel(stationName = station!!, maxRows = 3, live = true)
+            ArrivalsPanel(stationName = station!!, network = network, maxRows = 3, live = true)
         }
     }
 }

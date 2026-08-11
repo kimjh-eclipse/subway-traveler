@@ -19,6 +19,15 @@ data class SubwayStation(
     @SerialName("x") val lon: Double,
     /** Lines serving this station — drives transfer dots and the editor's line chips. */
     @SerialName("l") val lines: List<String> = emptyList(),
+    /**
+     * 실시간 도착 API가 부르는 이름. [name]과 같으면 비어 있다.
+     *
+     * 노선망은 OSM에서, 실시간 도착은 서울시에서 와 이름이 어긋난다 — 그것도 한
+     * 방향이 아니다. OSM의 `교대(법원·검찰청)`을 API는 `교대`라 하고, OSM의 `군자`를
+     * API는 `군자(능동)`이라 한다. 어긋나면 API는 오류 없이 빈 결과를 주므로
+     * 화면에는 막차가 끊긴 것처럼 보인다. `tools/realtime_names.py`가 채운다.
+     */
+    @SerialName("r") val realtimeName: String? = null,
 )
 
 @Serializable
@@ -72,6 +81,15 @@ data class SubwayNetwork(
         if (name.endsWith("역") && name.length > 1) byName[name.dropLast(1)]?.let { return it }
         byName["${name}역"]?.let { return it }
         return null
+    }
+
+    /**
+     * 실시간 도착 API에 물을 때 쓸 이름. 짝을 못 찾으면 받은 이름을 그대로 돌려준다 —
+     * 틀린 이름으로 묻는 것이 아예 묻지 않는 것보다 낫다.
+     */
+    fun realtimeNameFor(rawName: String): String {
+        val index = findStation(rawName) ?: return rawName.trim()
+        return stations[index].realtimeName ?: stations[index].name
     }
 
     /**
