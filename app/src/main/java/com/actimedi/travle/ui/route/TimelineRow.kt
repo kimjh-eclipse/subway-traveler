@@ -52,6 +52,7 @@ import androidx.compose.foundation.Canvas
 import com.actimedi.travle.R
 import com.actimedi.travle.data.RouteSegment
 import com.actimedi.travle.ui.common.ArrivalsPanel
+import com.actimedi.travle.ui.common.SchedulePanel
 import com.actimedi.travle.ui.common.durationText
 import com.actimedi.travle.data.SubwayNetwork
 import com.actimedi.travle.data.TimelineEntry
@@ -76,6 +77,8 @@ fun TimelineRow(
     modifier: Modifier = Modifier,
     network: SubwayNetwork = SubwayNetwork(),
     live: Boolean = false,
+    /** 계획 중일 때 어느 요일의 시간표를 볼지 정한다. */
+    dayOfWeek: String = "",
 ) {
     Row(modifier = modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
         TimeColumn(
@@ -107,8 +110,10 @@ fun TimelineRow(
                 TransferWait(
                     minutes = entry.transferWaitMinutes,
                     station = entry.transferStation,
+                    entry = entry,
                     network = network,
                     live = live,
+                    dayOfWeek = dayOfWeek,
                 )
             }
         }
@@ -428,27 +433,51 @@ private fun DetailStat(
 }
 
 /**
- * 환승 대기.
+ * 환승 지점.
  *
- * 여행 중에는 환승 지점마다 도착정보를 바로 펼친다 — 갈아타는 순간 알아야 하는
- * 정보라 한 번 더 누르게 할 이유가 없다. 계획 중에는 아예 부르지 않으므로
- * 하루 1,000건 제한도 여행하는 날에만 쓰인다. 접어 둘 수는 있다.
+ * 두 모드가 다른 것을 보여준다. 여행 중이면 실시간 도착이고, 계획 중이면 그 요일의
+ * 시간표다 — 계획하는 시점에는 '지금'이라는 것이 없기 때문이다.
+ *
+ * 어느 쪽이든 **누르면 열린다**. 예전에는 여행 중일 때만 눌렸는데, 체류 카드는
+ * 계획 중에도 열리다 보니 환승 칩만 고장 난 것처럼 보였다.
+ *
+ * 여행 중에는 처음부터 펼쳐 둔다 — 갈아타는 순간 알아야 하는 정보라 한 번 더
+ * 누르게 할 이유가 없다. 계획 중에는 접어 둔다: 시간표 조회도 호출이라 화면을
+ * 열 때마다 스무 번씩 부를 이유는 없다.
  */
 @Composable
-private fun TransferWait(minutes: Int, station: String?, network: SubwayNetwork, live: Boolean) {
-    val canQuery = live && station != null && network.findStation(station) != null
+private fun TransferWait(
+    minutes: Int,
+    station: String?,
+    entry: TimelineEntry,
+    network: SubwayNetwork,
+    live: Boolean,
+    dayOfWeek: String,
+) {
+    val known = station != null && network.findStation(station) != null
     var expanded by rememberSaveable(station, live) { mutableStateOf(live) }
 
     Column {
         WaitChip(
             minutes = minutes,
-            station = station.takeIf { canQuery },
+            station = station.takeIf { known },
             expanded = expanded,
-            onClick = { expanded = !expanded }.takeIf { canQuery },
+            onClick = { expanded = !expanded }.takeIf { known },
         )
-        if (canQuery && expanded) {
-            Spacer(Modifier.height(8.dp))
-            ArrivalsPanel(stationName = station!!, network = network, live = true)
+        if (!known || !expanded) return@Column
+
+        Spacer(Modifier.height(8.dp))
+        val ride = entry.segment as? RouteSegment.Move
+        when {
+            live -> ArrivalsPanel(stationName = station!!, network = network, live = true)
+            // 갈아타고 어디로 가는지 알아야 시간표에서 방향을 고를 수 있다.
+            ride != null -> SchedulePanel(
+                station = station!!,
+                line = ride.line,
+                towards = ride.destination,
+                dayOfWeek = dayOfWeek,
+                around = ride.start,
+            )
         }
     }
 }

@@ -232,7 +232,13 @@ class SeoulTimetable(
         DayType.SATURDAY, DayType.HOLIDAY -> "주말"
     }
 
-    private companion object {
+    companion object {
+        /**
+         * 화면 곳곳이 같은 시간표를 다시 받지 않도록 한 벌을 나눠 쓴다. 시간표는
+         * 하루 동안 변하지 않으니 오래 들고 있어도 상하지 않고, 무엇보다 호출을 아낀다.
+         */
+        val shared: SeoulTimetable by lazy { SeoulTimetable() }
+
         const val TAG = "SeoulTimetable"
         const val ENDPOINT = "https://apis.data.go.kr/B553766/schedule/getTrainSch"
         const val TIMEOUT_MS = 15_000

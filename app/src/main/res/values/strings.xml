@@ -158,6 +158,11 @@
     <string name="mode_planning_note">계획 보기 — 저장된 시각을 보여줍니다.</string>
     <string name="mode_travelling_note">여행 중 — 역을 누르면 실시간 도착을 조회합니다.</string>
 
+    <string name="schedule_title">%1$s 방면 열차 시간표</string>
+    <string name="schedule_loading">시간표 확인 중…</string>
+    <string name="schedule_empty">이 구간의 시간표가 없습니다.</string>
+    <string name="schedule_after_last">이 시각 이후 열차가 없습니다.</string>
+
     <string name="align_action">시간표로 맞추기</string>
     <string name="align_note">실제 열차 시각에 맞춰 다시 계산합니다.</string>
     <string name="align_loading">시간표 확인 중…</string>

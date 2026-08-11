@@ -147,6 +147,11 @@
     <string name="mode_planning_note">計画中 — 保存した時刻を表示します。</string>
     <string name="mode_travelling_note">移動中 — 駅をタップすると到着情報を照会します。</string>
 
+    <string name="schedule_title">%1$s 方面の列車時刻表</string>
+    <string name="schedule_loading">時刻表を確認中…</string>
+    <string name="schedule_empty">この区間の時刻表がありません。</string>
+    <string name="schedule_after_last">この時刻以降の列車はありません。</string>
+
     <string name="align_action">時刻表に合わせる</string>
     <string name="align_note">実際の発車時刻で計算し直します。</string>
     <string name="align_loading">時刻表を確認中…</string>

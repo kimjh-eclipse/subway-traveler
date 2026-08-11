@@ -178,6 +178,7 @@ fun RouteScreen(
                 network = network,
                 fare = fare,
                 live = isTravelling,
+                dayOfWeek = route.dayOfWeek,
                 modifier = Modifier.weight(1f),
             )
         }
@@ -582,6 +583,7 @@ private fun RouteTimeline(
     network: SubwayNetwork,
     fare: FareEstimate,
     live: Boolean,
+    dayOfWeek: String,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -609,6 +611,7 @@ private fun RouteTimeline(
                 onToggle = { onToggle(entry.index) },
                 network = network,
                 live = live,
+                dayOfWeek = dayOfWeek,
             )
         }
 
