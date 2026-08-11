@@ -24,7 +24,8 @@ misc.xml
 deploymentTargetDropDown.xml
 render.experimental.xml
 
-# 서명 비밀 — 절대 커밋 금지
+# 비밀 — 절대 커밋 금지
+.env
 keystore.properties
 *.jks
 *.keystore

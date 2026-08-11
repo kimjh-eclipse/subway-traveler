@@ -136,4 +136,12 @@
     <string name="about_fares_body">Estimated from the metropolitan integrated fare table. Without an official distance table the distance is approximated from coordinates, so the real fare may differ.</string>
     <string name="about_fonts_title">Fonts</string>
     <string name="about_fonts_body">SUIT, SUITE · SIL Open Font License 1.1</string>
+    <string name="arrivals_title">Live arrivals</string>
+    <string name="arrivals_empty">No trains due right now.</string>
+    <string name="arrivals_failed">Could not load live arrivals.</string>
+    <string name="wait_chip_at">%1$s · %2$d min wait</string>
+    <string name="mode_start">Start trip</string>
+    <string name="mode_stop">End trip</string>
+    <string name="mode_planning_note">Planning — showing your saved times.</string>
+    <string name="mode_travelling_note">On the move — tap a station for live arrivals.</string>
 </resources>

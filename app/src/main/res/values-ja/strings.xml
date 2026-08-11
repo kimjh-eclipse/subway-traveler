@@ -136,4 +136,12 @@
     <string name="about_fares_body">首都圏統合運賃をもとにした目安です。営業距離表がないため座標距離で近似しており、実際の運賃と異なる場合があります。</string>
     <string name="about_fonts_title">フォント</string>
     <string name="about_fonts_body">SUIT, SUITE · SIL Open Font License 1.1</string>
+    <string name="arrivals_title">リアルタイム到着</string>
+    <string name="arrivals_empty">まもなく来る列車はありません。</string>
+    <string name="arrivals_failed">リアルタイム情報を取得できませんでした。</string>
+    <string name="wait_chip_at">%1$s 乗換待ち %2$d分</string>
+    <string name="mode_start">旅を開始</string>
+    <string name="mode_stop">旅を終了</string>
+    <string name="mode_planning_note">計画中 — 保存した時刻を表示します。</string>
+    <string name="mode_travelling_note">移動中 — 駅をタップすると到着情報を照会します。</string>
 </resources>

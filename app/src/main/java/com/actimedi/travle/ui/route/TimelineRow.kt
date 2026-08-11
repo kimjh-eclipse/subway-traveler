@@ -29,7 +29,10 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,6 +51,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Canvas
 import com.actimedi.travle.R
 import com.actimedi.travle.data.RouteSegment
+import com.actimedi.travle.ui.common.ArrivalsPanel
 import com.actimedi.travle.ui.common.durationText
 import com.actimedi.travle.data.SubwayNetwork
 import com.actimedi.travle.data.TimelineEntry
@@ -71,6 +75,7 @@ fun TimelineRow(
     onToggle: () -> Unit,
     modifier: Modifier = Modifier,
     network: SubwayNetwork = SubwayNetwork(),
+    live: Boolean = false,
 ) {
     Row(modifier = modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
         TimeColumn(
@@ -93,11 +98,17 @@ fun TimelineRow(
                     expanded = expanded,
                     onToggle = onToggle,
                     network = network,
+                    live = live,
                 )
             }
             if (entry.transferWaitMinutes > 0) {
                 Spacer(Modifier.height(6.dp))
-                WaitChip(entry.transferWaitMinutes)
+                TransferWait(
+                    minutes = entry.transferWaitMinutes,
+                    station = entry.transferStation,
+                    network = network,
+                    live = live,
+                )
             }
         }
     }
@@ -238,6 +249,7 @@ private fun StayCard(
     expanded: Boolean,
     onToggle: () -> Unit,
     network: SubwayNetwork,
+    live: Boolean,
 ) {
     val shape = RoundedCornerShape(22.dp)
     val borderColor by animateColorAsState(
@@ -328,6 +340,11 @@ private fun StayCard(
                     )
                 }
 
+                if (live && network.findStation(segment.place) != null) {
+                    Spacer(Modifier.height(12.dp))
+                    ArrivalsPanel(stationName = segment.place, maxRows = 2, live = true)
+                }
+
                 Spacer(Modifier.height(12.dp))
                 NearbyFoodLinks(place = segment.place, network = network)
             }
@@ -409,13 +426,45 @@ private fun DetailStat(
     }
 }
 
+/**
+ * 환승 대기.
+ *
+ * 여행 중에는 환승 지점마다 도착정보를 바로 펼친다 — 갈아타는 순간 알아야 하는
+ * 정보라 한 번 더 누르게 할 이유가 없다. 계획 중에는 아예 부르지 않으므로
+ * 하루 1,000건 제한도 여행하는 날에만 쓰인다. 접어 둘 수는 있다.
+ */
 @Composable
-private fun WaitChip(minutes: Int) {
+private fun TransferWait(minutes: Int, station: String?, network: SubwayNetwork, live: Boolean) {
+    val canQuery = live && station != null && network.findStation(station) != null
+    var expanded by rememberSaveable(station, live) { mutableStateOf(live) }
+
+    Column {
+        WaitChip(
+            minutes = minutes,
+            station = station.takeIf { canQuery },
+            expanded = expanded,
+            onClick = { expanded = !expanded }.takeIf { canQuery },
+        )
+        if (canQuery && expanded) {
+            Spacer(Modifier.height(8.dp))
+            ArrivalsPanel(stationName = station!!, maxRows = 3, live = true)
+        }
+    }
+}
+
+@Composable
+private fun WaitChip(
+    minutes: Int,
+    station: String?,
+    expanded: Boolean,
+    onClick: (() -> Unit)?,
+) {
     Row(
         modifier = Modifier
             .clip(CircleShape)
             .background(RouteColor.WaitFill)
             .border(1.dp, RouteColor.WaitLine, CircleShape)
+            .then(if (onClick == null) Modifier else Modifier.clickable(onClick = onClick))
             .padding(horizontal = 10.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -427,12 +476,26 @@ private fun WaitChip(minutes: Int) {
                 .background(RouteColor.WaitDot),
         )
         Text(
-            text = stringResource(R.string.wait_chip, minutes),
+            text = if (station == null) {
+                stringResource(R.string.wait_chip, minutes)
+            } else {
+                stringResource(R.string.wait_chip_at, station, minutes)
+            },
             fontFamily = SuitFamily,
             fontWeight = FontWeight.SemiBold,
             fontSize = 11.5.sp,
             lineHeight = 11.5.sp,
             color = RouteColor.WaitText,
         )
+        if (onClick != null) {
+            Text(
+                text = if (expanded) "▴" else "▾",
+                fontFamily = SuitFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = 10.sp,
+                lineHeight = 11.5.sp,
+                color = RouteColor.WaitText,
+            )
+        }
     }
 }

@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.actimedi.travle.data.SubwayNetwork
 import com.actimedi.travle.R
+import com.actimedi.travle.ui.common.ArrivalsPanel
 import com.actimedi.travle.ui.theme.AmColor
 import com.actimedi.travle.ui.theme.RouteColor
 import com.actimedi.travle.ui.theme.SuitFamily
@@ -210,6 +211,9 @@ private fun SelectionBar(
                     .padding(horizontal = 16.dp, vertical = 9.dp),
             )
         }
+
+        Spacer(Modifier.height(12.dp))
+        ArrivalsPanel(stationName = station.name, maxRows = 3)
 
         if (station.lines.isNotEmpty()) {
             Spacer(Modifier.height(10.dp))

@@ -17,6 +17,22 @@ val keystoreProperties = Properties().apply {
 }
 val hasReleaseSigning = keystorePropertiesFile.exists()
 
+/**
+ * 서울 열린데이터광장 인증키는 저장소에 올리지 않는다.
+ *
+ * 실시간 지하철 API는 '지하철인증키'만 받는다 — '일반인증키'를 넣으면 ERROR-338로
+ * 거부한다. 그래서 둘을 다른 이름으로 받고 실시간용만 앱에 넣는다.
+ */
+fun envValue(name: String): String? = rootProject.file(".env")
+    .takeIf { it.exists() }
+    ?.readLines()
+    ?.firstOrNull { it.startsWith("$name=") }
+    ?.substringAfter("=")
+    ?.trim()
+    ?.takeIf { it.isNotEmpty() }
+
+val seoulApiKey: String = envValue("SEOUL_SUBWAY_API_KEY") ?: "sample"
+
 android {
     namespace = "com.actimedi.travle"
     compileSdk = 36
@@ -27,6 +43,8 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
+
+        buildConfigField("String", "SEOUL_API_KEY", "\"$seoulApiKey\"")
     }
 
     signingConfigs {
@@ -59,6 +77,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     packaging {

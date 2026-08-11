@@ -103,6 +103,9 @@ fun RouteScreen(
     val timeline = remember(route) { route.toTimeline() }
     val fare = remember(route, network) { route.estimateFare(network) }
 
+    // 여행 중인지는 앱이 짐작하지 않는다 — 저장된 경로에 날짜가 없어 오늘이 그 날인지
+    // 알 수 없고, 계획을 다듬는 중에 화면이 실시간으로 바뀌면 방해가 된다.
+    var isTravelling by rememberSaveable(route.id) { mutableStateOf(false) }
     var filter by rememberSaveable(route.id) { mutableStateOf(RouteFilter.ALL) }
     var expandedIndex by rememberSaveable(route.id) { mutableStateOf(-1) }
     val entries = remember(timeline, filter) { timeline.filterBy(filter) }
@@ -158,6 +161,7 @@ fun RouteScreen(
                 onContentMeasured = { expandedContentPx.floatValue = it },
             )
             FilterTabs(selected = filter, onSelect = { filter = it })
+            TravelModeBar(isTravelling = isTravelling, onToggle = { isTravelling = it })
             HorizontalDivider(color = AmColor.Line, thickness = 1.dp)
             RouteTimeline(
                 entries = entries,
@@ -166,6 +170,7 @@ fun RouteScreen(
                 onToggle = { index -> expandedIndex = if (expandedIndex == index) -1 else index },
                 network = network,
                 fare = fare,
+                live = isTravelling,
                 modifier = Modifier.weight(1f),
             )
         }
@@ -456,6 +461,51 @@ private fun StatChip(label: String, value: String, modifier: Modifier = Modifier
     }
 }
 
+/**
+ * 계획 중인지 이동 중인지 정하는 자리.
+ *
+ * 모드에 따라 무엇을 보여주는지 한 줄로 밝힌다 — 실시간이 안 보이는 이유가
+ * 고장이 아니라 모드 때문임이 드러나야 한다.
+ */
+@Composable
+private fun TravelModeBar(isTravelling: Boolean, onToggle: (Boolean) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(AmColor.SurfacePage)
+            .padding(start = 20.dp, end = 20.dp, bottom = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Text(
+            text = stringResource(
+                if (isTravelling) R.string.mode_travelling_note else R.string.mode_planning_note,
+            ),
+            fontFamily = SuitFamily,
+            fontWeight = FontWeight.Medium,
+            fontSize = 11.5.sp,
+            lineHeight = 15.sp,
+            color = RouteColor.StayLabel,
+            modifier = Modifier.weight(1f),
+        )
+        Text(
+            text = stringResource(
+                if (isTravelling) R.string.mode_stop else R.string.mode_start,
+            ),
+            fontFamily = SuitFamily,
+            fontWeight = FontWeight.Bold,
+            fontSize = 12.sp,
+            lineHeight = 12.sp,
+            color = if (isTravelling) AmColor.White else AmColor.Blue,
+            modifier = Modifier
+                .clip(CircleShape)
+                .background(if (isTravelling) AmColor.Blue else RouteColor.StayBadgeFill)
+                .clickable { onToggle(!isTravelling) }
+                .padding(horizontal = 14.dp, vertical = 8.dp),
+        )
+    }
+}
+
 @Composable
 private fun FilterTabs(selected: RouteFilter, onSelect: (RouteFilter) -> Unit) {
     Row(
@@ -524,6 +574,7 @@ private fun RouteTimeline(
     onToggle: (Int) -> Unit,
     network: SubwayNetwork,
     fare: FareEstimate,
+    live: Boolean,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -550,6 +601,7 @@ private fun RouteTimeline(
                 expanded = expandedIndex == entry.index,
                 onToggle = { onToggle(entry.index) },
                 network = network,
+                live = live,
             )
         }
 

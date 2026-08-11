@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  서울 열린데이터광장 실시간 API는 HTTPS를 제공하지 않는다(연결 실패).
+  전체 평문 허용 대신 이 호스트 하나만 예외로 둔다 — 공개 교통정보라
+  가로채여도 새는 정보가 없고, 다른 통신은 여전히 HTTPS만 허용된다.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">swopenapi.seoul.go.kr</domain>
+    </domain-config>
+</network-security-config>
