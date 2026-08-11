@@ -20,14 +20,20 @@ data class SubwayStation(
     /** Lines serving this station — drives transfer dots and the editor's line chips. */
     @SerialName("l") val lines: List<String> = emptyList(),
     /**
-     * 실시간 도착 API가 부르는 이름. [name]과 같으면 비어 있다.
+     * 실시간 도착 API가 부르는 이름들. [name]으로 그냥 통하면 비어 있다.
      *
      * 노선망은 OSM에서, 실시간 도착은 서울시에서 와 이름이 어긋난다 — 그것도 한
      * 방향이 아니다. OSM의 `교대(법원·검찰청)`을 API는 `교대`라 하고, OSM의 `군자`를
      * API는 `군자(능동)`이라 한다. 어긋나면 API는 오류 없이 빈 결과를 주므로
-     * 화면에는 막차가 끊긴 것처럼 보인다. `tools/realtime_names.py`가 채운다.
+     * 화면에는 막차가 끊긴 것처럼 보인다.
+     *
+     * 하나로 안 되는 역이 있어 목록이다. 올림픽공원은 API가 노선별로 쪼개 두어
+     * `올림픽공원`(9호선)과 `올림픽공원(한국체대)`(5호선)을 다 물어야 한다.
+     *
+     * `tools/realtime_names.py`가 채운다 — 전수 조사해서 실제로 자료가 오는
+     * 이름만 남긴다.
      */
-    @SerialName("r") val realtimeName: String? = null,
+    @SerialName("r") val realtimeNames: List<String> = emptyList(),
 )
 
 @Serializable
@@ -84,12 +90,14 @@ data class SubwayNetwork(
     }
 
     /**
-     * 실시간 도착 API에 물을 때 쓸 이름. 짝을 못 찾으면 받은 이름을 그대로 돌려준다 —
-     * 틀린 이름으로 묻는 것이 아예 묻지 않는 것보다 낫다.
+     * 실시간 도착 API에 물을 때 쓸 이름들. 대개 하나지만 올림픽공원처럼 API가 노선을
+     * 쪼개 둔 역은 둘이다. 짝을 못 찾으면 받은 이름을 그대로 돌려준다 — 틀린 이름으로
+     * 묻는 것이 아예 묻지 않는 것보다 낫다.
      */
-    fun realtimeNameFor(rawName: String): String {
-        val index = findStation(rawName) ?: return rawName.trim()
-        return stations[index].realtimeName ?: stations[index].name
+    fun realtimeNamesFor(rawName: String): List<String> {
+        val index = findStation(rawName) ?: return listOf(rawName.trim())
+        val station = stations[index]
+        return station.realtimeNames.ifEmpty { listOf(station.name) }
     }
 
     /**

@@ -50,13 +50,15 @@ fun ArrivalsPanel(
     /** 여행 중일 때만 실시간을 부른다. 계획 중에는 부르지 않는다. */
     live: Boolean = true,
 ) {
-    // 노선망 이름과 API 이름이 어긋나는 역이 45곳 있다 — 물어보기 전에 바꿔 둔다.
-    val apiName = remember(stationName, network) { network.realtimeNameFor(stationName) }
-    var state by remember(apiName, live) { mutableStateOf<ArrivalResult?>(null) }
+    // 노선망 이름과 API 이름이 어긋나는 역이 51곳 있다 — 물어보기 전에 바꿔 둔다.
+    val apiNames = remember(stationName, network) { network.realtimeNamesFor(stationName) }
+    var state by remember(apiNames, live) { mutableStateOf<ArrivalResult?>(null) }
 
-    LaunchedEffect(apiName, live) {
+    LaunchedEffect(apiNames, live) {
         state = null
-        if (live && apiName.isNotBlank()) state = RealtimeArrivals.forStation(apiName)
+        if (live && apiNames.any { it.isNotBlank() }) {
+            state = RealtimeArrivals.forStations(apiNames)
+        }
     }
 
     if (!live) return

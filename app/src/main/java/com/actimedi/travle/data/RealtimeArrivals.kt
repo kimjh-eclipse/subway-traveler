@@ -49,6 +49,24 @@ object RealtimeArrivals {
     /** 한 역에서 보여줄 최대 편수. 상·하행이 섞이므로 너무 적으면 한쪽만 나온다. */
     private const val LIMIT = 8
 
+    /**
+     * 여러 이름을 물어 하나로 합친다.
+     *
+     * 올림픽공원처럼 API가 한 역을 노선별로 쪼개 둔 곳이 있다 — 이름 하나만 물으면
+     * 5호선이 통째로 빠진다. 곧 들어올 순서로 섞어 놓아야 갈아탈 것을 고를 수 있다.
+     */
+    suspend fun forStations(names: List<String>): ArrivalResult {
+        if (names.size == 1) return forStation(names.first())
+
+        val results = names.map { forStation(it) }
+        val arrivals = results.filterIsInstance<ArrivalResult.Ready>().flatMap { it.arrivals }
+        if (arrivals.isNotEmpty()) {
+            return ArrivalResult.Ready(arrivals.sortedBy { it.seconds })
+        }
+        // 하나라도 이유를 알면 그것을 전한다. 전부 조용히 비었으면 비었다고 한다.
+        return results.filterIsInstance<ArrivalResult.Failed>().firstOrNull() ?: ArrivalResult.Empty
+    }
+
     suspend fun forStation(stationName: String): ArrivalResult = withContext(Dispatchers.IO) {
         // 노선망 이름과 API 이름이 다를 수 있어 괄호를 떼고도 시도한다.
         val candidates = listOfNotNull(
