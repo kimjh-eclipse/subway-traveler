@@ -80,6 +80,7 @@ import com.actimedi.travle.ui.theme.lineColorFor
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.foundation.lazy.rememberLazyListState
+import kotlinx.coroutines.delay
 
 @Composable
 fun RouteEditorScreen(
@@ -165,8 +166,9 @@ fun RouteEditorScreen(
             }
         }
 
+        // 노선도가 열리는 중이면 그쪽이 먼저다 — 두 창이 겹치지 않게 한다.
         val index = draft.stops.indexOfFirst { it.id == stopId }
-        if (index <= 0 || draft.stops[index].line.isNotBlank()) return
+        if (pickerStopId != null || index <= 0 || draft.stops[index].line.isNotBlank()) return
         val previous = draft.stops[index - 1].name
         val from = network.findStation(previous) ?: return
         val to = network.findStation(name) ?: return
@@ -589,6 +591,16 @@ private fun StationNameField(
 ) {
     val suggestions = remember(value, network) {
         if (network.findStation(value) != null) emptyList() else network.suggest(value)
+    }
+
+    // 이름을 끝까지 직접 치면 추천 목록이 사라져 누를 것이 없다 — 그래서 손을 뗀
+    // 것을 보고 알린다. `LaunchedEffect(value)`가 글자마다 취소되므로, 타이핑이
+    // 멎어야 아래가 끝까지 간다. `강남구청`을 치다 잠깐 멈춘 `강남`에도 걸릴 수 있지만,
+    // 그때 바로 갈 수 있는 역이면 아무 일도 일어나지 않는다.
+    LaunchedEffect(value, network) {
+        if (network.findStation(value) == null) return@LaunchedEffect
+        delay(TypingSettleMs)
+        onPick(value)
     }
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -1138,3 +1150,6 @@ private fun BlockedBanner(text: String) {
         )
     }
 }
+
+/** 타이핑이 멎었다고 보는 시간. 짧으면 치는 중에 끼어들고, 길면 답답하다. */
+private const val TypingSettleMs = 900L
