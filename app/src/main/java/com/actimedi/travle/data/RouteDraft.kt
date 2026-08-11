@@ -142,6 +142,21 @@ data class DraftValidation(
     val stopErrors: Map<String, DraftProblem> = emptyMap(),
 ) {
     val isValid: Boolean get() = messages.isEmpty() && stopErrors.isEmpty()
+
+    /**
+     * 저장을 막고 있는 첫 문제와, 그것이 몇 번째 정거장에 있는지. 정거장과 무관한
+     * 문제면 순번은 null이다.
+     *
+     * 화면 순서대로 고른다 — 위에서부터 고쳐 나가는 것이 사람이 하는 방식이고,
+     * 데려다 놓을 자리도 그래야 자연스럽다.
+     */
+    fun firstProblem(stops: List<RouteStop>): Pair<DraftProblem, Int?>? {
+        if (DraftProblem.BLANK_TITLE in messages) return DraftProblem.BLANK_TITLE to null
+        stops.forEachIndexed { index, stop ->
+            stopErrors[stop.id]?.let { return it to index }
+        }
+        return messages.firstOrNull()?.let { it to null }
+    }
 }
 
 fun RouteDraft.validate(network: SubwayNetwork = SubwayNetwork()): DraftValidation {

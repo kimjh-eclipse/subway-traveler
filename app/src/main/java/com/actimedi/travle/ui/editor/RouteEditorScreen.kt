@@ -77,6 +77,9 @@ import com.actimedi.travle.ui.theme.RouteColor
 import com.actimedi.travle.ui.theme.SuitFamily
 import com.actimedi.travle.ui.theme.SuiteFamily
 import com.actimedi.travle.ui.theme.lineColorFor
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 @Composable
 fun RouteEditorScreen(
@@ -91,6 +94,10 @@ fun RouteEditorScreen(
     var isPickingStartTime by remember { mutableStateOf(false) }
     var pickerStopId by remember { mutableStateOf<String?>(null) }
     var searchStopId by remember { mutableStateOf<String?>(null) }
+    // 저장을 눌렀는데 막혔을 때 무엇이 막고 있는지. 고쳐지면 저절로 사라진다.
+    var blocked by remember { mutableStateOf<DraftProblem?>(null) }
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
     val validation = draft.validate(network)
     val scheduled = remember(draft, network) { draft.schedule(network) }
 
@@ -100,33 +107,6 @@ fun RouteEditorScreen(
         draft = draft
             .copy(stops = draft.stops.map { if (it.id == id) transform(it) else it })
             .withAutoLines(network)
-    }
-
-    pickerStopId?.let { stopId ->
-        val stop = draft.stops.first { it.id == stopId }
-        // Fall back to the nearest station already chosen earlier on the route, so
-        // adding a stop opens next to where you left off rather than country-wide.
-        val previousStation = draft.stops
-            .takeWhile { it.id != stopId }
-            .lastOrNull { it.name.isNotBlank() }
-            ?.name
-        StationPickerScreen(
-            network = network,
-            initialStation = stop.name.takeIf { it.isNotBlank() },
-            focusStation = previousStation,
-            onCancel = { pickerStopId = null },
-            onPick = { station, line ->
-                updateStop(stopId) {
-                    if (line == null) {
-                        it.copy(name = station)
-                    } else {
-                        it.copy(name = station, line = line, lineIsManual = true)
-                    }
-                }
-                pickerStopId = null
-            },
-        )
-        return
     }
 
     // 길찾기 결과는 환승역들을 정거장으로 펼쳐 넣는다 — 갈아타는 역도 들르는 곳이다.
@@ -163,6 +143,67 @@ fun RouteEditorScreen(
         )
     }
 
+    /**
+     * 역을 **고른** 순간 — 자동완성이나 노선도에서 — 앞 정거장에서 바로 갈 수 있는지
+     * 보고, 갈 수 없으면 그 자리에서 길을 정한다.
+     *
+     * 예전에는 회색 글씨 한 줄로 "직결 노선이 없습니다"라고만 일러 줬다. 눈에 띄지
+     * 않으니 그냥 지나치게 되고, 노선이 비어 있어 저장은 막히는데 왜 막히는지는 알 수
+     * 없었다. 이제 고른 자리에서 바로 물어본다.
+     *
+     * 최단 시간과 최소 환승이 같은 길이면 고를 것이 없으므로 묻지 않고 채운다.
+     *
+     * 글자를 칠 때마다 하지 않고 고를 때만 하는 이유는, `강남구청`을 치는 도중에도
+     * `강남`이 잠깐 완성되기 때문이다.
+     */
+    fun chooseStation(stopId: String, name: String, line: String? = null) {
+        updateStop(stopId) {
+            if (line == null) {
+                it.copy(name = name)
+            } else {
+                it.copy(name = name, line = line, lineIsManual = true)
+            }
+        }
+
+        val index = draft.stops.indexOfFirst { it.id == stopId }
+        if (index <= 0 || draft.stops[index].line.isNotBlank()) return
+        val previous = draft.stops[index - 1].name
+        val from = network.findStation(previous) ?: return
+        val to = network.findStation(name) ?: return
+        // 직결 노선이 여럿이면 칩으로 고르면 된다. 아예 없을 때만 끼어든다.
+        if (network.linesBetween(from, to).isNotEmpty()) return
+
+        val fastest = RouteSearch.find(network, previous, name, SearchGoal.FASTEST)
+        val fewest = RouteSearch.find(network, previous, name, SearchGoal.FEWEST_TRANSFERS)
+        val onlyChoice = when {
+            fastest != null && (fewest == null || fewest.legs == fastest.legs) -> fastest
+            fastest == null -> fewest
+            else -> null
+        }
+        if (onlyChoice != null) applySearch(stopId, onlyChoice) else searchStopId = stopId
+    }
+
+    pickerStopId?.let { stopId ->
+        val stop = draft.stops.first { it.id == stopId }
+        // Fall back to the nearest station already chosen earlier on the route, so
+        // adding a stop opens next to where you left off rather than country-wide.
+        val previousStation = draft.stops
+            .takeWhile { it.id != stopId }
+            .lastOrNull { it.name.isNotBlank() }
+            ?.name
+        StationPickerScreen(
+            network = network,
+            initialStation = stop.name.takeIf { it.isNotBlank() },
+            focusStation = previousStation,
+            onCancel = { pickerStopId = null },
+            onPick = { station, line ->
+                pickerStopId = null
+                chooseStation(stopId, station, line)
+            },
+        )
+        return
+    }
+
     searchStopId?.let { stopId ->
         val index = draft.stops.indexOfFirst { it.id == stopId }
         val from = draft.stops.getOrNull(index - 1)?.name.orEmpty()
@@ -194,11 +235,26 @@ fun RouteEditorScreen(
             },
             canSave = validation.isValid,
             onCancel = onCancel,
-            onSave = { onSave(draft) },
+            onSave = {
+                val problem = validation.firstProblem(draft.stops)
+                if (problem == null) {
+                    onSave(draft)
+                } else {
+                    // 회색 버튼이 아무 반응도 없으면 고장으로 읽힌다. 무엇이 막는지
+                    // 말해 주고, 고칠 자리로 데려다 놓는다.
+                    val (what, stopIndex) = problem
+                    blocked = what
+                    scope.launch {
+                        listState.animateScrollToItem(stopIndex?.let { it + StopItemOffset } ?: 0)
+                    }
+                }
+            },
         )
         HorizontalDivider(color = AmColor.Line, thickness = 1.dp)
+        blocked?.takeIf { !validation.isValid }?.let { BlockedBanner(problemText(it)) }
 
         LazyColumn(
+            state = listState,
             modifier = Modifier.weight(1f),
             contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 18.dp, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -267,6 +323,7 @@ fun RouteEditorScreen(
                     },
                     onOpenMap = { pickerStopId = stop.id },
                     onSearchRoute = { searchStopId = stop.id },
+                    onPickStation = { picked -> chooseStation(stop.id, picked) },
                 )
             }
 
@@ -352,7 +409,8 @@ private fun EditorTopBar(
             modifier = Modifier
                 .clip(CircleShape)
                 .background(if (canSave) AmColor.Blue else RouteColor.TabTrack)
-                .clickable(enabled = canSave, onClick = onSave)
+                // 막혀 있어도 누를 수는 있다 — 눌러야 왜 막혔는지 알려줄 수 있다.
+                .clickable(onClick = onSave)
                 .padding(horizontal = 16.dp, vertical = 8.dp),
         )
     }
@@ -372,6 +430,7 @@ private fun StopCard(
     onDelete: () -> Unit,
     onOpenMap: () -> Unit,
     onSearchRoute: () -> Unit,
+    onPickStation: (String) -> Unit,
 ) {
     val isFirst = index == 0
     val shape = RoundedCornerShape(22.dp)
@@ -434,6 +493,7 @@ private fun StopCard(
             value = stop.name,
             network = network,
             onValueChange = { onChange(stop.copy(name = it)) },
+            onPick = onPickStation,
             onOpenMap = onOpenMap,
         )
 
@@ -523,6 +583,8 @@ private fun StationNameField(
     value: String,
     network: SubwayNetwork,
     onValueChange: (String) -> Unit,
+    /** 추천 목록에서 **고른** 것. 글자를 치는 것과 달리 확정된 선택이다. */
+    onPick: (String) -> Unit,
     onOpenMap: () -> Unit,
 ) {
     val suggestions = remember(value, network) {
@@ -566,7 +628,7 @@ private fun StationNameField(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onValueChange(station.name) }
+                            .clickable { onPick(station.name) }
                             .padding(horizontal = 14.dp, vertical = 10.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -1044,4 +1106,35 @@ private fun TimePickerDialog(
         containerColor = AmColor.White,
         modifier = Modifier.navigationBarsPadding(),
     )
+}
+
+/** 정거장 카드가 목록에서 시작하는 자리. 앞에 이름·요일·출발 시각·소제목이 있다. */
+private const val StopItemOffset = 4
+
+/** 저장이 막힌 이유. 저장을 누른 뒤에만 나오고, 고치면 사라진다. */
+@Composable
+private fun BlockedBanner(text: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(RouteColor.WaitFill)
+            .padding(horizontal = 20.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(5.dp)
+                .clip(CircleShape)
+                .background(RouteColor.WaitDot),
+        )
+        Text(
+            text = text,
+            fontFamily = SuitFamily,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 12.sp,
+            lineHeight = 17.sp,
+            color = RouteColor.WaitText,
+        )
+    }
 }
