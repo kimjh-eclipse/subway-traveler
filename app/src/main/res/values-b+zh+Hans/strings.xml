@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">地铁旅行者</string>
+
+    <string name="eyebrow">ONE DAY ROUTE</string>
+    <string name="stat_total">总耗时</string>
+    <string name="stat_move">乘车·换乘</string>
+    <string name="stat_stay">停留</string>
+
+    <string name="filter_all">全部</string>
+    <string name="filter_move">仅乘车</string>
+    <string name="filter_stay">仅停留</string>
+
+    <string name="detail_arrive">到达</string>
+    <string name="detail_depart">出发</string>
+    <string name="detail_cumulative">累计时间</string>
+
+    <string name="start_mark">始</string>
+    <string name="start_departure">%1$s · 从 %2$s 出发</string>
+    <string name="finish_mark">终</string>
+    <string name="fare_estimated">预估</string>
+    <string name="fare_rides">地铁乘车 %1$d 次</string>
+    <string name="fare_excluded">不含 %1$s</string>
+
+    <string name="nav_route">路线</string>
+    <string name="nav_log">记录</string>
+    <string name="nav_settings">设置</string>
+
+    <string name="empty_filtered">没有符合条件的区间。</string>
+
+    <string name="new_route">新建路线</string>
+    <string name="route_empty_title">还没有路线</string>
+    <string name="route_empty_body">创建路线后，这一天的行程会在这里画成线路图。</string>
+
+    <string name="history_subtitle">已保存路线 %1$d 条</string>
+    <string name="history_empty">还没有创建过路线。\n试着新增一条吧。</string>
+    <string name="history_showing">正在查看</string>
+    <string name="history_counts">乘车 %1$d 段 · 停留 %2$d 处 · %3$s</string>
+    <string name="route_edit">编辑</string>
+    <string name="route_delete">删除</string>
+    <string name="delete_title">要删除这条路线吗？</string>
+    <string name="delete_body">将删除“%1$s”。无法撤销。</string>
+    <string name="delete_confirm">删除</string>
+    <string name="editor_title_edit">编辑路线</string>
+
+    <string name="editor_title">新建路线</string>
+    <string name="editor_cancel">取消</string>
+    <string name="editor_save">保存</string>
+    <string name="editor_confirm">确定</string>
+    <string name="editor_name">路线名称</string>
+    <string name="editor_name_hint">例）江南 → 首尔一圈</string>
+    <string name="editor_day">星期（可选）</string>
+    <string name="editor_day_hint">例）星期六</string>
+    <string name="editor_stops">停靠点</string>
+    <string name="editor_stops_hint">请从出发地按顺序添加。时刻会根据出发时间自动计算。停留只需填停留时长，换乘只需填等车时间。</string>
+    <string name="editor_travel">乘车时间</string>
+    <string name="editor_stay">停留时间</string>
+    <string name="editor_wait">换乘等待</string>
+    <string name="editor_estimated">预估</string>
+    <string name="editor_reset">恢复预估值</string>
+    <string name="editor_badge_start">出发</string>
+    <string name="editor_badge_index">%1$d</string>
+    <string name="editor_line">乘坐的线路</string>
+    <string name="editor_line_hint">例）26-2 路公交、步行 — 非地铁区间</string>
+    <string name="editor_line_choose">乘坐的线路（有多条线路经过）</string>
+    <string name="editor_place">车站 · 地点</string>
+    <string name="editor_place_hint">例）江南</string>
+    <string name="editor_arrive">到达</string>
+    <string name="editor_start_time">出发时刻</string>
+    <string name="editor_depart">出发</string>
+    <string name="editor_kind_stay">停留</string>
+    <string name="editor_kind_transfer">换乘</string>
+    <string name="editor_memo">备注（可选）</string>
+    <string name="editor_memo_hint">例）午餐 — 辣炒年糕</string>
+    <string name="editor_add_stop">添加停靠点</string>
+    <string name="editor_delete_stop">删除此停靠点</string>
+    <string name="editor_pick_on_map">线路图</string>
+
+    <string name="search_open">查找路线</string>
+    <string name="search_title">怎么走？</string>
+    <string name="search_fastest">用时最短</string>
+    <string name="search_fewest_transfers">换乘最少</string>
+    <string name="search_summary">换乘 %1$d 次 · 车站 %2$d 个</string>
+    <string name="search_none">找不到连接这两站的路线。请确认站名。</string>
+    <string name="search_note">选择后会把换乘站加为停靠点。没有时刻表，所需时间为预估值。</string>
+
+    <string name="open_map">线路图</string>
+    <string name="nearby_food">找附近的餐厅</string>
+    <string name="open_google_maps">Google 地图</string>
+    <string name="open_naver_map">Naver 地图</string>
+
+    <string name="dur_minutes">%1$d 分钟</string>
+    <string name="dur_hours">%1$d 小时</string>
+    <string name="dur_hours_minutes">%1$d 小时 %2$d 分</string>
+    <string name="fare_amount">%1$s 韩元</string>
+
+    <string name="header_departure">%1$s 出发</string>
+    <string name="finish_arrival">%1$s · 到达 %2$s</string>
+    <string name="finish_counts">换乘 %1$d 次 · 乘车 %2$d 段 · 停留 %3$d 处</string>
+    <string name="transfer_chip">换乘</string>
+    <string name="transfer_chip_at">在 %1$s 换乘</string>
+    <string name="wait_chip">换乘等待 %1$d 分钟</string>
+    <string name="wait_chip_at">%1$s 换乘等待 %2$d 分钟</string>
+
+    <string name="map_this_route">本路线</string>
+    <string name="map_whole">全部线路图</string>
+    <string name="map_close">关闭</string>
+    <string name="map_stations">车站 %1$d 个</string>
+    <string name="map_straight">直线显示 %1$d 段</string>
+    <string name="map_offmap">图外 %1$d 个</string>
+
+    <string name="picker_title">在线路图上选站</string>
+    <string name="picker_hint">放大后点击车站</string>
+    <string name="picker_empty">选择车站后会显示在这里。</string>
+    <string name="picker_use">使用此站</string>
+    <string name="picker_line_optional">乘坐的线路（可选）</string>
+
+    <string name="history_span">%1$s → %2$s · 共 %3$s</string>
+    <string name="history_builtin">内置</string>
+
+    <string name="invalid_title">请输入路线名称。</string>
+    <string name="invalid_too_few_stops">请至少添加 1 个停靠点。</string>
+    <string name="invalid_blank_name">请输入车站或地点名称。</string>
+    <string name="invalid_blank_line">请输入乘坐到这里的线路。</string>
+    <string name="invalid_past_midnight">行程超过午夜。请缩短时间。</string>
+
+    <string name="nearby_food_query">餐厅</string>
+
+    <string-array name="days_of_week">
+        <item>星期一</item><item>星期二</item><item>星期三</item><item>星期四</item>
+        <item>星期五</item><item>星期六</item><item>星期日</item>
+    </string-array>
+
+    <string name="line_needs_transfer">没有直达线路。这段需要换乘，请用查找路线来填写。</string>
+    <string name="about_network_title">线路图数据</string>
+    <string name="about_network_body">© OpenStreetMap contributors · ODbL 1.0
+首都圈 676 个车站，24 条线路。</string>
+    <string name="about_times_title">站间所需时间</string>
+    <string name="about_times_body">首尔交通公社《站间距离及所需时间》· KOGL 第 1 类型
+1～8 号线的 264 个区间为实测值，其余线路以平均值（每站 1 分 32 秒）补足，为预估值。</string>
+    <string name="about_fares_title">票价</string>
+    <string name="about_fares_body">按首都圈综合票价计算的预估值。因缺少营业距离表，改用坐标距离近似，可能与实际票价不同。</string>
+    <string name="about_fonts_title">字体</string>
+    <string name="about_fonts_body">SUIT, SUITE · SIL Open Font License 1.1</string>
+
+    <string name="arrivals_title">实时到达</string>
+    <string name="arrivals_empty">暂无即将到站的列车。</string>
+    <string name="arrivals_failed">无法获取实时信息。</string>
+
+    <string name="mode_start">开始旅程</string>
+    <string name="mode_stop">结束旅程</string>
+    <string name="mode_planning_note">计划视图 — 显示已保存的时刻。</string>
+    <string name="mode_travelling_note">旅途中 — 点击车站可查询实时到达。</string>
+
+    <string name="schedule_title">开往 %1$s 的列车时刻表</string>
+    <string name="schedule_loading">正在查询时刻表…</string>
+    <string name="schedule_empty">该区间没有时刻表。</string>
+    <string name="schedule_after_last">此时刻之后没有列车。</string>
+
+    <string name="align_action">对齐时刻表</string>
+    <string name="align_note">按实际发车时刻重新计算。</string>
+    <string name="align_loading">正在查询时刻表…</string>
+    <string name="align_title">对齐时刻表的结果</string>
+    <string name="align_changed">%1$d 个区间的时刻会改变。等待时间计入前一站的停留。</string>
+    <string name="align_unchanged">计划的时刻已经与列车时刻一致。</string>
+    <string name="align_skipped">因没有时刻表而保持原样的线路：%1$s</string>
+    <string name="align_none">未找到时刻表。计划保持不变。</string>
+    <string name="align_apply">应用</string>
+</resources>

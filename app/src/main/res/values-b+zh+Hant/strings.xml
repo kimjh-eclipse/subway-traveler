@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  繁體中文。粵語圈的裝置語言設定為 zh-HK，會落在這裡；台灣、澳門的裝置
+  同樣使用本檔案。用詞取香港習慣（巴士、轉乘），但一律用書面語 —
+  「嘅、咗、喺」等粵語口語在台灣讀起來並不自然。
+-->
+<resources>
+    <string name="app_name">地鐵旅行者</string>
+
+    <string name="eyebrow">ONE DAY ROUTE</string>
+    <string name="stat_total">總時間</string>
+    <string name="stat_move">乘車·轉乘</string>
+    <string name="stat_stay">停留</string>
+
+    <string name="filter_all">全部</string>
+    <string name="filter_move">只看乘車</string>
+    <string name="filter_stay">只看停留</string>
+
+    <string name="detail_arrive">到達</string>
+    <string name="detail_depart">出發</string>
+    <string name="detail_cumulative">累計時間</string>
+
+    <string name="start_mark">始</string>
+    <string name="start_departure">%1$s · 由 %2$s 出發</string>
+    <string name="finish_mark">終</string>
+    <string name="fare_estimated">預估</string>
+    <string name="fare_rides">地鐵乘車 %1$d 次</string>
+    <string name="fare_excluded">不包括 %1$s</string>
+
+    <string name="nav_route">路線</string>
+    <string name="nav_log">記錄</string>
+    <string name="nav_settings">設定</string>
+
+    <string name="empty_filtered">沒有符合條件的路段。</string>
+
+    <string name="new_route">新增路線</string>
+    <string name="route_empty_title">尚未有路線</string>
+    <string name="route_empty_body">建立路線後，這一天的行程會在這裡畫成路線圖。</string>
+
+    <string name="history_subtitle">已儲存路線 %1$d 條</string>
+    <string name="history_empty">尚未建立過路線。\n試試新增一條。</string>
+    <string name="history_showing">正在查看</string>
+    <string name="history_counts">乘車 %1$d 段 · 停留 %2$d 處 · %3$s</string>
+    <string name="route_edit">編輯</string>
+    <string name="route_delete">刪除</string>
+    <string name="delete_title">要刪除這條路線嗎？</string>
+    <string name="delete_body">將會刪除「%1$s」。無法復原。</string>
+    <string name="delete_confirm">刪除</string>
+    <string name="editor_title_edit">編輯路線</string>
+
+    <string name="editor_title">新增路線</string>
+    <string name="editor_cancel">取消</string>
+    <string name="editor_save">儲存</string>
+    <string name="editor_confirm">確定</string>
+    <string name="editor_name">路線名稱</string>
+    <string name="editor_name_hint">例）江南 → 首爾一圈</string>
+    <string name="editor_day">星期（可選）</string>
+    <string name="editor_day_hint">例）星期六</string>
+    <string name="editor_stops">停靠點</string>
+    <string name="editor_stops_hint">請由出發地按次序加入。時間會根據出發時刻自動計算。停留只需填停留時間，轉乘只需填等車時間。</string>
+    <string name="editor_travel">乘車時間</string>
+    <string name="editor_stay">停留時間</string>
+    <string name="editor_wait">轉乘等候</string>
+    <string name="editor_estimated">預估</string>
+    <string name="editor_reset">回復預估值</string>
+    <string name="editor_badge_start">出發</string>
+    <string name="editor_badge_index">%1$d</string>
+    <string name="editor_line">乘搭的路線</string>
+    <string name="editor_line_hint">例）26-2 號巴士、步行 — 非地鐵路段</string>
+    <string name="editor_line_choose">乘搭的路線（有多條路線經過）</string>
+    <string name="editor_place">車站 · 地點</string>
+    <string name="editor_place_hint">例）江南</string>
+    <string name="editor_arrive">到達</string>
+    <string name="editor_start_time">出發時刻</string>
+    <string name="editor_depart">出發</string>
+    <string name="editor_kind_stay">停留</string>
+    <string name="editor_kind_transfer">轉乘</string>
+    <string name="editor_memo">備註（可選）</string>
+    <string name="editor_memo_hint">例）午餐 — 辣炒年糕</string>
+    <string name="editor_add_stop">加入停靠點</string>
+    <string name="editor_delete_stop">刪除此停靠點</string>
+    <string name="editor_pick_on_map">路線圖</string>
+
+    <string name="search_open">尋找路線</string>
+    <string name="search_title">怎樣去？</string>
+    <string name="search_fastest">時間最短</string>
+    <string name="search_fewest_transfers">轉乘最少</string>
+    <string name="search_summary">轉乘 %1$d 次 · 車站 %2$d 個</string>
+    <string name="search_none">找不到連接這兩個站的路線。請確認站名。</string>
+    <string name="search_note">選擇後會將轉乘站加為停靠點。沒有時間表，所需時間為預估值。</string>
+
+    <string name="open_map">路線圖</string>
+    <string name="nearby_food">尋找附近的餐廳</string>
+    <string name="open_google_maps">Google 地圖</string>
+    <string name="open_naver_map">Naver 地圖</string>
+
+    <string name="dur_minutes">%1$d 分鐘</string>
+    <string name="dur_hours">%1$d 小時</string>
+    <string name="dur_hours_minutes">%1$d 小時 %2$d 分</string>
+    <string name="fare_amount">%1$s 韓圜</string>
+
+    <string name="header_departure">%1$s 出發</string>
+    <string name="finish_arrival">%1$s · 到達 %2$s</string>
+    <string name="finish_counts">轉乘 %1$d 次 · 乘車 %2$d 段 · 停留 %3$d 處</string>
+    <string name="transfer_chip">轉乘</string>
+    <string name="transfer_chip_at">在 %1$s 轉乘</string>
+    <string name="wait_chip">轉乘等候 %1$d 分鐘</string>
+    <string name="wait_chip_at">%1$s 轉乘等候 %2$d 分鐘</string>
+
+    <string name="map_this_route">本路線</string>
+    <string name="map_whole">全部路線圖</string>
+    <string name="map_close">關閉</string>
+    <string name="map_stations">車站 %1$d 個</string>
+    <string name="map_straight">直線顯示 %1$d 段</string>
+    <string name="map_offmap">圖外 %1$d 個</string>
+
+    <string name="picker_title">在路線圖上選站</string>
+    <string name="picker_hint">放大後按車站</string>
+    <string name="picker_empty">選擇車站後會在這裡顯示。</string>
+    <string name="picker_use">使用此站</string>
+    <string name="picker_line_optional">乘搭的路線（可選）</string>
+
+    <string name="history_span">%1$s → %2$s · 共 %3$s</string>
+    <string name="history_builtin">內置</string>
+
+    <string name="invalid_title">請輸入路線名稱。</string>
+    <string name="invalid_too_few_stops">請至少加入 1 個停靠點。</string>
+    <string name="invalid_blank_name">請輸入車站或地點名稱。</string>
+    <string name="invalid_blank_line">請輸入乘搭到這裡的路線。</string>
+    <string name="invalid_past_midnight">行程超過凌晨零時。請縮短時間。</string>
+
+    <string name="nearby_food_query">餐廳</string>
+
+    <string-array name="days_of_week">
+        <item>星期一</item><item>星期二</item><item>星期三</item><item>星期四</item>
+        <item>星期五</item><item>星期六</item><item>星期日</item>
+    </string-array>
+
+    <string name="line_needs_transfer">沒有直達路線。這段需要轉乘，請用尋找路線填寫。</string>
+    <string name="about_network_title">路線圖資料</string>
+    <string name="about_network_body">© OpenStreetMap contributors · ODbL 1.0
+首都圈 676 個車站，24 條路線。</string>
+    <string name="about_times_title">站間所需時間</string>
+    <string name="about_times_body">首爾交通公社《站間距離及所需時間》· KOGL 第 1 類型
+1～8 號線的 264 個路段為實測值，其餘路線以平均值（每站 1 分 32 秒）補上，屬預估值。</string>
+    <string name="about_fares_title">車費</string>
+    <string name="about_fares_body">按首都圈綜合車費計算的預估值。因缺少營業距離表，改以座標距離近似，可能與實際車費不同。</string>
+    <string name="about_fonts_title">字型</string>
+    <string name="about_fonts_body">SUIT, SUITE · SIL Open Font License 1.1</string>
+
+    <string name="arrivals_title">即時到站</string>
+    <string name="arrivals_empty">暫時未有列車到站。</string>
+    <string name="arrivals_failed">無法取得即時資訊。</string>
+
+    <string name="mode_start">開始行程</string>
+    <string name="mode_stop">結束行程</string>
+    <string name="mode_planning_note">計劃檢視 — 顯示已儲存的時間。</string>
+    <string name="mode_travelling_note">行程中 — 點按車站可查即時到站。</string>
+
+    <string name="schedule_title">往 %1$s 的列車時間表</string>
+    <string name="schedule_loading">正在查時間表…</string>
+    <string name="schedule_empty">這段路沒有時間表。</string>
+    <string name="schedule_after_last">這個時間之後沒有列車。</string>
+
+    <string name="align_action">對齊時間表</string>
+    <string name="align_note">按實際開車時間重新計算。</string>
+    <string name="align_loading">正在查時間表…</string>
+    <string name="align_title">對齊時間表的結果</string>
+    <string name="align_changed">%1$d 段路的時間會變。等候時間當作在上一個站停留。</string>
+    <string name="align_unchanged">計劃的時間已經與列車時間一致。</string>
+    <string name="align_skipped">因為沒有時間表而維持原狀的路線：%1$s</string>
+    <string name="align_none">找不到時間表。計劃維持不變。</string>
+    <string name="align_apply">套用</string>
+</resources>
