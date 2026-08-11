@@ -76,7 +76,7 @@
 
     <string name="search_open">ルート検索</string>
     <string name="search_title">どう行きますか？</string>
-    <string name="search_fastest">最短ルート</string>
+    <string name="search_fastest">最短時間</string>
     <string name="search_fewest_transfers">乗換最少</string>
     <string name="search_summary">乗換 %1$d回 · 駅 %2$d個</string>
     <string name="search_none">この2駅を結ぶ経路が見つかりません。駅名をご確認ください。</string>
