@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.actimedi.travle.R
 import com.actimedi.travle.data.Route
+import com.actimedi.travle.data.RouteDraft
 import com.actimedi.travle.data.RouteFilter
 import com.actimedi.travle.data.RouteSummary
 import com.actimedi.travle.data.SeoulOneDayRoute
@@ -98,6 +99,8 @@ fun RouteScreen(
     network: SubwayNetwork = SubwayNetwork(),
     /** Null until the bundled network has loaded. */
     onOpenMap: (() -> Unit)? = null,
+    /** 시간표에 맞춘 결과를 저장한다. 계획 모드에서만 불린다. */
+    onApplyTimetable: ((RouteDraft) -> Unit)? = null,
 ) {
     val summary = remember(route) { route.summarize() }
     val timeline = remember(route) { route.toTimeline() }
@@ -162,6 +165,10 @@ fun RouteScreen(
             )
             FilterTabs(selected = filter, onSelect = { filter = it })
             TravelModeBar(isTravelling = isTravelling, onToggle = { isTravelling = it })
+            // 여행 중에는 실시간 도착이 더 정확하니 시간표를 들이밀지 않는다.
+            if (!isTravelling && onApplyTimetable != null && network.stations.isNotEmpty()) {
+                TimetableAlignBar(route = route, network = network, onApply = onApplyTimetable)
+            }
             HorizontalDivider(color = AmColor.Line, thickness = 1.dp)
             RouteTimeline(
                 entries = entries,

@@ -155,4 +155,14 @@
     <string name="mode_stop">여행 종료</string>
     <string name="mode_planning_note">계획 보기 — 저장된 시각을 보여줍니다.</string>
     <string name="mode_travelling_note">여행 중 — 역을 누르면 실시간 도착을 조회합니다.</string>
+
+    <string name="align_action">시간표로 맞추기</string>
+    <string name="align_note">실제 열차 시각에 맞춰 다시 계산합니다.</string>
+    <string name="align_loading">시간표 확인 중…</string>
+    <string name="align_title">시간표에 맞춘 결과</string>
+    <string name="align_changed">%1$d개 구간의 시각이 바뀝니다. 기다리는 시간은 앞 정거장에 머무는 것으로 칩니다.</string>
+    <string name="align_unchanged">계획한 시각이 이미 열차 시각과 맞습니다.</string>
+    <string name="align_skipped">시간표가 없어 그대로 둔 노선: %1$s</string>
+    <string name="align_none">시간표를 찾지 못했습니다. 계획을 그대로 둡니다.</string>
+    <string name="align_apply">적용</string>
 </resources>

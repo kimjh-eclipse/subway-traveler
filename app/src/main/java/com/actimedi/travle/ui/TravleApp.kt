@@ -163,6 +163,9 @@ fun TravleApp(viewModel: TravleViewModel = viewModel()) {
                             onOpenMap = { isMapOpen = true }.takeIf {
                                 viewModel.network.stations.isNotEmpty()
                             },
+                            onApplyTimetable = { draft ->
+                                viewModel.updateRoute(route.id, draft)
+                            },
                         )
                         // Nothing to show yet, and nothing to say until the disk read lands.
                         viewModel.isLoading -> Box(Modifier.fillMaxSize())

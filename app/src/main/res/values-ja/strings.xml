@@ -144,4 +144,14 @@
     <string name="mode_stop">旅を終了</string>
     <string name="mode_planning_note">計画中 — 保存した時刻を表示します。</string>
     <string name="mode_travelling_note">移動中 — 駅をタップすると到着情報を照会します。</string>
+
+    <string name="align_action">時刻表に合わせる</string>
+    <string name="align_note">実際の発車時刻で計算し直します。</string>
+    <string name="align_loading">時刻表を確認中…</string>
+    <string name="align_title">時刻表に合わせた結果</string>
+    <string name="align_changed">%1$d区間の時刻が変わります。待ち時間は前の駅での滞在として数えます。</string>
+    <string name="align_unchanged">計画はすでに列車の時刻と合っています。</string>
+    <string name="align_skipped">時刻表がないためそのままにした路線：%1$s</string>
+    <string name="align_none">時刻表が見つかりませんでした。計画はそのままです。</string>
+    <string name="align_apply">適用</string>
 </resources>

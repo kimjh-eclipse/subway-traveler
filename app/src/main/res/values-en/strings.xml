@@ -144,4 +144,14 @@
     <string name="mode_stop">End trip</string>
     <string name="mode_planning_note">Planning — showing your saved times.</string>
     <string name="mode_travelling_note">On the move — tap a station for live arrivals.</string>
+
+    <string name="align_action">Match the timetable</string>
+    <string name="align_note">Recalculate against real departure times.</string>
+    <string name="align_loading">Checking the timetable…</string>
+    <string name="align_title">Matched to the timetable</string>
+    <string name="align_changed">%1$d legs shift. Waiting counts as time spent at the stop before.</string>
+    <string name="align_unchanged">Your plan already matches the trains.</string>
+    <string name="align_skipped">Left as planned, no timetable: %1$s</string>
+    <string name="align_none">No timetable found. Your plan is unchanged.</string>
+    <string name="align_apply">Apply</string>
 </resources>

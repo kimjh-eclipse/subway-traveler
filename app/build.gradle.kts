@@ -33,6 +33,9 @@ fun envValue(name: String): String? = rootProject.file(".env")
 
 val seoulApiKey: String = envValue("SEOUL_SUBWAY_API_KEY") ?: "sample"
 
+// 공공데이터포털 열차시간표. 없으면 빈 값으로 두고 시간표 맞추기 기능만 조용히 쉰다.
+val seoulTimetableKey: String = envValue("SEOUL_SUBWAY2_API_KEY").orEmpty()
+
 android {
     namespace = "com.actimedi.travle"
     compileSdk = 36
@@ -45,6 +48,7 @@ android {
         versionName = "1.0"
 
         buildConfigField("String", "SEOUL_API_KEY", "\"$seoulApiKey\"")
+        buildConfigField("String", "SEOUL_TIMETABLE_KEY", "\"$seoulTimetableKey\"")
     }
 
     signingConfigs {
