@@ -15,6 +15,8 @@
     <string name="detail_depart">출발</string>
     <string name="detail_cumulative">누적 시간</string>
 
+    <string name="start_mark">시작</string>
+    <string name="start_departure">%1$s · %2$s 출발</string>
     <string name="finish_mark">끝</string>
     <string name="fare_estimated">예상</string>
     <string name="fare_rides">지하철 %1$d회 승차</string>

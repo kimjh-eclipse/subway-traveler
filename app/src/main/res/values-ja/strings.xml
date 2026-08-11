@@ -15,6 +15,8 @@
     <string name="detail_depart">出発</string>
     <string name="detail_cumulative">経過時間</string>
 
+    <string name="start_mark">始</string>
+    <string name="start_departure">%1$s · %2$s 出発</string>
     <string name="finish_mark">終</string>
     <string name="fare_estimated">目安</string>
     <string name="fare_rides">地下鉄 %1$d回乗車</string>

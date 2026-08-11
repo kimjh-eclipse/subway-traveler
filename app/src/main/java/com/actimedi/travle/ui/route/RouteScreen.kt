@@ -77,6 +77,8 @@ import com.actimedi.travle.ui.theme.SuitFamily
 import com.actimedi.travle.ui.theme.SuiteFamily
 import com.actimedi.travle.ui.theme.TravleTheme
 import kotlin.math.min
+import com.actimedi.travle.data.ClockTime
+import com.actimedi.travle.data.RouteSegment
 
 private val BrandEasing = CubicBezierEasing(0.2f, 0f, 0.1f, 1f)
 
@@ -179,6 +181,8 @@ fun RouteScreen(
                 fare = fare,
                 live = isTravelling,
                 dayOfWeek = route.dayOfWeek,
+                origin = route.origin,
+                startTime = route.startTime,
                 modifier = Modifier.weight(1f),
             )
         }
@@ -584,12 +588,20 @@ private fun RouteTimeline(
     fare: FareEstimate,
     live: Boolean,
     dayOfWeek: String,
+    origin: String,
+    startTime: ClockTime,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
         modifier = modifier.fillMaxWidth().background(AmColor.SurfacePage),
         contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 18.dp, bottom = 28.dp),
     ) {
+        val originShown = entries.firstOrNull()?.segment
+            .let { it is RouteSegment.Stay && it.place == origin }
+        if (origin.isNotBlank() && !originShown) {
+            item { StartCard(place = origin, at = startTime.format()) }
+        }
+
         if (entries.isEmpty()) {
             item {
                 Text(
@@ -727,6 +739,51 @@ private fun FareLine(fare: FareEstimate) {
             fontSize = 11.5.sp,
             lineHeight = 15.sp,
             color = RouteColor.StayLabel,
+        )
+    }
+}
+
+/**
+ * 출발지 표시.
+ *
+ * 출발지는 머무는 시간이 있을 때만 구간이 된다 — 바로 떠나면 [Route.origin]에만
+ * 남아 화면에서 사라졌다. 도착에는 `끝` 카드가 있는데 출발에는 짝이 없어, 경로가
+ * 첫 환승역에서 시작하는 것처럼 읽혔다.
+ */
+@Composable
+private fun StartCard(place: String, at: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(24.dp))
+            .background(RouteColor.TabTrack)
+            .padding(horizontal = 18.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(38.dp)
+                .clip(CircleShape)
+                .background(AmColor.Blue),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = stringResource(R.string.start_mark),
+                fontFamily = SuiteFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = 13.sp,
+                lineHeight = 13.sp,
+                color = AmColor.White,
+            )
+        }
+        Text(
+            text = stringResource(R.string.start_departure, at, place),
+            fontFamily = SuiteFamily,
+            fontWeight = FontWeight.Bold,
+            fontSize = 15.sp,
+            lineHeight = 18.sp,
+            color = AmColor.Navy,
         )
     }
 }
