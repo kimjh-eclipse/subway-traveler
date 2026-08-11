@@ -95,6 +95,8 @@
     <string name="header_departure">Departs %1$s</string>
     <string name="finish_arrival">%1$s · Arrive %2$s</string>
     <string name="finish_counts">%1$d transfers · %2$d rides · %3$d stays</string>
+    <string name="transfer_chip">Transfer</string>
+    <string name="transfer_chip_at">Transfer at %1$s</string>
     <string name="wait_chip">%1$d min wait</string>
 
     <string name="map_this_route">This route</string>

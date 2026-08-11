@@ -101,7 +101,8 @@ fun TimelineRow(
                     live = live,
                 )
             }
-            if (entry.transferWaitMinutes > 0) {
+            // 기다림이 0분이어도 갈아타는 자리는 내놓는다 — 거기서 다음 열차를 봐야 한다.
+            if (entry.transferStation != null || entry.transferWaitMinutes > 0) {
                 Spacer(Modifier.height(6.dp))
                 TransferWait(
                     minutes = entry.transferWaitMinutes,
@@ -342,7 +343,7 @@ private fun StayCard(
 
                 if (live && network.findStation(segment.place) != null) {
                     Spacer(Modifier.height(12.dp))
-                    ArrivalsPanel(stationName = segment.place, network = network, maxRows = 2, live = true)
+                    ArrivalsPanel(stationName = segment.place, network = network, live = true)
                 }
 
                 Spacer(Modifier.height(12.dp))
@@ -447,7 +448,7 @@ private fun TransferWait(minutes: Int, station: String?, network: SubwayNetwork,
         )
         if (canQuery && expanded) {
             Spacer(Modifier.height(8.dp))
-            ArrivalsPanel(stationName = station!!, network = network, maxRows = 3, live = true)
+            ArrivalsPanel(stationName = station!!, network = network, live = true)
         }
     }
 }
@@ -476,10 +477,12 @@ private fun WaitChip(
                 .background(RouteColor.WaitDot),
         )
         Text(
-            text = if (station == null) {
-                stringResource(R.string.wait_chip, minutes)
-            } else {
-                stringResource(R.string.wait_chip_at, station, minutes)
+            text = when {
+                // 시간표에 딱 맞아 기다림이 없는 환승도 있다. "대기 0분"은 말이 안 된다.
+                station == null && minutes <= 0 -> stringResource(R.string.transfer_chip)
+                station == null -> stringResource(R.string.wait_chip, minutes)
+                minutes <= 0 -> stringResource(R.string.transfer_chip_at, station)
+                else -> stringResource(R.string.wait_chip_at, station, minutes)
             },
             fontFamily = SuitFamily,
             fontWeight = FontWeight.SemiBold,

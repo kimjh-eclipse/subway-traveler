@@ -46,7 +46,6 @@ fun ArrivalsPanel(
     stationName: String,
     network: SubwayNetwork,
     modifier: Modifier = Modifier,
-    maxRows: Int = 3,
     /** 여행 중일 때만 실시간을 부른다. 계획 중에는 부르지 않는다. */
     live: Boolean = true,
 ) {
@@ -77,8 +76,10 @@ fun ArrivalsPanel(
         )
         Spacer(Modifier.height(8.dp))
         when (result) {
+            // 잘라내지 않는다. 갈아탈 때 필요한 것은 '다음 열차' 하나가 아니라
+            // 어느 방향이 언제 오는지 전부다.
             is ArrivalResult.Ready -> Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                result.arrivals.take(maxRows).forEach { ArrivalRow(it) }
+                result.arrivals.forEach { ArrivalRow(it) }
             }
             // 조용히 사라지면 고장으로 읽힌다 — 왜 비었는지 한 줄로 알린다.
             ArrivalResult.Empty -> Note(stringResource(R.string.arrivals_empty))

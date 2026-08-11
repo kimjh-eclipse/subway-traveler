@@ -141,8 +141,10 @@ data class TimelineEntry(
     /** Minutes idled before this ride because the previous segment was also a ride. */
     val transferWaitMinutes: Int,
     /**
-     * 갈아타며 기다리는 역. 앞 이동의 도착지다 — 이 구간의 목적지가 아니다.
-     * 환승 대기가 없으면 null.
+     * 갈아타는 역. 앞 이동의 도착지다 — 이 구간의 목적지가 아니다.
+     *
+     * 기다리는 시간이 0분이어도 채운다. 갈아타는 자리라는 사실은 기다림과 무관하고,
+     * 여행 중에는 그 자리에서 다음 열차를 봐야 하기 때문이다. 갈아타지 않으면 null.
      */
     val transferStation: String? = null,
     /** Elapsed time from the start of the day to the end of this segment. */
@@ -162,7 +164,7 @@ fun Route.toTimeline(): List<TimelineEntry> = segments.mapIndexed { index, segme
         index = index,
         segment = segment,
         transferWaitMinutes = wait,
-        transferStation = (previous as? RouteSegment.Move)?.destination.takeIf { wait > 0 },
+        transferStation = if (isTransfer) (previous as RouteSegment.Move).destination else null,
         cumulativeMinutes = segment.end - startTime,
     )
 }

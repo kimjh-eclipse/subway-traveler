@@ -213,7 +213,7 @@ private fun SelectionBar(
         }
 
         Spacer(Modifier.height(12.dp))
-        ArrivalsPanel(stationName = station.name, network = network, maxRows = 3)
+        ArrivalsPanel(stationName = station.name, network = network)
 
         if (station.lines.isNotEmpty()) {
             Spacer(Modifier.height(10.dp))

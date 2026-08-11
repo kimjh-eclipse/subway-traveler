@@ -46,8 +46,13 @@ object RealtimeArrivals {
     private const val HOST = "http://swopenapi.seoul.go.kr/api/subway"
     private const val TIMEOUT_MS = 6_000
 
-    /** 한 역에서 보여줄 최대 편수. 상·하행이 섞이므로 너무 적으면 한쪽만 나온다. */
-    private const val LIMIT = 8
+    /**
+     * 한 역에서 받아올 최대 편수.
+     *
+     * 상·하행이 섞여 오므로 적게 받으면 한쪽만 남는다. 왕십리처럼 네 노선이 지나는
+     * 역은 방향까지 치면 여덟 편으로는 절반도 못 본다. 호출 수는 그대로다.
+     */
+    private const val LIMIT = 20
 
     /**
      * 여러 이름을 물어 하나로 합친다.

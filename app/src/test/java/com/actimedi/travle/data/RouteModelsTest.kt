@@ -43,6 +43,34 @@ class RouteModelsTest {
         assertEquals(10, timeline[2].transferWaitMinutes)
     }
 
+    /**
+     * 기다림이 0분이어도 갈아타는 자리는 남아야 한다. 예전에는 대기 시간이 있을 때만
+     * 환승 역을 채워서, 시간표에 딱 맞는 환승은 화면에 아예 나오지 않았다 — 누를 수가
+     * 없으니 그 역의 실시간 도착도 볼 수 없었다.
+     */
+    @Test
+    fun `기다림이 없는 환승도 역을 남긴다`() {
+        val back = Route(
+            id = "t1",
+            title = "연속 환승",
+            dayOfWeek = "월요일",
+            createdAt = 0L,
+            origin = "청량리",
+            segments = listOf(
+                RouteSegment.Move("1호선", "신도림", ClockTime.parse("09:00"), ClockTime.parse("09:10"), 10),
+                // 내리자마자 갈아탄다 — 기다림이 없다.
+                RouteSegment.Move("2호선", "신촌", ClockTime.parse("09:10"), ClockTime.parse("09:25"), 15),
+            ),
+        )
+
+        val timeline = back.toTimeline()
+
+        assertEquals(0, timeline[1].transferWaitMinutes)
+        assertEquals("신도림", timeline[1].transferStation)
+        // 갈아타지 않는 첫 구간에는 붙지 않는다.
+        assertEquals(null, timeline[0].transferStation)
+    }
+
     @Test
     fun `filters partition the timeline`() {
         val timeline = route.toTimeline()
