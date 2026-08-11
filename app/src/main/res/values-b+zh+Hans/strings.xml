@@ -157,6 +157,18 @@
     <string name="schedule_empty">该区间没有时刻表。</string>
     <string name="schedule_after_last">此时刻之后没有列车。</string>
 
+    <string name="lastrain_action">末班车</string>
+    <string name="lastrain_note">看看这个行程会不会赶不上末班车。</string>
+    <string name="lastrain_loading">正在查末班车…</string>
+    <string name="lastrain_title">末班车确认</string>
+    <string name="lastrain_broken">%1$s 开往 %2$s 方向的末班车是 %3$s。计划的 %4$s 出发赶不上。</string>
+    <string name="lastrain_safe">不用担心末班车。最紧张的是 %1$s，还有 %2$s 余裕。</string>
+    <string name="lastrain_tight">%2$s 前离开 %1$s 才能按计划走完全程，余裕 %3$s。</string>
+    <string name="lastrain_none">找不到时刻表，无法确认末班车。</string>
+    <string name="lastrain_skipped">因没有时刻表而未计入的线路：%1$s</string>
+    <string name="lastrain_chip_ok">距末班车 %1$s</string>
+    <string name="lastrain_chip_bad">赶不上末班车</string>
+
     <string name="align_action">对齐时刻表</string>
     <string name="align_note">按实际发车时刻重新计算。</string>
     <string name="align_loading">正在查询时刻表…</string>

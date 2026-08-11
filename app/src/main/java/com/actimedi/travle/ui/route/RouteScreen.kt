@@ -170,6 +170,7 @@ fun RouteScreen(
             // 여행 중에는 실시간 도착이 더 정확하니 시간표를 들이밀지 않는다.
             if (!isTravelling && onApplyTimetable != null && network.stations.isNotEmpty()) {
                 TimetableAlignBar(route = route, network = network, onApply = onApplyTimetable)
+                LastTrainBar(route = route, network = network)
             }
             HorizontalDivider(color = AmColor.Line, thickness = 1.dp)
             RouteTimeline(

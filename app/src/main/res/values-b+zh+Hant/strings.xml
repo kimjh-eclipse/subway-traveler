@@ -162,6 +162,18 @@
     <string name="schedule_empty">這段路沒有時間表。</string>
     <string name="schedule_after_last">這個時間之後沒有列車。</string>
 
+    <string name="lastrain_action">尾班車</string>
+    <string name="lastrain_note">看看這個行程會不會趕不上尾班車。</string>
+    <string name="lastrain_loading">正在查尾班車…</string>
+    <string name="lastrain_title">尾班車確認</string>
+    <string name="lastrain_broken">%1$s 開往 %2$s 方向的尾班車是 %3$s。計劃的 %4$s 出發趕不上。</string>
+    <string name="lastrain_safe">不用擔心尾班車。最緊張的是 %1$s，還有 %2$s 餘裕。</string>
+    <string name="lastrain_tight">%2$s 前離開 %1$s 才能按計劃走完全程，餘裕 %3$s。</string>
+    <string name="lastrain_none">找不到時間表，無法確認尾班車。</string>
+    <string name="lastrain_skipped">因沒有時間表而未計入的路線：%1$s</string>
+    <string name="lastrain_chip_ok">距尾班車 %1$s</string>
+    <string name="lastrain_chip_bad">趕不上尾班車</string>
+
     <string name="align_action">對齊時間表</string>
     <string name="align_note">按實際開車時間重新計算。</string>
     <string name="align_loading">正在查時間表…</string>

@@ -154,6 +154,18 @@
     <string name="schedule_empty">この区間の時刻表がありません。</string>
     <string name="schedule_after_last">この時刻以降の列車はありません。</string>
 
+    <string name="lastrain_action">終電を確認</string>
+    <string name="lastrain_note">この予定で終電を逃さないか調べます。</string>
+    <string name="lastrain_loading">終電を確認中…</string>
+    <string name="lastrain_title">終電の確認</string>
+    <string name="lastrain_broken">%1$s から %2$s 方面の終電は %3$s です。予定の %4$s 出発では間に合いません。</string>
+    <string name="lastrain_safe">終電の心配はありません。いちばん際どいのは %1$s で、%2$s の余裕があります。</string>
+    <string name="lastrain_tight">%1$s を %2$s までに出れば予定どおり最後まで行けます。余裕は %3$s です。</string>
+    <string name="lastrain_none">時刻表が見つからず、終電を確認できませんでした。</string>
+    <string name="lastrain_skipped">時刻表がないため除いた路線：%1$s</string>
+    <string name="lastrain_chip_ok">終電まで %1$s</string>
+    <string name="lastrain_chip_bad">終電を逃します</string>
+
     <string name="align_action">時刻表に合わせる</string>
     <string name="align_note">実際の発車時刻で計算し直します。</string>
     <string name="align_loading">時刻表を確認中…</string>

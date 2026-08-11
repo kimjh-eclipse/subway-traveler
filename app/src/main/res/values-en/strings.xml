@@ -154,6 +154,18 @@
     <string name="schedule_empty">No timetable for this leg.</string>
     <string name="schedule_after_last">No trains after this time.</string>
 
+    <string name="lastrain_action">Last train</string>
+    <string name="lastrain_note">Check whether this plan misses the last train.</string>
+    <string name="lastrain_loading">Checking last trains…</string>
+    <string name="lastrain_title">Last train</string>
+    <string name="lastrain_broken">The last train from %1$s towards %2$s leaves at %3$s. Your plan departs at %4$s, too late to catch it.</string>
+    <string name="lastrain_safe">No last-train trouble. The tightest point is %1$s, with %2$s to spare.</string>
+    <string name="lastrain_tight">Leave %1$s by %2$s to finish the plan — %3$s to spare.</string>
+    <string name="lastrain_none">No timetable found, so last trains could not be checked.</string>
+    <string name="lastrain_skipped">Left out, no timetable: %1$s</string>
+    <string name="lastrain_chip_ok">%1$s before the last train</string>
+    <string name="lastrain_chip_bad">Misses the last train</string>
+
     <string name="align_action">Match the timetable</string>
     <string name="align_note">Recalculate against real departure times.</string>
     <string name="align_loading">Checking the timetable…</string>

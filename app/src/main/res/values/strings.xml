@@ -165,6 +165,18 @@
     <string name="schedule_empty">이 구간의 시간표가 없습니다.</string>
     <string name="schedule_after_last">이 시각 이후 열차가 없습니다.</string>
 
+    <string name="lastrain_action">막차 확인</string>
+    <string name="lastrain_note">이 일정으로 막차를 놓치는지 봅니다.</string>
+    <string name="lastrain_loading">막차 확인 중…</string>
+    <string name="lastrain_title">막차 확인</string>
+    <string name="lastrain_broken">%1$s에서 %2$s 방면 막차가 %3$s입니다. 계획한 %4$s 출발로는 탈 수 없습니다.</string>
+    <string name="lastrain_safe">막차 걱정은 없습니다. 가장 빠듯한 곳은 %1$s이고 %2$s 여유가 있습니다.</string>
+    <string name="lastrain_tight">%1$s에서 %2$s까지 떠나야 계획대로 끝까지 갈 수 있습니다. 여유 %3$s.</string>
+    <string name="lastrain_none">시간표를 찾지 못해 막차를 따져보지 못했습니다.</string>
+    <string name="lastrain_skipped">시간표가 없어 빼고 본 노선: %1$s</string>
+    <string name="lastrain_chip_ok">막차까지 %1$s 여유</string>
+    <string name="lastrain_chip_bad">막차를 놓칩니다</string>
+
     <string name="align_action">시간표로 맞추기</string>
     <string name="align_note">실제 열차 시각에 맞춰 다시 계산합니다.</string>
     <string name="align_loading">시간표 확인 중…</string>
