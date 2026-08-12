@@ -54,6 +54,15 @@ ASSET = ROOT / "app/src/main/assets/subway_map.json"
 HOST = "http://swopenapi.seoul.go.kr/api/subway"
 
 
+# 역정보 대장으로는 못 찾는 자리. 대장에 GTX-A 가 없어 후보에조차 오르지 못한다.
+#
+#   서울역 — API 가 둘로 쪼개 두었다. `서울`은 1·4호선·경의중앙·공항철도,
+#            `서울역`은 GTX-A 뿐이다. 올림픽공원과 같은 꼴이다.
+MANUAL = {
+    "서울역": ["서울", "서울역"],
+}
+
+
 def api_key():
     for line in (ROOT / ".env").read_text(encoding="utf-8").splitlines():
         if line.startswith("SEOUL_SUBWAY_API_KEY="):
@@ -173,7 +182,7 @@ def main():
     for station in data["stations"]:
         station.pop("r", None)
         # 자료가 실제로 오는 이름만 남긴다.
-        names = [n for n in wanted[station["n"]] if verified.get(n)]
+        names = MANUAL.get(station["n"]) or [n for n in wanted[station["n"]] if verified.get(n)]
         if names and names != [station["n"]]:
             station["r"] = names
             changed += 1
