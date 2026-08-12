@@ -109,7 +109,7 @@ private fun ArrivalRow(arrival: Arrival) {
     ) {
         if (arrival.line.isNotBlank()) {
             Text(
-                text = arrival.line,
+                text = lineLabel(arrival.line),
                 fontFamily = SuitFamily,
                 fontWeight = FontWeight.Bold,
                 fontSize = 10.5.sp,

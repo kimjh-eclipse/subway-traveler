@@ -177,4 +177,19 @@
     <string name="align_skipped">Left as planned, no timetable: %1$s</string>
     <string name="align_none">No timetable found. Your plan is unchanged.</string>
     <string name="align_apply">Apply</string>
+
+    <string name="line_numbered">Line %1$d</string>
+    <string name="line_incheon">Incheon Line %1$d</string>
+    <string name="line_sinbundang">Sinbundang Line</string>
+    <string name="line_suinbundang">Suin-Bundang Line</string>
+    <string name="line_airport">Airport Railroad</string>
+    <string name="line_gyeonguijungang">Gyeongui-Jungang Line</string>
+    <string name="line_gyeongchun">Gyeongchun Line</string>
+    <string name="line_gyeonggang">Gyeonggang Line</string>
+    <string name="line_seohae">Seohae Line</string>
+    <string name="line_uisinseol">Ui-Sinseol Line</string>
+    <string name="line_sillim">Sillim Line</string>
+    <string name="line_gimpo">Gimpo Goldline</string>
+    <string name="line_yongin">Yongin EverLine</string>
+    <string name="line_uijeongbu">Uijeongbu LRT</string>
 </resources>

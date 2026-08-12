@@ -185,4 +185,19 @@
     <string name="align_skipped">因為沒有時間表而維持原狀的路線：%1$s</string>
     <string name="align_none">找不到時間表。計劃維持不變。</string>
     <string name="align_apply">套用</string>
+
+    <string name="line_numbered">%1$d號線</string>
+    <string name="line_incheon">仁川%1$d號線</string>
+    <string name="line_sinbundang">新盆唐線</string>
+    <string name="line_suinbundang">水仁盆唐線</string>
+    <string name="line_airport">機場鐵路</string>
+    <string name="line_gyeonguijungang">京義中央線</string>
+    <string name="line_gyeongchun">京春線</string>
+    <string name="line_gyeonggang">京江線</string>
+    <string name="line_seohae">西海線</string>
+    <string name="line_uisinseol">牛耳新設線</string>
+    <string name="line_sillim">新林線</string>
+    <string name="line_gimpo">金浦都市鐵道</string>
+    <string name="line_yongin">龍仁輕軌</string>
+    <string name="line_uijeongbu">議政府輕軌</string>
 </resources>

@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import com.actimedi.travle.data.SubwayNetwork
 import com.actimedi.travle.R
 import com.actimedi.travle.ui.common.ArrivalsPanel
+import com.actimedi.travle.ui.common.lineLabel
 import com.actimedi.travle.ui.theme.AmColor
 import com.actimedi.travle.ui.theme.RouteColor
 import com.actimedi.travle.ui.theme.SuitFamily
@@ -245,7 +246,7 @@ private fun SelectionBar(
 fun LineChip(line: String, isSelected: Boolean, onClick: () -> Unit) {
     val color = lineColorFor(line)
     Text(
-        text = line,
+        text = lineLabel(line),
         fontFamily = SuitFamily,
         fontWeight = FontWeight.Bold,
         fontSize = 12.sp,

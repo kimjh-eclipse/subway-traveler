@@ -66,6 +66,7 @@ import com.actimedi.travle.data.FareEstimate
 import com.actimedi.travle.data.SubwayNetwork
 import com.actimedi.travle.ui.common.wonText
 import com.actimedi.travle.ui.common.stationLabel
+import com.actimedi.travle.ui.common.lineLabel
 import com.actimedi.travle.data.estimateFare
 import com.actimedi.travle.data.TimelineEntry
 import com.actimedi.travle.data.filterBy
@@ -728,14 +729,16 @@ private fun FareLine(fare: FareEstimate) {
                 .background(RouteColor.WaitFill)
                 .padding(horizontal = 6.dp, vertical = 3.dp),
         )
+        // 노선 이름은 문자열 자원이라 @Composable 밖에서는 읽을 수 없다 — 먼저 만든다.
+        val skipped = fare.skippedLines.map { lineLabel(it) }
+        val rides = stringResource(R.string.fare_rides, fare.rideCount)
+        val excluded = if (skipped.isEmpty()) {
+            ""
+        } else {
+            " · " + stringResource(R.string.fare_excluded, skipped.joinToString(", "))
+        }
         Text(
-            text = buildString {
-                append(stringResource(R.string.fare_rides, fare.rideCount))
-                if (fare.skippedLines.isNotEmpty()) {
-                    append(" · ")
-                    append(stringResource(R.string.fare_excluded, fare.skippedLines.joinToString(", ")))
-                }
-            },
+            text = rides + excluded,
             fontFamily = SuitFamily,
             fontWeight = FontWeight.Medium,
             fontSize = 11.5.sp,

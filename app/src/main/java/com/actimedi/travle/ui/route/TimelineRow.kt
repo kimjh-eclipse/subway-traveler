@@ -53,6 +53,7 @@ import com.actimedi.travle.R
 import com.actimedi.travle.data.RouteSegment
 import com.actimedi.travle.ui.common.ArrivalsPanel
 import com.actimedi.travle.ui.common.stationLabel
+import com.actimedi.travle.ui.common.lineLabel
 import com.actimedi.travle.ui.common.SchedulePanel
 import com.actimedi.travle.ui.common.durationText
 import com.actimedi.travle.data.SubwayNetwork
@@ -216,7 +217,7 @@ private fun MoveRow(segment: RouteSegment.Move, network: SubwayNetwork) {
         horizontalArrangement = Arrangement.spacedBy(9.dp),
     ) {
         Text(
-            text = segment.line,
+            text = lineLabel(segment.line),
             fontFamily = SuitFamily,
             fontWeight = FontWeight.Bold,
             fontSize = 11.5.sp,

@@ -188,4 +188,20 @@
     <string name="align_skipped">시간표가 없어 그대로 둔 노선: %1$s</string>
     <string name="align_none">시간표를 찾지 못했습니다. 계획을 그대로 둡니다.</string>
     <string name="align_apply">적용</string>
+
+    <!-- 노선 이름. 자료는 한국어로만 들고 있어 보여줄 때만 바꾼다. -->
+    <string name="line_numbered">%1$d호선</string>
+    <string name="line_incheon">인천%1$d호선</string>
+    <string name="line_sinbundang">신분당선</string>
+    <string name="line_suinbundang">수인분당선</string>
+    <string name="line_airport">공항철도</string>
+    <string name="line_gyeonguijungang">경의중앙선</string>
+    <string name="line_gyeongchun">경춘선</string>
+    <string name="line_gyeonggang">경강선</string>
+    <string name="line_seohae">서해선</string>
+    <string name="line_uisinseol">우이신설선</string>
+    <string name="line_sillim">신림선</string>
+    <string name="line_gimpo">김포 골드라인</string>
+    <string name="line_yongin">용인 경전철</string>
+    <string name="line_uijeongbu">의정부경전철</string>
 </resources>

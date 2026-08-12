@@ -37,6 +37,7 @@ import com.actimedi.travle.ui.theme.RouteColor
 import com.actimedi.travle.ui.theme.SuitFamily
 import com.actimedi.travle.ui.theme.SuiteFamily
 import com.actimedi.travle.ui.theme.lineColorFor
+import com.actimedi.travle.ui.common.lineLabel
 
 /**
  * 두 역 사이의 길을 제안한다.
@@ -184,7 +185,7 @@ private fun SearchOptionCard(result: SearchResult, onClick: () -> Unit) {
                     )
                 }
                 Text(
-                    text = leg.line,
+                    text = lineLabel(leg.line),
                     fontFamily = SuitFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 11.5.sp,
