@@ -38,6 +38,7 @@ import kotlin.math.cos
 import kotlin.math.hypot
 import kotlin.math.max
 import kotlin.math.min
+import androidx.compose.ui.platform.LocalConfiguration
 
 const val MinMapScale = 0.35f
 const val MaxMapScale = 40f
@@ -113,6 +114,11 @@ fun SubwayMapView(
 ) {
     val measurer = rememberTextMeasurer()
     val density = LocalDensity.current.density
+    // 그리기 람다는 @Composable 이 아니라 자원을 읽을 수 없다 — 이름을 미리 푼다.
+    val locale = LocalConfiguration.current.locales[0]
+    val nameOf = remember(network, locale) {
+        { index: Int -> network.displayName(network.stations[index].name, locale) }
+    }
     val lineColors = remember(network) { network.lines.associate { it.name to parseColor(it.colour) } }
     val tapSlop = 22f * density
 
@@ -193,14 +199,14 @@ fun SubwayMapView(
         val placed = mutableListOf<Rect>()
         selectedStation?.let { index ->
             drawLabelIfVisible(
-                measurer, network.stations[index].name,
+                measurer, nameOf(index),
                 camera.toScreen(projected[index]), density, size, placed, strong = true,
             )
         }
         if (camera.scale >= LabelScaleThreshold) {
             mapped?.stops?.forEach { stop ->
                 drawLabelIfVisible(
-                    measurer, "${stop.order}. ${stop.label}",
+                    measurer, "${stop.order}. ${nameOf(stop.stationIndex)}",
                     camera.toScreen(projected[stop.stationIndex]), density, size, placed,
                 )
             }
@@ -212,12 +218,13 @@ fun SubwayMapView(
             network.stations.indices
                 .map { it to camera.toScreen(projected[it]) }
                 .filter { (_, p) ->
-                    p.x > -220f && p.y > -60f && p.x < size.width + 220f && p.y < size.height + 60f
+                    p.x > -LabelMargin && p.y > -60f &&
+                        p.x < size.width + LabelMargin && p.y < size.height + 60f
                 }
                 .sortedBy { (_, p) -> hypot(p.x - centre.x, p.y - centre.y) }
                 .forEach { (index, p) ->
                     drawLabelIfVisible(
-                        measurer, network.stations[index].name, p, density, size, placed,
+                        measurer, nameOf(index), p, density, size, placed,
                     )
                 }
         }
@@ -275,7 +282,11 @@ private fun DrawScope.drawLabelIfVisible(
     placed: MutableList<Rect>,
     strong: Boolean = false,
 ) {
-    if (at.x < -220f || at.y < -60f || at.x > canvas.width + 220f || at.y > canvas.height + 60f) return
+    // 여유를 넉넉히 잡는다. `Gyeongin Nat'l Univ. of Education` 같은 이름은 한글
+    // 역명의 서너 배라, 좁게 자르면 화면에 들어와야 할 라벨이 먼저 사라진다.
+    if (at.x < -LabelMargin || at.y < -60f ||
+        at.x > canvas.width + LabelMargin || at.y > canvas.height + 60f
+    ) return
     val layout = measurer.measure(
         text = text,
         style = TextStyle(
@@ -347,3 +358,12 @@ fun boundsOf(points: List<Offset>): Rect? {
 fun parseColor(hex: String): Color = runCatching {
     Color(android.graphics.Color.parseColor(hex))
 }.getOrDefault(AmColor.Ink300)
+
+/**
+ * 화면 밖 라벨을 자르는 여유(px).
+ *
+ * 점이 화면 밖에 있어도 라벨은 안쪽으로 뻗어 들어올 수 있다. 한글 역명은 서너
+ * 글자라 220이면 넉넉했지만 라틴 표기는 그보다 훨씬 길어, 좁게 두면 보여야 할
+ * 이름이 먼저 사라진다.
+ */
+private const val LabelMargin = 520f

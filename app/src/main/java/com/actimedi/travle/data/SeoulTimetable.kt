@@ -43,6 +43,30 @@ class SeoulTimetable(
 ) : TimetableSource {
 
     /**
+     * 디스크 저장소. 앱이 시작할 때 한 번 붙인다.
+     *
+     * 붙지 않아도 동작한다 — 그때는 이번 실행 동안만 기억한다. 시험에서 파일을
+     * 만들지 않아도 되도록 이렇게 뒀다.
+     */
+    var store: TimetableStore? = null
+        set(value) {
+            field = value
+            value?.load()?.let { saved ->
+                answers.putAll(saved.entries)
+                savedOn = saved.savedOn
+            }
+        }
+
+    /**
+     * 물어본 것의 **답**을 그대로 남긴다 — `역|노선|목적지|요일` → 출발 시각들.
+     *
+     * 열차번호 단위로 남기지 않는 이유는, 방향을 가리는 데만 쓰이고 그 판정은 이미
+     * 끝났기 때문이다. 답만 남기면 되고, 그래야 망 없이도 같은 답을 낼 수 있다.
+     */
+    private val answers = ConcurrentHashMap<String, List<Int>>()
+    private var savedOn: String = ""
+
+    /**
      * 한 번 부른 (역·노선·방향·요일)은 다시 부르지 않는다. 한 경로에서 역이 겹친다.
      * [prefetch]가 여러 갈래로 채우므로 동시 접근을 견디는 지도를 쓴다. 같은 칸을
      * 두 갈래가 동시에 채워도 결과가 같아 잠금까지는 걸지 않는다.
@@ -59,6 +83,11 @@ class SeoulTimetable(
      * 기다리기엔 길다. 조회는 서로 독립이니 미리 병렬로 채워 두면 그만큼 줄어든다.
      */
     suspend fun prefetch(draft: RouteDraft, dayType: DayType): Unit = coroutineScope {
+        // 지난번에 받아 둔 답이 아직 성하면 망을 아예 타지 않는다 — 비행기 모드에서도
+        // 여기서 곧장 돌아선다.
+        val today = NOW_FORMAT.format(Date()).take(10)
+        if (!TimetableCache(savedOn).isStale(today) && draft.isAnswered(dayType)) return@coroutineScope
+
         val gate = Semaphore(MAX_IN_FLIGHT)
         draft.stops.zipWithNext()
             .flatMap { (from, to) ->
@@ -78,15 +107,54 @@ class SeoulTimetable(
             .awaitAll()
     }
 
+    /** 이 경로의 모든 구간에 답이 남아 있는가. */
+    private fun RouteDraft.isAnswered(dayType: DayType): Boolean =
+        stops.zipWithNext().all { (from, to) ->
+            val line = normalizeLineName(to.line)
+            line.isBlank() || answers.containsKey("${from.name}|$line|${to.name}|$dayType")
+        }
+
     override suspend fun departures(
         station: String,
         line: String,
         towards: String,
         dayType: DayType,
     ): List<ClockTime> = withContext(Dispatchers.IO) {
-        if (apiKey.isBlank() || station.isBlank() || towards.isBlank()) return@withContext emptyList()
+        if (station.isBlank() || towards.isBlank()) return@withContext emptyList()
         val lineName = normalizeLineName(line).ifBlank { return@withContext emptyList() }
+        val key = "$station|$lineName|$towards|$dayType"
+        val today = NOW_FORMAT.format(Date()).take(10)
+        val kept = answers[key]
 
+        // 받아 둔 지 얼마 안 됐으면 그대로 쓴다. 망을 탈 이유가 없다.
+        if (kept != null && !TimetableCache(savedOn).isStale(today)) {
+            return@withContext kept.map { ClockTime(it) }
+        }
+        if (apiKey.isBlank()) return@withContext kept.orEmpty().map { ClockTime(it) }
+
+        val fresh = lookUp(station, lineName, towards, dayType)
+        if (fresh.isNotEmpty()) {
+            answers[key] = fresh.map { it.minuteOfDay }
+            savedOn = today
+            // 얻은 자리에서 바로 남긴다. 어차피 망을 탄 참이라 파일 쓰기는 묻힌다.
+            flush()
+            return@withContext fresh
+        }
+        // 망이 안 되거나 자료가 비었다. 낡았어도 남아 있는 것이 아예 없는 것보다 낫다.
+        kept.orEmpty().map { ClockTime(it) }
+    }
+
+    /** 저장소에 밀어 넣는다. 저장소가 붙지 않았으면 아무 일도 하지 않는다. */
+    private fun flush() {
+        store?.save(TimetableCache(savedOn, answers.toMap()))
+    }
+
+    private suspend fun lookUp(
+        station: String,
+        lineName: String,
+        towards: String,
+        dayType: DayType,
+    ): List<ClockTime> = withContext(Dispatchers.IO) {
         for (direction in DIRECTIONS) {
             val boarding = fetch(station, lineName, direction, dayType)
             if (boarding.isEmpty()) continue

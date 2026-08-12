@@ -50,6 +50,19 @@ AGENT = {"User-Agent": "subway-traveler/1.0 (station name table)"}
 BBOX = "36.55,126.20,38.25,127.95"
 
 HANJA_IN_PARENS = re.compile(r"[（(]([一-鿿・･\s]+)[)）]")
+
+# OSM이 틀린 자리. 위키데이터의 영문 라벨과 전수 대조해 찾았고, 표기 방식 차이가
+# 아니라 **다른 역의 이름**이 붙은 것만 골랐다.
+#
+#   용인중앙시장 — `name:en` 이 이웃한 운동장·송담대의 영문으로 잘못 달려 있다.
+#   일원·답십리 — 국어의 로마자 표기법에서 어긋난다(Irwon·Dapsimni가 맞다).
+#
+# 고치면 여기서 지운다. 규칙으로 풀 수 없어 손으로 적어 두는 자리다.
+ENGLISH_OVERRIDES = {
+    "용인중앙시장": "Yongin Jungang Market",
+    "일원": "Irwon",
+    "답십리": "Dapsimni",
+}
 # `シンチョン(新村)[国鉄駅]` 처럼 뒤에 붙는 구분용 꼬리표.
 DISAMBIGUATION = re.compile(r"[\[［][^\]］]*[\]］]")
 
@@ -153,7 +166,7 @@ def main():
             continue
         japanese = tidy_japanese(tags.get("name:ja"))
         rows[station["n"]] = {
-            "e": tags.get("name:en"),
+            "e": ENGLISH_OVERRIDES.get(station["n"], tags.get("name:en")),
             "j": japanese,
             "zh": tidy_chinese(
                 tags.get("name:zh-Hans") or tags.get("name:zh") or tags.get("name:zh-Hant")

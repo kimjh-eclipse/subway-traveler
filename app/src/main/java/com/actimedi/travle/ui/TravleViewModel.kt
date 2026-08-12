@@ -16,6 +16,8 @@ import com.actimedi.travle.data.toRoute
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.actimedi.travle.data.FileTimetableStore
+import com.actimedi.travle.data.SeoulTimetable
 
 /** Owns the saved routes and which one the 노선 tab is showing. */
 class TravleViewModel(application: Application) : AndroidViewModel(application) {
@@ -44,6 +46,13 @@ class TravleViewModel(application: Application) : AndroidViewModel(application) 
     init {
         viewModelScope.launch {
             network = withContext(Dispatchers.IO) { SubwayNetworkLoader.load(application) }
+        }
+        // 받아 둔 시간표를 붙인다. 로밍이 끊긴 채로 지하철에 있을 때 막차를 물으면
+        // 지난번에 본 구간은 망 없이도 답한다.
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                SeoulTimetable.shared.store = FileTimetableStore(application)
+            }
         }
         viewModelScope.launch {
             val stored = withContext(Dispatchers.IO) { store.load() }
