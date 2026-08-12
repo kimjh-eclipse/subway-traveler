@@ -46,6 +46,8 @@ fun SchedulePanel(
     station: String,
     line: String,
     towards: String,
+    /** 화면에 쓸 방면 이름. 조회에는 [towards]의 한국어 이름을 그대로 쓴다. */
+    towardsLabel: String = towards,
     dayOfWeek: String,
     /** 계획상 이 역을 떠나는 시각. 이 시각 이후부터 보여준다. */
     around: ClockTime,
@@ -65,7 +67,7 @@ fun SchedulePanel(
 
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
-            text = stringResource(R.string.schedule_title, towards),
+            text = stringResource(R.string.schedule_title, towardsLabel),
             fontFamily = SuitFamily,
             fontWeight = FontWeight.Medium,
             fontSize = 11.sp,

@@ -65,6 +65,7 @@ import com.actimedi.travle.data.SeoulOneDayRoute
 import com.actimedi.travle.data.FareEstimate
 import com.actimedi.travle.data.SubwayNetwork
 import com.actimedi.travle.ui.common.wonText
+import com.actimedi.travle.ui.common.stationLabel
 import com.actimedi.travle.data.estimateFare
 import com.actimedi.travle.data.TimelineEntry
 import com.actimedi.travle.data.filterBy
@@ -600,7 +601,7 @@ private fun RouteTimeline(
         val originShown = entries.firstOrNull()?.segment
             .let { it is RouteSegment.Stay && it.place == origin }
         if (origin.isNotBlank() && !originShown) {
-            item { StartCard(place = origin, at = startTime.format()) }
+            item { StartCard(place = stationLabel(origin, network), at = startTime.format()) }
         }
 
         if (entries.isEmpty()) {
@@ -630,7 +631,7 @@ private fun RouteTimeline(
 
         item {
             Spacer(Modifier.height(8.dp))
-            FinishCard(summary, fare)
+            FinishCard(summary, fare, network)
             // Clears the floating 새 경로 button.
             Spacer(Modifier.height(64.dp))
         }
@@ -638,7 +639,7 @@ private fun RouteTimeline(
 }
 
 @Composable
-private fun FinishCard(summary: RouteSummary, fare: FareEstimate) {
+private fun FinishCard(summary: RouteSummary, fare: FareEstimate, network: SubwayNetwork) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -669,7 +670,7 @@ private fun FinishCard(summary: RouteSummary, fare: FareEstimate) {
                 text = stringResource(
                     R.string.finish_arrival,
                     summary.finishTime.format(),
-                    summary.finishPlace,
+                    stationLabel(summary.finishPlace, network),
                 ),
                 fontFamily = SuiteFamily,
                 fontWeight = FontWeight.Bold,

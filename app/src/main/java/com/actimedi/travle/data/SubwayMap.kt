@@ -55,7 +55,17 @@ data class SubwayNetwork(
      */
     val times: List<List<Int>> = emptyList(),
     val timeSource: String = "",
+    /**
+     * 역 이름의 다른 나라 표기. 자산이 따로라 [SubwayNetworkLoader]가 채운다 —
+     * 한국어로 볼 때는 읽을 필요가 없어 노선도 자산과 나눠 두었다.
+     */
+    @kotlinx.serialization.Transient
+    val stationNames: StationNameTable = StationNameTable(),
 ) {
+    /** 화면에 쓸 역 이름. 자료가 없으면 한국어 그대로다. */
+    fun displayName(rawName: String, locale: java.util.Locale): String =
+        stationNames.localized(rawName, locale)
+
     /** (작은 인덱스, 큰 인덱스) → 초. 조회가 잦아 한 번만 만든다. */
     private val edgeSeconds: Map<Long, Int> by lazy {
         times.associate { (a, b, seconds) -> edgeKey(a, b) to seconds }
@@ -221,7 +231,9 @@ object SubwayNetworkLoader {
     private val json = Json { ignoreUnknownKeys = true }
 
     fun load(context: Context): SubwayNetwork = runCatching {
-        context.assets.open(ASSET).bufferedReader().use { json.decodeFromString<SubwayNetwork>(it.readText()) }
+        context.assets.open(ASSET).bufferedReader()
+            .use { json.decodeFromString<SubwayNetwork>(it.readText()) }
+            .copy(stationNames = StationNamesLoader.load(context))
     }.onFailure { Log.w("SubwayNetwork", "노선도 데이터를 읽지 못했습니다", it) }
         .getOrDefault(SubwayNetwork())
 }

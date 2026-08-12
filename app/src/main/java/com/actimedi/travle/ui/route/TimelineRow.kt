@@ -52,6 +52,7 @@ import androidx.compose.foundation.Canvas
 import com.actimedi.travle.R
 import com.actimedi.travle.data.RouteSegment
 import com.actimedi.travle.ui.common.ArrivalsPanel
+import com.actimedi.travle.ui.common.stationLabel
 import com.actimedi.travle.ui.common.SchedulePanel
 import com.actimedi.travle.ui.common.durationText
 import com.actimedi.travle.data.SubwayNetwork
@@ -94,7 +95,7 @@ fun TimelineRow(
                 .padding(bottom = 10.dp),
         ) {
             when (val segment = entry.segment) {
-                is RouteSegment.Move -> MoveRow(segment)
+                is RouteSegment.Move -> MoveRow(segment, network)
                 is RouteSegment.Stay -> StayCard(
                     segment = segment,
                     entry = entry,
@@ -204,7 +205,7 @@ private fun DashedRail(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun MoveRow(segment: RouteSegment.Move) {
+private fun MoveRow(segment: RouteSegment.Move, network: SubwayNetwork) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -228,7 +229,7 @@ private fun MoveRow(segment: RouteSegment.Move) {
                 .padding(horizontal = 9.dp, vertical = 4.dp),
         )
         Text(
-            text = segment.destination,
+            text = stationLabel(segment.destination, network),
             fontFamily = SuitFamily,
             fontWeight = FontWeight.SemiBold,
             fontSize = 14.sp,
@@ -286,7 +287,7 @@ private fun StayCard(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = segment.place,
+                    text = stationLabel(segment.place, network),
                     fontFamily = SuiteFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 17.sp,
@@ -460,7 +461,7 @@ private fun TransferWait(
     Column {
         WaitChip(
             minutes = minutes,
-            station = station.takeIf { known },
+            station = station.takeIf { known }?.let { stationLabel(it, network) },
             expanded = expanded,
             onClick = { expanded = !expanded }.takeIf { known },
         )
@@ -475,6 +476,7 @@ private fun TransferWait(
                 station = station!!,
                 line = ride.line,
                 towards = ride.destination,
+                towardsLabel = stationLabel(ride.destination, network),
                 dayOfWeek = dayOfWeek,
                 around = ride.start,
             )

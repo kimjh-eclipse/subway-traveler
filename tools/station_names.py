@@ -50,6 +50,8 @@ AGENT = {"User-Agent": "subway-traveler/1.0 (station name table)"}
 BBOX = "36.55,126.20,38.25,127.95"
 
 HANJA_IN_PARENS = re.compile(r"[（(]([一-鿿・･\s]+)[)）]")
+# `シンチョン(新村)[国鉄駅]` 처럼 뒤에 붙는 구분용 꼬리표.
+DISAMBIGUATION = re.compile(r"[\[［][^\]］]*[\]］]")
 
 
 def normalise(name):
@@ -94,6 +96,13 @@ def index_by_name(elements):
         if key not in best or filled > best[key][0]:
             best[key] = (filled, tags)
     return {k: v[1] for k, v in best.items()}
+
+
+def tidy_japanese(text):
+    """같은 이름의 역을 가르려고 붙인 꼬리표는 화면에 쓸 것이 아니다."""
+    if not text:
+        return None
+    return DISAMBIGUATION.sub("", text).strip() or None
 
 
 def hanja_from_japanese(japanese):
@@ -142,24 +151,27 @@ def main():
         tags = osm.get(normalise(station["n"]))
         if not tags:
             continue
-        chinese = tidy_chinese(
-            tags.get("name:zh-Hans")
-            or tags.get("name:zh")
-            or tags.get("name:zh-Hant")
-            or hanja_from_japanese(tags.get("name:ja"))
-        )
+        japanese = tidy_japanese(tags.get("name:ja"))
         rows[station["n"]] = {
             "e": tags.get("name:en"),
-            "j": tags.get("name:ja"),
-            "zh": chinese,
+            "j": japanese,
+            "zh": tidy_chinese(
+                tags.get("name:zh-Hans") or tags.get("name:zh") or tags.get("name:zh-Hant")
+            ),
+            "hanja": tidy_chinese(hanja_from_japanese(japanese)),
         }
-        if not chinese and tags.get("wikidata"):
+        if not rows[station["n"]]["zh"] and tags.get("wikidata"):
             pending.append((station["n"], tags["wikidata"]))
 
     print(f"위키데이터로 메울 역 {len(pending)}개…")
     labels = wikidata_labels([qid for _, qid in pending])
     for name, qid in pending:
         rows[name]["zh"] = tidy_chinese(labels.get(qid))
+
+    # 괄호 한자는 마지막에만 쓴다 — 고유어 역명에서는 일본어 번역이 섞여 나온다.
+    for row in rows.values():
+        row["zh"] = row["zh"] or row.pop("hanja", None)
+        row.pop("hanja", None)
 
     # 출처마다 서체가 섞여 있어 한 벌에서 둘을 만든다. 같으면 번체는 접는다.
     table = {}
