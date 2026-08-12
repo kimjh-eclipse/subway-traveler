@@ -39,6 +39,7 @@ import kotlin.math.hypot
 import kotlin.math.max
 import kotlin.math.min
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.draw.clipToBounds
 
 const val MinMapScale = 0.35f
 const val MaxMapScale = 40f
@@ -125,6 +126,9 @@ fun SubwayMapView(
     Canvas(
         modifier = modifier
             .fillMaxSize()
+            // 컴포즈는 그리기를 자리 밖으로 나가도 자르지 않는다. 지도 가장자리의
+            // 역 이름이 위쪽 안내 문구를 덮고 있었다.
+            .clipToBounds()
             .background(RouteColor.TabTrack)
             // Measured in layout, not during draw — writing state while drawing
             // does not reliably restart the framing effect.
