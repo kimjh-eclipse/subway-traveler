@@ -200,4 +200,16 @@
     <string name="line_gimpo">金浦都市鐵道</string>
     <string name="line_yongin">龍仁輕軌</string>
     <string name="line_uijeongbu">議政府輕軌</string>
+
+    <string name="arrival_bound">開往%1$s</string>
+    <string name="arrival_towards">%1$s方向</string>
+    <string name="arrival_at">%1$s（%2$s）</string>
+    <string name="arrival_minutes">%1$d分鐘後</string>
+    <string name="arrival_stops_away">前方%1$d站</string>
+    <string name="arrival_entering">進站中</string>
+    <string name="arrival_arrived">已到站</string>
+    <string name="arrival_departed">已發車</string>
+    <string name="arrival_prev_entering">進入前一站</string>
+    <string name="arrival_prev_arrived">已到前一站</string>
+    <string name="arrival_prev_departed">已離開前一站</string>
 </resources>

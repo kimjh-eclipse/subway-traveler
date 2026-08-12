@@ -204,4 +204,17 @@
     <string name="line_gimpo">김포 골드라인</string>
     <string name="line_yongin">용인 경전철</string>
     <string name="line_uijeongbu">의정부경전철</string>
+
+    <!-- 실시간 도착. API가 완성된 한국어를 주므로 뜯어서 다시 짓는다. -->
+    <string name="arrival_bound">%1$s행</string>
+    <string name="arrival_towards">%1$s 방면</string>
+    <string name="arrival_at">%1$s (%2$s)</string>
+    <string name="arrival_minutes">%1$d분 후</string>
+    <string name="arrival_stops_away">%1$d번째 전역</string>
+    <string name="arrival_entering">진입</string>
+    <string name="arrival_arrived">도착</string>
+    <string name="arrival_departed">출발</string>
+    <string name="arrival_prev_entering">전역 진입</string>
+    <string name="arrival_prev_arrived">전역 도착</string>
+    <string name="arrival_prev_departed">전역 출발</string>
 </resources>

@@ -65,7 +65,15 @@ data class StationNameTable(
         names["${name}역"]?.let { return it }
         // `총신대입구 (이수)` ↔ `총신대입구(이수)` — 띄어쓰기가 자료마다 다르다.
         val squashed = name.replace(" ", "")
-        return names.entries.firstOrNull { it.key.replace(" ", "") == squashed }?.value
+        names.entries.firstOrNull { it.key.replace(" ", "") == squashed }?.let { return it.value }
+        // 실시간 API는 `군자(능동)`, `천호(풍납토성)`이라 부른다. 이름표의 열쇠는
+        // 괄호 없는 `군자`·`천호`다.
+        val bare = squashed.substringBefore('(').trim()
+        if (bare.isNotEmpty() && bare != squashed) {
+            names[bare]?.let { return it }
+            return names.entries.firstOrNull { it.key.replace(" ", "") == bare }?.value
+        }
+        return null
     }
 }
 

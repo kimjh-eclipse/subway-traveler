@@ -192,4 +192,16 @@
     <string name="line_gimpo">金浦ゴールドライン</string>
     <string name="line_yongin">龍仁エバーライン</string>
     <string name="line_uijeongbu">議政府軽電鉄</string>
+
+    <string name="arrival_bound">%1$s行</string>
+    <string name="arrival_towards">%1$s方面</string>
+    <string name="arrival_at">%1$s（%2$s）</string>
+    <string name="arrival_minutes">%1$d分後</string>
+    <string name="arrival_stops_away">%1$d駅前</string>
+    <string name="arrival_entering">進入</string>
+    <string name="arrival_arrived">到着</string>
+    <string name="arrival_departed">発車</string>
+    <string name="arrival_prev_entering">前駅進入</string>
+    <string name="arrival_prev_arrived">前駅到着</string>
+    <string name="arrival_prev_departed">前駅発車</string>
 </resources>

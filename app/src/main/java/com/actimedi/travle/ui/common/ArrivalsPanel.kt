@@ -26,6 +26,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.actimedi.travle.R
 import com.actimedi.travle.data.Arrival
+import com.actimedi.travle.data.ArrivalHeadsign
+import com.actimedi.travle.data.ArrivalStatus
+import com.actimedi.travle.data.ArrivalWhen
 import com.actimedi.travle.data.ArrivalResult
 import com.actimedi.travle.data.RealtimeArrivals
 import com.actimedi.travle.data.SubwayNetwork
@@ -79,7 +82,7 @@ fun ArrivalsPanel(
             // 잘라내지 않는다. 갈아탈 때 필요한 것은 '다음 열차' 하나가 아니라
             // 어느 방향이 언제 오는지 전부다.
             is ArrivalResult.Ready -> Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                result.arrivals.forEach { ArrivalRow(it) }
+                result.arrivals.forEach { ArrivalRow(it, network) }
             }
             // 조용히 사라지면 고장으로 읽힌다 — 왜 비었는지 한 줄로 알린다.
             ArrivalResult.Empty -> Note(stringResource(R.string.arrivals_empty))
@@ -100,8 +103,41 @@ private fun Note(text: String) {
     )
 }
 
+/**
+ * API가 준 한국어 문장을 그대로 쓰지 않고, 뜯어 둔 조각으로 다시 짓는다.
+ * 역 이름은 이름표로 바꾸고 `~행`·`~분 후` 같은 말은 문자열 자원에서 온다.
+ */
 @Composable
-private fun ArrivalRow(arrival: Arrival) {
+private fun headsignText(headsign: ArrivalHeadsign, network: SubwayNetwork): String {
+    if (headsign.raw.isNotBlank()) return headsign.raw
+    val bound = stringResource(R.string.arrival_bound, stationLabel(headsign.destination, network))
+    if (headsign.towards.isBlank() || headsign.towards == headsign.destination) return bound
+    return bound + " · " + stringResource(
+        R.string.arrival_towards,
+        stationLabel(headsign.towards, network),
+    )
+}
+
+@Composable
+private fun timingText(timing: ArrivalWhen, network: SubwayNetwork): String {
+    val what = when (val status = timing.status) {
+        is ArrivalStatus.Minutes -> stringResource(R.string.arrival_minutes, status.minutes)
+        is ArrivalStatus.StopsAway -> stringResource(R.string.arrival_stops_away, status.stops)
+        ArrivalStatus.Entering -> stringResource(R.string.arrival_entering)
+        ArrivalStatus.Arrived -> stringResource(R.string.arrival_arrived)
+        ArrivalStatus.Departed -> stringResource(R.string.arrival_departed)
+        ArrivalStatus.PreviousEntering -> stringResource(R.string.arrival_prev_entering)
+        ArrivalStatus.PreviousArrived -> stringResource(R.string.arrival_prev_arrived)
+        ArrivalStatus.PreviousDeparted -> stringResource(R.string.arrival_prev_departed)
+        // 알아보지 못한 문구는 원문 그대로. 지우는 것보다 낫다.
+        is ArrivalStatus.Unknown -> return status.text
+    }
+    if (timing.at.isBlank()) return what
+    return stringResource(R.string.arrival_at, what, stationLabel(timing.at, network))
+}
+
+@Composable
+private fun ArrivalRow(arrival: Arrival, network: SubwayNetwork) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -123,7 +159,7 @@ private fun ArrivalRow(arrival: Arrival) {
             )
         }
         Text(
-            text = arrival.headsign,
+            text = headsignText(arrival.headsign, network),
             fontFamily = SuitFamily,
             fontWeight = FontWeight.SemiBold,
             fontSize = 12.sp,
@@ -134,13 +170,16 @@ private fun ArrivalRow(arrival: Arrival) {
             modifier = Modifier.weight(1f),
         )
         Text(
-            text = arrival.message,
+            text = timingText(arrival.timing, network),
             fontFamily = SuitFamily,
             fontWeight = FontWeight.Bold,
             fontSize = 11.5.sp,
             lineHeight = 16.sp,
             color = AmColor.Blue,
             maxLines = 1,
+            // 잘릴 때는 잘렸다고 보여야 한다. 그냥 끊기면 `(Yangjae` 처럼 읽혀
+            // 이름이 그런 줄 안다.
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }

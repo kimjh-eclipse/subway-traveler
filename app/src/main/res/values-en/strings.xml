@@ -192,4 +192,16 @@
     <string name="line_gimpo">Gimpo Goldline</string>
     <string name="line_yongin">Yongin EverLine</string>
     <string name="line_uijeongbu">Uijeongbu LRT</string>
+
+    <string name="arrival_bound">To %1$s</string>
+    <string name="arrival_towards">via %1$s</string>
+    <string name="arrival_at">%1$s (%2$s)</string>
+    <string name="arrival_minutes">%1$d min</string>
+    <string name="arrival_stops_away">%1$d stops</string>
+    <string name="arrival_entering">Approaching</string>
+    <string name="arrival_arrived">Arrived</string>
+    <string name="arrival_departed">Departed</string>
+    <string name="arrival_prev_entering">Nearing prev.</string>
+    <string name="arrival_prev_arrived">At prev.</string>
+    <string name="arrival_prev_departed">Left prev.</string>
 </resources>

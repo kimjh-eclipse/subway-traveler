@@ -10,13 +10,18 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 
-/** 한 역에 곧 들어올 열차 하나. */
+/**
+ * 한 역에 곧 들어올 열차 하나.
+ *
+ * API가 주는 한국어 문장을 그대로 담지 않고 [parseHeadsign]·[parseArrivalMessage]로
+ * 뜯어 둔다. 담긴 역 이름은 한국어 그대로이고, 화면이 이름표로 바꿔 보여준다.
+ */
 data class Arrival(
     val line: String,
-    /** "성수행 - 삼성방면" */
-    val headsign: String,
-    /** "전역 도착", "3분 후 (역삼)" 같은 안내 문구. */
-    val message: String,
+    /** `성수행 - 삼성방면`을 뜯은 것. */
+    val headsign: ArrivalHeadsign,
+    /** `전역 도착`, `3분 후 (역삼)`을 뜯은 것. */
+    val timing: ArrivalWhen,
     /** 도착까지 남은 초. 0이면 이미 도착했거나 값이 없다. */
     val seconds: Int,
 )
@@ -155,14 +160,14 @@ object RealtimeArrivals {
     }
 
     private fun Map<String, String>.toArrival(): Arrival {
-        val seconds = this["barvlDt"]?.toIntOrNull() ?: 0
-        // arvlMsg2가 "3분 후 (역삼)"처럼 이미 사람이 읽을 문구다. 비면 위치로 대신한다.
-        val message = this["arvlMsg2"].orEmpty().ifBlank { this["arvlMsg3"].orEmpty() }
+        // arvlMsg3은 열차가 지금 있는 역이다. arvlMsg2에 괄호가 없을 때 자리를 메운다.
+        val position = this["arvlMsg3"].orEmpty().trim()
+        val message = this["arvlMsg2"].orEmpty().ifBlank { position }
         return Arrival(
             line = subwayName(this["subwayId"].orEmpty()),
-            headsign = this["trainLineNm"].orEmpty(),
-            message = message,
-            seconds = seconds,
+            headsign = parseHeadsign(this["trainLineNm"].orEmpty()),
+            timing = parseArrivalMessage(message, position),
+            seconds = this["barvlDt"]?.toIntOrNull() ?: 0,
         )
     }
 

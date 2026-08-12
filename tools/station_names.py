@@ -63,6 +63,16 @@ ENGLISH_OVERRIDES = {
     "일원": "Irwon",
     "답십리": "Dapsimni",
 }
+
+# 출처로는 메울 수 없는 자리. 규칙이 아니라 사실이라 손으로 적는다.
+#
+#   뚝섬유원지 — OSM 에 역 노드가 없다(`뚝섬`만 있다). 실시간 도착에는 나온다.
+#   자양       — OSM 노드에 달린 wikidata 가 이웃 뚝섬유원지를 가리켜, 중국어가
+#                `纛岛游园地`(뚝섬유원지)로 들어왔다.
+MANUAL = {
+    "뚝섬유원지": {"e": "Ttukseom Resort", "j": "トゥクソムユウォンジ(纛島遊園地)", "zh": "纛島遊園地"},
+    "자양": {"e": "Jayang", "j": "チャヤン(紫陽)", "zh": "紫陽"},
+}
 # `シンチョン(新村)[国鉄駅]` 처럼 뒤에 붙는 구분용 꼬리표.
 DISAMBIGUATION = re.compile(r"[\[［][^\]］]*[\]］]")
 
@@ -159,11 +169,18 @@ def main():
     osm = index_by_name(fetch_osm())
     stations = json.loads(NETWORK.read_text(encoding="utf-8"))["stations"]
 
+    # 노선망에 있는 역 + 실시간 API가 언급하는 역. 뚝섬유원지처럼 우리 노선망에는
+    # 없는데 도착 정보에는 나오는 역이 있다 — 그 이름이 한국어로 남으면, 화면을
+    # 영어로 보다가 거기서만 읽을 수 없게 된다.
+    wanted = [station["n"] for station in stations]
+    wanted += [name for name in osm if name not in {normalise(w) for w in wanted}]
+
     rows, pending = {}, []
-    for station in stations:
-        tags = osm.get(normalise(station["n"]))
+    for name in wanted:
+        tags = osm.get(normalise(name))
         if not tags:
             continue
+        station = {"n": name}
         japanese = tidy_japanese(tags.get("name:ja"))
         rows[station["n"]] = {
             "e": ENGLISH_OVERRIDES.get(station["n"], tags.get("name:en")),
@@ -175,6 +192,10 @@ def main():
         }
         if not rows[station["n"]]["zh"] and tags.get("wikidata"):
             pending.append((station["n"], tags["wikidata"]))
+
+    for name, fixed in MANUAL.items():
+        rows[name] = dict(fixed, hanja=None)
+        pending = [p for p in pending if p[0] != name]
 
     print(f"위키데이터로 메울 역 {len(pending)}개…")
     labels = wikidata_labels([qid for _, qid in pending])
