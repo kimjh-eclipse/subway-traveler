@@ -134,7 +134,6 @@ enum class DraftProblem {
     TOO_FEW_STOPS,
     BLANK_STOP_NAME,
     BLANK_LINE,
-    PAST_MIDNIGHT,
 }
 
 data class DraftValidation(
@@ -173,11 +172,6 @@ fun RouteDraft.validate(network: SubwayNetwork = SubwayNetwork()): DraftValidati
             else -> null
         }
         if (problem != null) stopErrors[stop.id] = problem
-    }
-
-    if (stops.size >= 2 && stopErrors.isEmpty()) {
-        val end = schedule(network).last().departure
-        if (end.minuteOfDay >= 24 * 60) messages += DraftProblem.PAST_MIDNIGHT
     }
 
     return DraftValidation(messages, stopErrors)

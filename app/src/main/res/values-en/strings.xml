@@ -121,7 +121,6 @@
     <string name="invalid_too_few_stops">Add at least one stop.</string>
     <string name="invalid_blank_name">Enter a station or place name.</string>
     <string name="invalid_blank_line">Enter the line you took to get here.</string>
-    <string name="invalid_past_midnight">The day runs past midnight. Try trimming some time.</string>
 
     <string name="nearby_food_query">restaurants</string>
 
@@ -154,6 +153,9 @@
     <string name="schedule_empty">No timetable for this leg.</string>
     <string name="schedule_after_last">No trains after this time.</string>
 
+    <string name="lastrain_save_anyway">Save anyway</string>
+    <string name="lastrain_fix">Go back</string>
+    <string name="lastrain_checking">Checking last trains…</string>
     <string name="lastrain_action">Last train</string>
     <string name="lastrain_note">Check whether this plan misses the last train.</string>
     <string name="lastrain_loading">Checking last trains…</string>

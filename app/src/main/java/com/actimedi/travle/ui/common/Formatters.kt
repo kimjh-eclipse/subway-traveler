@@ -41,6 +41,5 @@ fun problemText(problem: DraftProblem): String = stringResource(
         DraftProblem.TOO_FEW_STOPS -> R.string.invalid_too_few_stops
         DraftProblem.BLANK_STOP_NAME -> R.string.invalid_blank_name
         DraftProblem.BLANK_LINE -> R.string.invalid_blank_line
-        DraftProblem.PAST_MIDNIGHT -> R.string.invalid_past_midnight
     },
 )

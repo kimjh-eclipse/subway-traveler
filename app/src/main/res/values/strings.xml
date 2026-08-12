@@ -131,7 +131,6 @@
     <string name="invalid_too_few_stops">경유지를 1곳 이상 추가하세요.</string>
     <string name="invalid_blank_name">역·장소 이름을 입력하세요.</string>
     <string name="invalid_blank_line">여기까지 타고 온 노선을 입력하세요.</string>
-    <string name="invalid_past_midnight">일정이 자정을 넘습니다. 시간을 줄여 보세요.</string>
 
     <!-- 지도 앱 검색어 -->
     <string name="nearby_food_query">맛집</string>
@@ -165,6 +164,9 @@
     <string name="schedule_empty">이 구간의 시간표가 없습니다.</string>
     <string name="schedule_after_last">이 시각 이후 열차가 없습니다.</string>
 
+    <string name="lastrain_save_anyway">그대로 저장</string>
+    <string name="lastrain_fix">고치기</string>
+    <string name="lastrain_checking">막차 확인 중…</string>
     <string name="lastrain_action">막차 확인</string>
     <string name="lastrain_note">이 일정으로 막차를 놓치는지 봅니다.</string>
     <string name="lastrain_loading">막차 확인 중…</string>

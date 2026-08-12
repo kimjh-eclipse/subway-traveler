@@ -127,7 +127,6 @@
     <string name="invalid_too_few_stops">請至少加入 1 個停靠點。</string>
     <string name="invalid_blank_name">請輸入車站或地點名稱。</string>
     <string name="invalid_blank_line">請輸入乘搭到這裡的路線。</string>
-    <string name="invalid_past_midnight">行程超過凌晨零時。請縮短時間。</string>
 
     <string name="nearby_food_query">餐廳</string>
 
@@ -162,6 +161,9 @@
     <string name="schedule_empty">這段路沒有時間表。</string>
     <string name="schedule_after_last">這個時間之後沒有列車。</string>
 
+    <string name="lastrain_save_anyway">仍然儲存</string>
+    <string name="lastrain_fix">去修改</string>
+    <string name="lastrain_checking">正在查尾班車…</string>
     <string name="lastrain_action">尾班車</string>
     <string name="lastrain_note">看看這個行程會不會趕不上尾班車。</string>
     <string name="lastrain_loading">正在查尾班車…</string>

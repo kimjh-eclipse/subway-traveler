@@ -116,13 +116,15 @@ class RouteDraftTest {
             blankLine.validate(network).stopErrors[blankLine.stops[1].id],
         )
 
-        // 자정을 넘기면 막는다.
-        val tooLong = draft.copy(
+        // 자정을 넘는다고 막지는 않는다. 2호선·신분당선은 24시 이후에도 다니고,
+        // 반대로 자정 전에 끝나도 막차를 놓치는 일정이 있다 — 시각만 보는 규칙으로는
+        // 둘 다 틀린다. 실제 막차 판단은 checkLastTrain이 시간표를 보고 한다.
+        val pastMidnight = draft.copy(
             stops = draft.stops.mapIndexed { i, s ->
                 if (i == 2) s.copy(pauseMinutes = 20 * 60) else s
             },
         )
-        assertFalse(tooLong.validate(network).isValid)
+        assertTrue(pastMidnight.validate(network).isValid)
     }
 
     @Test

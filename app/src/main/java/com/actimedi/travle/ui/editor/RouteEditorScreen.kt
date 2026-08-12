@@ -54,6 +54,7 @@ import androidx.compose.ui.res.stringResource
 import com.actimedi.travle.R
 import com.actimedi.travle.data.ClockTime
 import com.actimedi.travle.data.RouteDraft
+import com.actimedi.travle.data.DayType
 import com.actimedi.travle.data.DraftProblem
 import com.actimedi.travle.data.RouteStop
 import com.actimedi.travle.data.ScheduledStop
@@ -81,6 +82,9 @@ import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.foundation.lazy.rememberLazyListState
 import kotlinx.coroutines.delay
+import com.actimedi.travle.data.LastTrainCheck
+import com.actimedi.travle.data.SeoulTimetable
+import com.actimedi.travle.data.checkLastTrain
 
 @Composable
 fun RouteEditorScreen(
@@ -97,6 +101,9 @@ fun RouteEditorScreen(
     var searchStopId by remember { mutableStateOf<String?>(null) }
     // 저장을 눌렀는데 막혔을 때 무엇이 막고 있는지. 고쳐지면 저절로 사라진다.
     var blocked by remember { mutableStateOf<DraftProblem?>(null) }
+    // 저장을 누른 뒤 막차를 따져보는 동안, 그리고 그 결과 발이 묶이는 계획일 때.
+    var isCheckingLastTrain by remember { mutableStateOf(false) }
+    var lastTrainWarning by remember { mutableStateOf<LastTrainCheck?>(null) }
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     val validation = draft.validate(network)
@@ -236,11 +243,26 @@ fun RouteEditorScreen(
                 R.string.editor_title_edit
             },
             canSave = validation.isValid,
+            isBusy = isCheckingLastTrain,
             onCancel = onCancel,
             onSave = {
                 val problem = validation.firstProblem(draft.stops)
                 if (problem == null) {
-                    onSave(draft)
+                    // 낮에 끝나는 일정은 막차와 무관하다 — 저장할 때마다 망을 탈 이유가 없다.
+                    val endsLate = (scheduled.lastOrNull()?.arrival?.minuteOfDay ?: 0) >= LateEnough
+                    if (!endsLate) {
+                        onSave(draft)
+                    } else {
+                        isCheckingLastTrain = true
+                        scope.launch {
+                            val source = SeoulTimetable.shared
+                            source.prefetch(draft, DayType.of(draft.dayOfWeek))
+                            val check = draft.checkLastTrain(network, source)
+                            isCheckingLastTrain = false
+                            // 자료를 못 받았으면 붙잡지 않는다. 확인 못 한 것과 문제인 것은 다르다.
+                            if (check.broken != null) lastTrainWarning = check else onSave(draft)
+                        }
+                    }
                 } else {
                     // 회색 버튼이 아무 반응도 없으면 고장으로 읽힌다. 무엇이 막는지
                     // 말해 주고, 고칠 자리로 데려다 놓는다.
@@ -254,6 +276,7 @@ fun RouteEditorScreen(
         )
         HorizontalDivider(color = AmColor.Line, thickness = 1.dp)
         blocked?.takeIf { !validation.isValid }?.let { BlockedBanner(problemText(it)) }
+        if (isCheckingLastTrain) BlockedBanner(stringResource(R.string.lastrain_checking))
 
         LazyColumn(
             state = listState,
@@ -357,6 +380,38 @@ fun RouteEditorScreen(
         }
     }
 
+    lastTrainWarning?.broken?.let { broken ->
+        AlertDialog(
+            onDismissRequest = { lastTrainWarning = null },
+            title = { Text(stringResource(R.string.lastrain_title), fontFamily = SuitFamily) },
+            text = {
+                Text(
+                    text = stringResource(
+                        R.string.lastrain_broken,
+                        broken.station,
+                        broken.towards,
+                        broken.lastTrain?.format().orEmpty(),
+                        broken.plannedDeparture.format(),
+                    ),
+                    fontFamily = SuitFamily,
+                    fontSize = 13.sp,
+                    lineHeight = 19.sp,
+                )
+            },
+            // 막차를 놓치는 계획도 계획이다. 알려주되 붙잡지는 않는다.
+            confirmButton = {
+                TextButton(onClick = { lastTrainWarning = null; onSave(draft) }) {
+                    Text(stringResource(R.string.lastrain_save_anyway), fontFamily = SuitFamily)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { lastTrainWarning = null }) {
+                    Text(stringResource(R.string.lastrain_fix), fontFamily = SuitFamily)
+                }
+            },
+        )
+    }
+
     if (isPickingStartTime) {
         TimePickerDialog(
             initial = draft.startTime,
@@ -373,6 +428,8 @@ fun RouteEditorScreen(
 private fun EditorTopBar(
     titleRes: Int,
     canSave: Boolean,
+    /** 막차를 따져보는 동안에는 다시 누르지 못하게 한다. */
+    isBusy: Boolean,
     onCancel: () -> Unit,
     onSave: () -> Unit,
 ) {
@@ -412,7 +469,7 @@ private fun EditorTopBar(
                 .clip(CircleShape)
                 .background(if (canSave) AmColor.Blue else RouteColor.TabTrack)
                 // 막혀 있어도 누를 수는 있다 — 눌러야 왜 막혔는지 알려줄 수 있다.
-                .clickable(onClick = onSave)
+                .clickable(enabled = !isBusy, onClick = onSave)
                 .padding(horizontal = 16.dp, vertical = 8.dp),
         )
     }
@@ -1153,3 +1210,12 @@ private fun BlockedBanner(text: String) {
 
 /** 타이핑이 멎었다고 보는 시간. 짧으면 치는 중에 끼어들고, 길면 답답하다. */
 private const val TypingSettleMs = 900L
+
+/**
+ * 이 시각 이후에 끝나는 일정만 막차를 따져본다.
+ *
+ * 낮에 끝나는 계획은 어떤 노선도 막차가 지나지 않았다. 저장할 때마다 망을 타는 값이
+ * 아깝고, 무엇보다 기다릴 이유가 없다. 21시로 잡은 것은 수도권에서 막차가 가장 이른
+ * 축인 경의중앙선 용문·지평 방면과 공항철도 인천공항 방면이 22시대이기 때문이다.
+ */
+private const val LateEnough = 21 * 60

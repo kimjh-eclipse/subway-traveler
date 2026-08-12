@@ -121,7 +121,6 @@
     <string name="invalid_too_few_stops">停車地を1か所以上追加してください。</string>
     <string name="invalid_blank_name">駅・場所の名前を入力してください。</string>
     <string name="invalid_blank_line">ここまで乗ってきた路線を入力してください。</string>
-    <string name="invalid_past_midnight">予定が深夜0時を過ぎます。時間を減らしてみてください。</string>
 
     <string name="nearby_food_query">グルメ</string>
 
@@ -154,6 +153,9 @@
     <string name="schedule_empty">この区間の時刻表がありません。</string>
     <string name="schedule_after_last">この時刻以降の列車はありません。</string>
 
+    <string name="lastrain_save_anyway">このまま保存</string>
+    <string name="lastrain_fix">直す</string>
+    <string name="lastrain_checking">終電を確認中…</string>
     <string name="lastrain_action">終電を確認</string>
     <string name="lastrain_note">この予定で終電を逃さないか調べます。</string>
     <string name="lastrain_loading">終電を確認中…</string>
