@@ -102,6 +102,9 @@
     <string name="header_departure">%1$s 出發</string>
     <string name="finish_arrival">%1$s · 到達 %2$s</string>
     <string name="finish_counts">轉乘 %1$d 次 · 乘車 %2$d 段 · 停留 %3$d 處</string>
+    <string name="transfer_cars">%1$s 下車 → %2$s 上車</string>
+    <string name="transfer_walk">轉乘需 %1$s</string>
+    <string name="transfer_source">首爾交通公社 轉乘指引</string>
     <string name="transfer_chip">轉乘</string>
     <string name="transfer_chip_at">在 %1$s 轉乘</string>
     <string name="wait_chip">轉乘等候 %1$d 分鐘</string>

@@ -55,6 +55,7 @@ import com.actimedi.travle.ui.common.ArrivalsPanel
 import com.actimedi.travle.ui.common.stationLabel
 import com.actimedi.travle.ui.common.lineLabel
 import com.actimedi.travle.ui.common.SchedulePanel
+import com.actimedi.travle.ui.common.TransferGuide
 import com.actimedi.travle.ui.common.durationText
 import com.actimedi.travle.data.SubwayNetwork
 import com.actimedi.travle.data.TimelineEntry
@@ -468,8 +469,21 @@ private fun TransferWait(
         )
         if (!known || !expanded) return@Column
 
-        Spacer(Modifier.height(8.dp))
+        // 어느 칸에서 내려 어디로 갈아탈지. 망이 없어도 나온다 — 자산에 실려 있다.
         val ride = entry.segment as? RouteSegment.Move
+        if (ride != null && entry.arrivedOnLine != null && entry.arrivedFrom != null) {
+            Spacer(Modifier.height(8.dp))
+            TransferGuide(
+                station = station!!,
+                fromLine = entry.arrivedOnLine,
+                fromStation = entry.arrivedFrom,
+                toLine = ride.line,
+                toStation = ride.destination,
+                network = network,
+            )
+        }
+
+        Spacer(Modifier.height(8.dp))
         when {
             live -> ArrivalsPanel(stationName = station!!, network = network, live = true)
             // 갈아타고 어디로 가는지 알아야 시간표에서 방향을 고를 수 있다.

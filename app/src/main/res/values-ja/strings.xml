@@ -97,6 +97,9 @@
     <string name="header_departure">%1$s 出発</string>
     <string name="finish_arrival">%1$s · %2$s 到着</string>
     <string name="finish_counts">乗換 %1$d回 · 乗車 %2$d区間 · 滞在 %3$dか所</string>
+    <string name="transfer_cars">%1$s で下車 → %2$s で乗車</string>
+    <string name="transfer_walk">乗換に %1$s</string>
+    <string name="transfer_source">ソウル交通公社 乗換案内</string>
     <string name="transfer_chip">乗換</string>
     <string name="transfer_chip_at">%1$s で乗換</string>
     <string name="wait_chip">乗換待ち %1$d分</string>

@@ -97,6 +97,9 @@
     <string name="header_departure">%1$s 出发</string>
     <string name="finish_arrival">%1$s · 到达 %2$s</string>
     <string name="finish_counts">换乘 %1$d 次 · 乘车 %2$d 段 · 停留 %3$d 处</string>
+    <string name="transfer_cars">%1$s 下车 → %2$s 上车</string>
+    <string name="transfer_walk">换乘需 %1$s</string>
+    <string name="transfer_source">首尔交通公社 换乘指引</string>
     <string name="transfer_chip">换乘</string>
     <string name="transfer_chip_at">在 %1$s 换乘</string>
     <string name="wait_chip">换乘等待 %1$d 分钟</string>

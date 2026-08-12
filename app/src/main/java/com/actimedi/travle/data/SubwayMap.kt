@@ -201,6 +201,24 @@ data class SubwayNetwork(
         return null
     }
 
+    /**
+     * [throughIndex]를 지나 계속 갈 때 그다음 역.
+     *
+     * 환승 안내가 방향을 '어느 역 방면'으로 적는데, 우리가 아는 것은 어디서 왔는가다.
+     * 타고 온 방향 그대로 한 정거장 더 간 곳이 곧 그 방면이다. 종착역이면 null.
+     */
+    fun stationBeyond(lineName: String, fromIndex: Int, throughIndex: Int): Int? {
+        val line = lines.firstOrNull { it.name == normalizeLineName(lineName) } ?: return null
+        for (path in line.paths) {
+            val a = path.indexOf(fromIndex)
+            val b = path.indexOf(throughIndex)
+            if (a < 0 || b < 0 || a == b) continue
+            val next = if (b > a) b + 1 else b - 1
+            return path.getOrNull(next)
+        }
+        return null
+    }
+
     fun lineColour(lineName: String): String? =
         lines.firstOrNull { it.name == normalizeLineName(lineName) }?.colour
 

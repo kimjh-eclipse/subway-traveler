@@ -147,12 +147,30 @@ data class TimelineEntry(
      * 여행 중에는 그 자리에서 다음 열차를 봐야 하기 때문이다. 갈아타지 않으면 null.
      */
     val transferStation: String? = null,
+    /**
+     * 타고 온 노선과 그 열차를 탄 곳. 환승 안내가 방향별이라 둘 다 있어야 한다 —
+     * 같은 역이라도 어느 쪽에서 왔느냐에 따라 내릴 칸이 갈린다.
+     */
+    val arrivedOnLine: String? = null,
+    val arrivedFrom: String? = null,
     /** Elapsed time from the start of the day to the end of this segment. */
     val cumulativeMinutes: Int,
 )
 
 /** Expands a route into rows, resolving transfer waits and running totals. */
-fun Route.toTimeline(): List<TimelineEntry> = segments.mapIndexed { index, segment ->
+fun Route.toTimeline(): List<TimelineEntry> {
+    // 각 구간을 떠난 자리를 따라간다. 갈아탈 때 '어디서 왔는가'가 방향이 된다.
+    val leftFrom = mutableListOf<String>()
+    var place = origin
+    segments.forEach { segment ->
+        leftFrom += place
+        place = when (segment) {
+            is RouteSegment.Move -> segment.destination
+            is RouteSegment.Stay -> segment.place
+        }
+    }
+
+    return segments.mapIndexed { index, segment ->
     val previous = segments.getOrNull(index - 1)
     val isTransfer = previous is RouteSegment.Move && segment is RouteSegment.Move
     val wait = if (isTransfer) {
@@ -165,8 +183,11 @@ fun Route.toTimeline(): List<TimelineEntry> = segments.mapIndexed { index, segme
         segment = segment,
         transferWaitMinutes = wait,
         transferStation = if (isTransfer) (previous as RouteSegment.Move).destination else null,
+        arrivedOnLine = (previous as? RouteSegment.Move)?.line,
+        arrivedFrom = leftFrom.getOrNull(index - 1),
         cumulativeMinutes = segment.end - startTime,
     )
+    }
 }
 
 fun List<TimelineEntry>.filterBy(filter: RouteFilter): List<TimelineEntry> = when (filter) {
