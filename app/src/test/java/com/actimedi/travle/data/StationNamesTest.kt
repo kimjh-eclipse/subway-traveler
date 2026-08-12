@@ -63,3 +63,59 @@ class StationNamesTest {
         assertFalse(Locale.forLanguageTag("zh-SG").isTraditionalChinese())
     }
 }
+
+/**
+ * 다른 나라 표기로 역을 찾는 것. 영어로 앱을 쓰는 사람에게는 `Gangnam`이 그 역의
+ * 이름이지, `강남`을 칠 방법이 없다 — 자판부터 없다.
+ */
+class ForeignSuggestTest {
+
+    private val network = SubwayNetwork(
+        stations = listOf(
+            SubwayStation("강남", 37.49, 127.02, listOf("2호선")),
+            SubwayStation("강남구청", 37.51, 127.04, listOf("7호선")),
+            SubwayStation("노원", 37.65, 127.06, listOf("4호선")),
+        ),
+        stationNames = StationNameTable(
+            names = mapOf(
+                "강남" to StationName("Gangnam", "カンナム(江南)", "江南"),
+                "강남구청" to StationName("Gangnam-gu Office", "カンナムクチョン", "江南区厅"),
+                "노원" to StationName("Nowon", "ノウォン(盧原)", "芦原", "蘆原"),
+            ),
+        ),
+    )
+
+    @Test
+    fun `영문으로 찾는다`() {
+        assertEquals(listOf("강남", "강남구청"), network.suggest("Gangnam").map { it.name })
+        assertEquals(listOf("노원"), network.suggest("nowon").map { it.name })
+    }
+
+    @Test
+    fun `대소문자를 가리지 않는다`() {
+        assertEquals("강남", network.suggest("GANGNAM").first().name)
+        assertEquals("강남", network.suggest("gangnam").first().name)
+    }
+
+    @Test
+    fun `일본어와 중국어로도 찾는다`() {
+        assertEquals("노원", network.suggest("ノウォン").first().name)
+        assertEquals("노원", network.suggest("芦原").first().name)
+        // 번체로 쳐도 같은 역이 나온다.
+        assertEquals("노원", network.suggest("蘆原").first().name)
+    }
+
+    @Test
+    fun `한국어로 정확히 맞은 역이 앞에 온다`() {
+        // `강남`은 한국어 완전 일치라 영문 완전 일치인 자기 자신보다 앞선다는 뜻이
+        // 아니라, 부분 일치한 강남구청보다 앞선다는 뜻이다.
+        assertEquals("강남", network.suggest("강남").first().name)
+    }
+
+    @Test
+    fun `이름표가 없으면 한국어 검색만 한다`() {
+        val bare = SubwayNetwork(stations = network.stations)
+        assertEquals(emptyList<String>(), bare.suggest("Gangnam").map { it.name })
+        assertEquals(listOf("강남", "강남구청"), bare.suggest("강남").map { it.name })
+    }
+}

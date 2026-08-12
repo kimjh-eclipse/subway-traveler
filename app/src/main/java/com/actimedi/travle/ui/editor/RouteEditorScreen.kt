@@ -85,6 +85,8 @@ import kotlinx.coroutines.delay
 import com.actimedi.travle.data.LastTrainCheck
 import com.actimedi.travle.data.SeoulTimetable
 import com.actimedi.travle.data.checkLastTrain
+import com.actimedi.travle.ui.common.lineLabel
+import com.actimedi.travle.ui.common.stationLabel
 
 @Composable
 fun RouteEditorScreen(
@@ -709,8 +711,23 @@ private fun StationNameField(
                             fontSize = 13.5.sp,
                             color = AmColor.Black,
                         )
+                        // 읽을 수 있는 이름을 나란히 둔다. 넣는 값은 한국어 이름이지만
+                        // 목록에서 역을 알아보려면 자기 언어로 읽혀야 한다.
+                        val reading = stationLabel(station.name, network)
+                        val lines = station.lines.map { lineLabel(it) }.joinToString(" · ")
+                        if (reading != station.name) {
+                            Text(
+                                text = reading,
+                                fontFamily = SuitFamily,
+                                fontWeight = FontWeight.Medium,
+                                fontSize = 12.sp,
+                                color = AmColor.Blue,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
                         Text(
-                            text = station.lines.joinToString(" · "),
+                            text = lines,
                             fontFamily = SuitFamily,
                             fontWeight = FontWeight.Medium,
                             fontSize = 11.sp,

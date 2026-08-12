@@ -85,6 +85,25 @@ data class SubwayNetwork(
     private val choseong: List<String> by lazy { stations.map { choseongOf(it.name) } }
 
     /**
+     * 역마다 붙은 다른 나라 표기를, 견주기 좋게 소문자로.
+     *
+     * 이름표가 없으면 (한국어로 보는 흔한 경우) 통째로 비어 아무 값도 만들지 않는다.
+     */
+    private val foreignNames: List<List<String>> by lazy {
+        if (stationNames.isEmpty) {
+            emptyList()
+        } else {
+            stations.map { station ->
+                stationNames.names[station.name]
+                    ?.let { listOfNotNull(it.english, it.japanese, it.simplified, it.traditional) }
+                    ?.map { it.lowercase() }
+                    ?.distinct()
+                    .orEmpty()
+            }
+        }
+    }
+
+    /**
      * Resolves a name typed by the user, or stored on a route, to a station.
      *
      * Route data says 미금역 / 강남역 while OSM says 미금 / 강남 — but Seoul Station
@@ -113,6 +132,9 @@ data class SubwayNetwork(
     /**
      * Autocomplete. Matches on the name itself or, when the query is nothing but
      * initial consonants (ㄱㄴ → 강남), on the station's 초성.
+     *
+     * 다른 나라 표기로도 찾는다. 영어로 앱을 쓰는 사람에게는 `Gangnam`이 그 역의
+     * 이름이지, `강남`을 칠 방법이 없다 — 자판부터 없다.
      */
     fun suggest(query: String, limit: Int = 6): List<SubwayStation> {
         val q = query.trim()
@@ -128,15 +150,10 @@ data class SubwayNetwork(
                 }
             }
         } else {
+            val lower = q.lowercase()
             stations.indices.mapNotNull { i ->
-                val name = stations[i].name
-                when {
-                    name == q -> 0 to i
-                    name.startsWith(q) -> 1 to i
-                    name.contains(q) -> 2 to i
-                    choseong[i].startsWith(choseongOf(q)) -> 3 to i
-                    else -> null
-                }
+                val rank = minOf(rankKorean(i, q), rankForeign(i, lower))
+                if (rank == NoMatch) null else rank to i
             }
         }
 
@@ -144,6 +161,28 @@ data class SubwayNetwork(
             .sortedWith(compareBy({ it.first }, { stations[it.second].name.length }))
             .take(limit)
             .map { stations[it.second] }
+    }
+
+    private fun rankKorean(index: Int, q: String): Int {
+        val name = stations[index].name
+        return when {
+            name == q -> 0
+            name.startsWith(q) -> 1
+            name.contains(q) -> 2
+            choseong[index].startsWith(choseongOf(q)) -> 3
+            else -> NoMatch
+        }
+    }
+
+    /** 한국어보다 한 칸씩 뒤에 둔다 — 한국어로 정확히 맞은 역이 먼저 보여야 한다. */
+    private fun rankForeign(index: Int, lower: String): Int {
+        val names = foreignNames.getOrNull(index) ?: return NoMatch
+        return when {
+            names.any { it == lower } -> 1
+            names.any { it.startsWith(lower) } -> 2
+            names.any { it.contains(lower) } -> 4
+            else -> NoMatch
+        }
     }
 
     /**
@@ -237,3 +276,6 @@ object SubwayNetworkLoader {
     }.onFailure { Log.w("SubwayNetwork", "노선도 데이터를 읽지 못했습니다", it) }
         .getOrDefault(SubwayNetwork())
 }
+
+/** 자동완성에서 '맞지 않음'. 작은 값이 앞이라 어떤 순위보다도 뒤에 있어야 한다. */
+private const val NoMatch = Int.MAX_VALUE
