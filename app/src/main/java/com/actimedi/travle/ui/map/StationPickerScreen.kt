@@ -42,6 +42,10 @@ import com.actimedi.travle.ui.theme.RouteColor
 import com.actimedi.travle.ui.theme.SuitFamily
 import com.actimedi.travle.ui.theme.SuiteFamily
 import com.actimedi.travle.ui.theme.lineColorFor
+import com.actimedi.travle.data.SchematicMapLoader
+import com.actimedi.travle.data.MapStyle
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.platform.LocalContext
 
 /**
  * How much tighter than a whole-network fit the picker opens.
@@ -70,7 +74,14 @@ fun StationPickerScreen(
 ) {
     BackHandler(onBack = onCancel)
 
-    val projected = remember(network) { projectStations(network) }
+    val context = LocalContext.current
+    val schematic = remember(context) { SchematicMapLoader.load(context) }
+    // 노선도 화면과 같이 도식이 기본이다. 역을 겨냥하기에도 도식이 낫다 —
+    // 지리로 그리면 도심에서 역이 뭉쳐 손가락으로 집기 어렵다.
+    var style by rememberSaveable { mutableStateOf(MapStyle.SCHEMATIC) }
+    val projected = remember(network, schematic, style) {
+        projectStations(network, schematic, style)
+    }
     val camera = rememberMapCameraState()
     var selected by remember { mutableStateOf(initialStation?.let { network.findStation(it) }) }
     var chosenLine by remember { mutableStateOf<String?>(null) }
@@ -78,7 +89,7 @@ fun StationPickerScreen(
     // Open zoomed in near the station being worked on. Framing the whole network
     // leaves the stations too small to aim at. Deliberately not keyed on
     // `selected`, so tapping around does not yank the camera back.
-    LaunchedEffect(camera.viewport, projected) {
+    LaunchedEffect(camera.viewport, projected, style) {
         if (projected.isEmpty()) return@LaunchedEffect
         val whole = boundsOf(projected)
         val focus = initialStation?.let { network.findStation(it) }
@@ -144,12 +155,38 @@ fun StationPickerScreen(
                     chosenLine = null
                 },
             )
-            Box(modifier = Modifier.align(Alignment.BottomStart).padding(16.dp)) {
+            Column(
+                modifier = Modifier.align(Alignment.BottomStart).padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 MapChip(stringResource(R.string.map_whole)) { camera.frame(boundsOf(projected)) }
+                // 도식에 자리가 없는 역이 여섯 곳 있다. 그 역을 고르려면 지리로 넘어가야 한다.
+                MapChip(
+                    if (style == MapStyle.SCHEMATIC) {
+                        stringResource(R.string.map_geographic)
+                    } else {
+                        stringResource(R.string.map_schematic)
+                    },
+                ) {
+                    style = if (style == MapStyle.SCHEMATIC) {
+                        MapStyle.GEOGRAPHIC
+                    } else {
+                        MapStyle.SCHEMATIC
+                    }
+                }
             }
             Attribution(
-                text = network.source,
-                modifier = Modifier.align(Alignment.BottomEnd).padding(12.dp),
+                // 구석에는 짧게 — 온전한 출처는 설정의 '도식 노선도' 항목에 있다.
+                text = if (style == MapStyle.SCHEMATIC && !schematic.isEmpty) {
+                    stringResource(R.string.map_credit_schematic)
+                } else {
+                    network.source
+                },
+                // 출처가 길어 두 줄로 넘치면 왼쪽 칩을 덮는다. 반쪽만 쓰게 묶어 둔다.
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .fillMaxWidth(0.55f)
+                    .padding(12.dp),
             )
         }
 

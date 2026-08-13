@@ -135,6 +135,10 @@
         <item>金曜日</item><item>土曜日</item><item>日曜日</item>
     </string-array>
     <string name="line_needs_transfer">直通の路線がありません。乗り換えが必要な区間なので、ルート検索から埋めてください。</string>
+    <string name="about_schematic_title">路線図（模式）</string>
+    <string name="about_schematic_body">Sinseiki/opensource-seoul-subway-map · MIT
+駅の位置だけがこの資料から来ており、路線のつながりは OpenStreetMap に従います。670駅を収録。</string>
+    <string name="map_credit_schematic">© Sinseiki (MIT) · © OpenStreetMap (ODbL)</string>
     <string name="about_network_title">路線データ</string>
     <string name="about_network_body">© OpenStreetMap contributors · ODbL 1.0
 首都圏676駅、24路線。</string>

@@ -58,6 +58,11 @@ fun AboutScreen(modifier: Modifier = Modifier) {
         )
         Spacer(Modifier.height(10.dp))
         SourceCard(
+            title = stringResource(R.string.about_schematic_title),
+            body = stringResource(R.string.about_schematic_body),
+        )
+        Spacer(Modifier.height(10.dp))
+        SourceCard(
             title = stringResource(R.string.about_times_title),
             body = stringResource(R.string.about_times_body),
         )

@@ -146,6 +146,10 @@
         <item>금요일</item><item>토요일</item><item>일요일</item>
     </string-array>
     <string name="line_needs_transfer">직결 노선이 없습니다. 갈아타야 하는 구간이니 길찾기로 채워 보세요.</string>
+    <string name="about_schematic_title">도식 노선도</string>
+    <string name="about_schematic_body">Sinseiki/opensource-seoul-subway-map · MIT
+역 자리만 이 자료에서 오고, 노선 연결은 OpenStreetMap을 따릅니다. 670개 역의 자리를 담았습니다.</string>
+    <string name="map_credit_schematic">© Sinseiki (MIT) · © OpenStreetMap (ODbL)</string>
     <string name="about_network_title">노선도 데이터</string>
     <string name="about_network_body">© OpenStreetMap contributors · ODbL 1.0
 수도권 676개 역, 24개 노선.</string>

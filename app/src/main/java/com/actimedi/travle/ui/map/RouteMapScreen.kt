@@ -112,12 +112,17 @@ fun RouteMapScreen(
             Attribution(
                 // 도식일 때는 자리가 다른 자료에서 온다. 어느 쪽 것을 보고 있는지에
                 // 따라 출처도 바뀌어야 한다 — 둘 다 출처표시가 조건인 라이선스다.
+                // 구석에는 짧게 — 온전한 출처는 설정의 '도식 노선도' 항목에 있다.
                 text = if (style == MapStyle.SCHEMATIC && !schematic.isEmpty) {
-                    "${schematic.source} · ${network.source}"
+                    stringResource(R.string.map_credit_schematic)
                 } else {
                     network.source
                 },
-                modifier = Modifier.align(Alignment.BottomEnd).padding(12.dp),
+                // 출처가 길어 두 줄로 넘치면 왼쪽 칩을 덮는다. 반쪽만 쓰게 묶어 둔다.
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .fillMaxWidth(0.55f)
+                    .padding(12.dp),
             )
 
         }

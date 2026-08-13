@@ -142,6 +142,10 @@
     </string-array>
 
     <string name="line_needs_transfer">沒有直達路線。這段需要轉乘，請用尋找路線填寫。</string>
+    <string name="about_schematic_title">示意圖路線圖</string>
+    <string name="about_schematic_body">Sinseiki/opensource-seoul-subway-map · MIT
+僅車站位置來自該資料，路線連接仍依據 OpenStreetMap。收錄 670 個車站。</string>
+    <string name="map_credit_schematic">© Sinseiki (MIT) · © OpenStreetMap (ODbL)</string>
     <string name="about_network_title">路線圖資料</string>
     <string name="about_network_body">© OpenStreetMap contributors · ODbL 1.0
 首都圈 676 個車站，24 條路線。</string>
