@@ -110,7 +110,13 @@ fun RouteMapScreen(
             }
 
             Attribution(
-                text = network.source,
+                // 도식일 때는 자리가 다른 자료에서 온다. 어느 쪽 것을 보고 있는지에
+                // 따라 출처도 바뀌어야 한다 — 둘 다 출처표시가 조건인 라이선스다.
+                text = if (style == MapStyle.SCHEMATIC && !schematic.isEmpty) {
+                    "${schematic.source} · ${network.source}"
+                } else {
+                    network.source
+                },
                 modifier = Modifier.align(Alignment.BottomEnd).padding(12.dp),
             )
 
