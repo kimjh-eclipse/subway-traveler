@@ -56,9 +56,6 @@ import androidx.compose.ui.platform.LocalContext
  */
 private const val PickerZoomFactor = 8f
 
-/** Where the very first pick starts, before the route has any stations. */
-private const val DefaultFocusStation = "강남"
-
 /**
  * Pick a station by tapping the map.
  *
@@ -99,15 +96,18 @@ fun StationPickerScreen(
     var selected by remember { mutableStateOf(initialStation?.let { network.findStation(it) }) }
     var chosenLine by remember { mutableStateOf<String?>(null) }
 
-    // Open zoomed in near the station being worked on. Framing the whole network
-    // leaves the stations too small to aim at. Deliberately not keyed on
-    // `selected`, so tapping around does not yank the camera back.
+    // Open zoomed in near the station being worked on — the stop's own name first,
+    // then the previous stop on the route. Deliberately not keyed on `selected`,
+    // so tapping around does not yank the camera back.
+    //
+    // 아무 실마리가 없으면(첫 경로의 첫 정거장) 전체 노선도로 연다. 강남을
+    // 기본값으로 두었더니 어디를 고르려던 사람이든 늘 강남부터 보게 됐다 —
+    // 임의의 역을 고르느니 전체를 보여 주고 확대하게 두는 편이 낫다.
     LaunchedEffect(camera.viewport, projected, style) {
         if (projected.isEmpty()) return@LaunchedEffect
         val whole = wholeBounds
         val focus = initialStation?.let { network.findStation(it) }
             ?: focusStation?.let { network.findStation(it) }
-            ?: network.findStation(DefaultFocusStation)
         val at = focus?.let { projected[it] }
         if (at != null) {
             camera.centerOn(at, camera.fitScaleFor(whole) * PickerZoomFactor)
