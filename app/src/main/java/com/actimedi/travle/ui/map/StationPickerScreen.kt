@@ -82,6 +82,13 @@ fun StationPickerScreen(
     val projected = remember(network, schematic, style) {
         projectStations(network, schematic, style)
     }
+    val backdrop = remember(network, schematic, style) {
+        if (style == MapStyle.SCHEMATIC) placeSegments(network, schematic) else emptyList()
+    }
+    // 도식은 역보다 선이 더 멀리 뻗는다 — 선까지 담아야 전체 보기에서 잘리지 않는다.
+    val wholeBounds = remember(projected, backdrop) {
+        boundsOf(projected + backdrop.flatMap { listOf(it.from, it.to) })
+    }
     val camera = rememberMapCameraState()
     var selected by remember { mutableStateOf(initialStation?.let { network.findStation(it) }) }
     var chosenLine by remember { mutableStateOf<String?>(null) }
@@ -91,7 +98,7 @@ fun StationPickerScreen(
     // `selected`, so tapping around does not yank the camera back.
     LaunchedEffect(camera.viewport, projected, style) {
         if (projected.isEmpty()) return@LaunchedEffect
-        val whole = boundsOf(projected)
+        val whole = wholeBounds
         val focus = initialStation?.let { network.findStation(it) }
             ?: focusStation?.let { network.findStation(it) }
             ?: network.findStation(DefaultFocusStation)
@@ -148,6 +155,7 @@ fun StationPickerScreen(
             SubwayMapView(
                 network = network,
                 projected = projected,
+                backdrop = backdrop,
                 camera = camera,
                 selectedStation = selected,
                 onStationTap = {
@@ -159,7 +167,7 @@ fun StationPickerScreen(
                 modifier = Modifier.align(Alignment.BottomStart).padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                MapChip(stringResource(R.string.map_whole)) { camera.frame(boundsOf(projected)) }
+                MapChip(stringResource(R.string.map_whole)) { camera.frame(wholeBounds) }
                 // 도식에 자리가 없는 역이 여섯 곳 있다. 그 역을 고르려면 지리로 넘어가야 한다.
                 MapChip(
                     if (style == MapStyle.SCHEMATIC) {

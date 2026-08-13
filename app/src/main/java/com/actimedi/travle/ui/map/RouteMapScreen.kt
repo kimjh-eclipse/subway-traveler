@@ -62,6 +62,13 @@ fun RouteMapScreen(
     val projected = remember(network, schematic, style) {
         projectStations(network, schematic, style)
     }
+    val backdrop = remember(network, schematic, style) {
+        if (style == MapStyle.SCHEMATIC) placeSegments(network, schematic) else emptyList()
+    }
+    // 도식은 역보다 선이 더 멀리 뻗는다 — 선까지 담아야 전체 보기에서 잘리지 않는다.
+    val wholeBounds = remember(projected, backdrop) {
+        boundsOf(projected + backdrop.flatMap { listOf(it.from, it.to) })
+    }
     val camera = rememberMapCameraState()
 
     val routeBounds = remember(mapped, projected) {
@@ -84,6 +91,7 @@ fun RouteMapScreen(
             SubwayMapView(
                 network = network,
                 projected = projected,
+                backdrop = backdrop,
                 camera = camera,
                 mapped = mapped,
             )
@@ -93,7 +101,7 @@ fun RouteMapScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 MapChip(stringResource(R.string.map_this_route)) { camera.frame(routeBounds) }
-                MapChip(stringResource(R.string.map_whole)) { camera.frame(boundsOf(projected)) }
+                MapChip(stringResource(R.string.map_whole)) { camera.frame(wholeBounds) }
                 MapChip(
                     if (style == MapStyle.SCHEMATIC) {
                         stringResource(R.string.map_geographic)

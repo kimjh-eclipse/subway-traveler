@@ -42,6 +42,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.draw.clipToBounds
 import com.actimedi.travle.data.SchematicMap
 import com.actimedi.travle.data.MapStyle
+import com.actimedi.travle.data.SchematicSegment
 
 const val MinMapScale = 0.35f
 const val MaxMapScale = 40f
@@ -113,6 +114,8 @@ fun SubwayMapView(
      * 그 역에 닿는 선은 그리지 않는다 — 엉뚱한 데 찍느니 비우는 편이 낫다.
      */
     projected: List<Offset?>,
+    /** 도식일 때 배경으로 깔 선. 비어 있으면 역끼리 이어 그린다. */
+    backdrop: List<PlacedSegment> = emptyList(),
     camera: MapCameraState,
     modifier: Modifier = Modifier,
     mapped: MappedRoute? = null,
@@ -160,9 +163,29 @@ fun SubwayMapView(
         val routeStroke = 5f * density
 
         // 1 — the whole network, faded back to context.
+        // 도식은 흐리게 깔면 형태가 무너진다. 색이 자료에 들어 있어 그대로 살린다.
+        val alpha = if (mapped == null) {
+            0.75f
+        } else if (backdrop.isNotEmpty()) {
+            0.5f
+        } else {
+            0.30f
+        }
+        if (backdrop.isNotEmpty()) {
+            // 도식일 때는 그림에 들어 있던 선을 그대로 쓴다. 역끼리 직선으로 이으면
+            // 역이 아닌 자리의 꺾임이 사라져 도식처럼 보이지 않는다.
+            backdrop.forEach { segment ->
+                drawLine(
+                    color = segment.colour.copy(alpha = alpha),
+                    start = camera.toScreen(segment.from),
+                    end = camera.toScreen(segment.to),
+                    strokeWidth = segment.width * camera.scale,
+                    cap = StrokeCap.Round,
+                )
+            }
+        } else {
         network.lines.forEach { line ->
             val color = lineColors[line.name] ?: AmColor.Ink300
-            val alpha = if (mapped == null) 0.75f else 0.30f
             line.paths.forEach { path ->
                 // 자리를 모르는 역에서 선을 끊는다. 이어 버리면 없는 구간이 생긴다.
                 path.split { projected[it] == null }.forEach { run ->
@@ -173,6 +196,7 @@ fun SubwayMapView(
                     )
                 }
             }
+        }
         }
 
         // 2 — every station, once they are far enough apart to aim at.
@@ -437,4 +461,28 @@ private fun List<Int>.split(drop: (Int) -> Boolean): List<List<Int>> {
     }
     if (run.size > 1) runs += run
     return runs
+}
+
+
+/** 화면에 그릴 준비가 끝난 도식 선 한 토막. */
+data class PlacedSegment(val from: Offset, val to: Offset, val colour: Color, val width: Float)
+
+/**
+ * 도식도의 선을 역 자리와 **같은 자로** 옮긴다.
+ *
+ * 둘이 어긋나면 역이 선 위에 얹히지 않는다. 그래서 자리를 옮기는 셈을 한 군데서만
+ * 한다 — 역 자리로 잡은 틀을 선에도 그대로 쓴다.
+ */
+fun placeSegments(network: SubwayNetwork, schematic: SchematicMap): List<PlacedSegment> {
+    if (schematic.isEmpty || schematic.segments.isEmpty()) return emptyList()
+    val raw = network.stations.indices.mapNotNull { schematic.at(it)?.let { (x, y) -> Offset(x, y) } }
+    val bounds = boundsOf(raw) ?: return emptyList()
+    val span = max(bounds.width, bounds.height).takeIf { it > 0f } ?: return emptyList()
+    val f = MapContentSpan / span
+
+    fun place(v: List<Float>) = Offset((v[0] - bounds.left) * f, (v[1] - bounds.top) * f)
+
+    return schematic.segments.filter { it.isUsable }.map {
+        PlacedSegment(place(it.from), place(it.to), parseColor(it.colour), it.width * f)
+    }
 }

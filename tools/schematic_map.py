@@ -55,6 +55,44 @@ def normalize(name):
     return re.sub(r"\s", "", name).split("(")[0].removesuffix("역")
 
 
+def read_segments(svg):
+    """도식도의 선 그 자체.
+
+    여태 역과 역을 직선으로 이어 그렸더니 도식처럼 보이지 않았다. 진짜 도식도는
+    역이 아닌 자리에서도 꺾이고, 그 꺾임이 그림의 성격을 만든다. SVG에 그 선이
+    `<line>` 408개로 들어 있다 — 405개가 정확히 0·45·90도다.
+
+    굵은 하늘색 한 줄기는 한강이다. 노선이 아니지만 그려야 서울로 읽힌다.
+    """
+    rules = {}
+    style = re.search(r"<style>(.*?)</style>", svg, re.S)
+    for selector, body in re.findall(r"([^{}]+)\{([^{}]*)\}", style.group(1) if style else ""):
+        props = dict(re.findall(r"([a-z-]+)\s*:\s*([^;]+)", body))
+        for name in re.findall(r"\.(cls-\d+)", selector):
+            rules.setdefault(name, {}).update(props)
+
+    out = []
+    for cls, x1, y1, x2, y2 in re.findall(
+        r'<line[^>]*class="(cls-\d+)"[^>]*x1="([-\d.]+)"[^>]*y1="([-\d.]+)"'
+        r'[^>]*x2="([-\d.]+)"[^>]*y2="([-\d.]+)"',
+        svg,
+    ):
+        style_of = rules.get(cls, {})
+        stroke = style_of.get("stroke", "").strip()
+        if not stroke.startswith("#"):
+            continue
+        width = float(re.sub(r"[^\d.]", "", style_of.get("stroke-width", "3")) or 3)
+        out.append(
+            {
+                "a": [round(float(x1), 2), round(float(y1), 2)],
+                "b": [round(float(x2), 2), round(float(y2), 2)],
+                "c": stroke,
+                "w": width,
+            }
+        )
+    return out
+
+
 def read_svg(path):
     """원의 자리와, 두 줄짜리를 합친 한글 라벨."""
     svg = pathlib.Path(path).read_text(encoding="utf-8", errors="replace")
@@ -97,7 +135,7 @@ def read_svg(path):
         else:
             taken.add(second)
             merged.append((x, y, label + texts[second][2]))
-    return circles, merged
+    return circles, merged, read_segments(svg)
 
 
 def neighbours_of(network):
@@ -122,7 +160,7 @@ def main():
     if len(sys.argv) != 2:
         sys.exit(__doc__)
 
-    circles, labels = read_svg(sys.argv[1])
+    circles, labels, segments = read_svg(sys.argv[1])
     network = json.loads(NETWORK.read_text(encoding="utf-8"))
     names = [s["n"] for s in network["stations"]]
     neighbour_index = neighbours_of(network)
@@ -250,7 +288,13 @@ def main():
     viewbox = [1150.36, 1074.59]
     ASSET.write_text(
         json.dumps(
-            {"source": SOURCE, "w": viewbox[0], "h": viewbox[1], "p": points},
+            {
+                "source": SOURCE,
+                "w": viewbox[0],
+                "h": viewbox[1],
+                "p": points,
+                "s": segments,
+            },
             ensure_ascii=False,
             separators=(",", ":"),
         ),
@@ -277,6 +321,7 @@ def main():
     print("가장 먼 이웃 6쌍:")
     for d, line, a, b in pairs[-6:]:
         print(f"   {d:7.1f}  {line:8} {a} ↔ {b}")
+    print(f"선 {len(segments)}개")
     print(f"{ASSET.name} {ASSET.stat().st_size // 1024} KB")
     missing = sorted(names[i] for i, p in enumerate(points) if not p)
     print(f"좌표 없는 역 {len(missing)}: {missing[:15]}")
