@@ -28,6 +28,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -70,6 +71,7 @@ import com.actimedi.travle.ui.common.lineLabel
 import com.actimedi.travle.data.estimateFare
 import com.actimedi.travle.data.TimelineEntry
 import com.actimedi.travle.data.filterBy
+import com.actimedi.travle.data.isNotEmpty
 import com.actimedi.travle.data.formatClockSpan
 import com.actimedi.travle.data.summarize
 import com.actimedi.travle.data.toTimeline
@@ -116,6 +118,11 @@ fun RouteScreen(
     var filter by rememberSaveable(route.id) { mutableStateOf(RouteFilter.ALL) }
     var expandedIndex by rememberSaveable(route.id) { mutableStateOf(-1) }
     val entries = remember(timeline, filter) { timeline.filterBy(filter) }
+
+    // 보던 갈래가 빈 경로로 넘어오면 잠긴 탭에 갇힌다 — 전체로 되돌린다.
+    LaunchedEffect(timeline, filter) {
+        if (entries.isEmpty() && filter != RouteFilter.ALL) filter = RouteFilter.ALL
+    }
 
     // Natural height of the header content below the status bar, measured once.
     val expandedContentPx = remember { mutableFloatStateOf(0f) }
@@ -169,7 +176,11 @@ fun RouteScreen(
                 origin = route.origin,
                 network = network,
             )
-            FilterTabs(selected = filter, onSelect = { filter = it })
+            FilterTabs(
+                selected = filter,
+                onSelect = { filter = it },
+                available = { it.isNotEmpty(timeline) },
+            )
             TravelModeBar(isTravelling = isTravelling, onToggle = { isTravelling = it })
             // 여행 중에는 실시간 도착이 더 정확하니 시간표를 들이밀지 않는다.
             if (!isTravelling && onApplyTimetable != null && network.stations.isNotEmpty()) {
@@ -551,7 +562,12 @@ private fun TravelModeBar(isTravelling: Boolean, onToggle: (Boolean) -> Unit) {
 }
 
 @Composable
-private fun FilterTabs(selected: RouteFilter, onSelect: (RouteFilter) -> Unit) {
+private fun FilterTabs(
+    selected: RouteFilter,
+    onSelect: (RouteFilter) -> Unit,
+    /** 각 갈래에 볼 것이 있는지. 비어 있는 갈래는 누를 수 없다. */
+    available: (RouteFilter) -> Boolean,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -566,9 +582,20 @@ private fun FilterTabs(selected: RouteFilter, onSelect: (RouteFilter) -> Unit) {
                 .padding(4.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            FilterTab(R.string.filter_all, RouteFilter.ALL, selected, onSelect, Modifier.weight(1f))
-            FilterTab(R.string.filter_move, RouteFilter.MOVE, selected, onSelect, Modifier.weight(1f))
-            FilterTab(R.string.filter_stay, RouteFilter.STAY, selected, onSelect, Modifier.weight(1f))
+            RouteFilter.entries.forEach { filter ->
+                FilterTab(
+                    labelRes = when (filter) {
+                        RouteFilter.ALL -> R.string.filter_all
+                        RouteFilter.MOVE -> R.string.filter_move
+                        RouteFilter.STAY -> R.string.filter_stay
+                    },
+                    filter = filter,
+                    selected = selected,
+                    onSelect = onSelect,
+                    enabled = available(filter),
+                    modifier = Modifier.weight(1f),
+                )
+            }
         }
     }
 }
@@ -579,6 +606,7 @@ private fun FilterTab(
     filter: RouteFilter,
     selected: RouteFilter,
     onSelect: (RouteFilter) -> Unit,
+    enabled: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val isSelected = filter == selected
@@ -589,7 +617,13 @@ private fun FilterTab(
         label = "tabBackground",
     )
     val textColor by animateColorAsState(
-        targetValue = if (isSelected) AmColor.White else RouteColor.TabInactiveText,
+        targetValue = when {
+            isSelected -> AmColor.White
+            // 볼 것이 없는 갈래는 흐리게 둔다. 눌러서 빈 화면을 보고 나서야
+            // 없다는 것을 알게 하지 않는다.
+            !enabled -> RouteColor.TabInactiveText.copy(alpha = 0.35f)
+            else -> RouteColor.TabInactiveText
+        },
         animationSpec = spec,
         label = "tabText",
     )
@@ -605,7 +639,7 @@ private fun FilterTab(
         modifier = modifier
             .clip(CircleShape)
             .background(background)
-            .clickable { onSelect(filter) }
+            .clickable(enabled = enabled) { onSelect(filter) }
             .padding(vertical = 9.dp),
     )
 }

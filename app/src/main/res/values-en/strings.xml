@@ -106,6 +106,8 @@
     <string name="wait_chip">%1$d min wait</string>
 
     <string name="map_this_route">This route</string>
+    <string name="map_schematic">Diagram</string>
+    <string name="map_geographic">Geographic</string>
     <string name="map_whole">Whole network</string>
     <string name="map_close">Close</string>
     <string name="map_stations">%1$d stations</string>

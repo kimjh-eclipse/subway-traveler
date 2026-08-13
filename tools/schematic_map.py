@@ -215,9 +215,36 @@ def main():
             for i in group:
                 placed.setdefault(i, placed[anchored[0]])
 
-    # 순번 그대로 늘어놓는다. 좌표를 못 찾은 역은 null이다.
+    coords = {i: circles[j] for i, j in placed.items()}
+
+    # 라벨이 없어 자리를 못 찾은 역은 노선을 따라 양옆의 자리 사이에 끼워 넣는다.
+    #
+    # 도식도에 원은 있는데 이름표가 없거나(약수·금호), 이 SVG가 만들어진 뒤 생긴
+    # 역(운정중앙·신검단중앙)이 그렇다. 빈칸으로 두면 노선이 끊겨 보이는데,
+    # 어차피 두 이웃 사이에 있는 역이니 그 사이에 놓는 편이 사실에 가깝다.
+    filled = []
+    for line in network["lines"]:
+        for path in line["p"]:
+            for k, station in enumerate(path):
+                if station in coords:
+                    continue
+                before = next(((d, path[k - d]) for d in range(1, k + 1) if path[k - d] in coords), None)
+                after = next(
+                    ((d, path[k + d]) for d in range(1, len(path) - k) if path[k + d] in coords), None
+                )
+                if not before or not after:
+                    continue
+                (da, a), (db, b) = before, after
+                t = da / (da + db)
+                coords[station] = (
+                    coords[a][0] + (coords[b][0] - coords[a][0]) * t,
+                    coords[a][1] + (coords[b][1] - coords[a][1]) * t,
+                )
+                filled.append(names[station])
+
+    # 순번 그대로 늘어놓는다. 끝내 자리를 못 찾은 역은 null이다.
     points = [
-        [round(circles[placed[i]][0], 2), round(circles[placed[i]][1], 2)] if i in placed else None
+        [round(coords[i][0], 2), round(coords[i][1], 2)] if i in coords else None
         for i in range(len(names))
     ]
     viewbox = [1150.36, 1074.59]
@@ -242,6 +269,7 @@ def main():
     found = sum(1 for p in points if p)
     print(f"좌표 {found}역 / 노선망 {len(names)}역 · 다시 붙인 역 {len(moved)} {[names[i] for i in moved]}")
     print(f"맞바꾼 쌍 {len(swapped)} {swapped}")
+    print(f"이웃 사이에 끼워 넣은 역 {len(filled)} {filled}")
     print(
         f"인접 간격 중앙값 {gaps[len(gaps) // 2]:.1f} · 90% {gaps[int(len(gaps) * 0.9)]:.1f}"
         f" · 최대 {gaps[-1]:.1f} · 겹침 {sum(1 for d in gaps if d < 0.5)}"

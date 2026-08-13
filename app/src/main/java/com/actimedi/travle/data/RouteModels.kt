@@ -190,6 +190,10 @@ fun Route.toTimeline(): List<TimelineEntry> {
     }
 }
 
+/** 이 갈래로 걸러도 볼 것이 남는가. 빈 갈래는 탭에서 잠근다. */
+fun RouteFilter.isNotEmpty(timeline: List<TimelineEntry>): Boolean =
+    timeline.filterBy(this).isNotEmpty()
+
 fun List<TimelineEntry>.filterBy(filter: RouteFilter): List<TimelineEntry> = when (filter) {
     RouteFilter.ALL -> this
     RouteFilter.MOVE -> filter { it.segment is RouteSegment.Move }

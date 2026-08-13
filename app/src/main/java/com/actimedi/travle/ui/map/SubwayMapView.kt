@@ -40,6 +40,8 @@ import kotlin.math.max
 import kotlin.math.min
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.draw.clipToBounds
+import com.actimedi.travle.data.SchematicMap
+import com.actimedi.travle.data.MapStyle
 
 const val MinMapScale = 0.35f
 const val MaxMapScale = 40f
@@ -106,7 +108,11 @@ fun rememberMapCameraState() = remember { MapCameraState() }
 @Composable
 fun SubwayMapView(
     network: SubwayNetwork,
-    projected: List<Offset>,
+    /**
+     * 순번대로 늘어놓은 역 자리. 도식도에 자리가 없는 역은 null이고, 그런 역과
+     * 그 역에 닿는 선은 그리지 않는다 — 엉뚱한 데 찍느니 비우는 편이 낫다.
+     */
+    projected: List<Offset?>,
     camera: MapCameraState,
     modifier: Modifier = Modifier,
     mapped: MappedRoute? = null,
@@ -158,13 +164,20 @@ fun SubwayMapView(
             val color = lineColors[line.name] ?: AmColor.Ink300
             val alpha = if (mapped == null) 0.75f else 0.30f
             line.paths.forEach { path ->
-                drawPolyline(path.map { camera.toScreen(projected[it]) }, color.copy(alpha = alpha), baseStroke)
+                // 자리를 모르는 역에서 선을 끊는다. 이어 버리면 없는 구간이 생긴다.
+                path.split { projected[it] == null }.forEach { run ->
+                    drawPolyline(
+                        run.map { camera.toScreen(projected[it]!!) },
+                        color.copy(alpha = alpha),
+                        baseStroke,
+                    )
+                }
             }
         }
 
         // 2 — every station, once they are far enough apart to aim at.
         if (onStationTap != null && camera.scale >= StationDotScaleThreshold) {
-            projected.forEach { p ->
+            projected.filterNotNull().forEach { p ->
                 val s = camera.toScreen(p)
                 if (s.x in -40f..(size.width + 40f) && s.y in -40f..(size.height + 40f)) {
                     drawCircle(AmColor.White, radius = 3.4f * density, center = s)
@@ -175,7 +188,7 @@ fun SubwayMapView(
 
         // 3 — the route.
         mapped?.legs?.forEach { leg ->
-            val points = leg.stations.map { camera.toScreen(projected[it]) }
+            val points = leg.stations.mapNotNull { projected[it]?.let(camera::toScreen) }
             if (leg.isStraightHop) {
                 drawDashedHop(points, leg.color, routeStroke, 7f * density)
             } else {
@@ -185,7 +198,7 @@ fun SubwayMapView(
 
         val dot = 5.5f * density
         mapped?.stops?.forEach { stop ->
-            val p = camera.toScreen(projected[stop.stationIndex])
+            val p = camera.toScreen(projected[stop.stationIndex] ?: return@forEach)
             drawCircle(AmColor.Navy, radius = dot + 2f * density, center = p)
             drawCircle(AmColor.White, radius = dot, center = p)
             if (stop.isStay) drawCircle(AmColor.Blue, radius = dot * 0.55f, center = p)
@@ -193,7 +206,7 @@ fun SubwayMapView(
 
         // 4 — the picker's current choice.
         selectedStation?.let { index ->
-            val p = camera.toScreen(projected[index])
+            val p = camera.toScreen(projected[index] ?: return@let)
             drawCircle(AmColor.Blue, radius = 9f * density, center = p)
             drawCircle(AmColor.White, radius = 4f * density, center = p)
         }
@@ -204,14 +217,14 @@ fun SubwayMapView(
         selectedStation?.let { index ->
             drawLabelIfVisible(
                 measurer, nameOf(index),
-                camera.toScreen(projected[index]), density, size, placed, strong = true,
+                camera.toScreen(projected[index] ?: return@let), density, size, placed, strong = true,
             )
         }
         if (camera.scale >= LabelScaleThreshold) {
             mapped?.stops?.forEach { stop ->
                 drawLabelIfVisible(
                     measurer, "${stop.order}. ${nameOf(stop.stationIndex)}",
-                    camera.toScreen(projected[stop.stationIndex]), density, size, placed,
+                    camera.toScreen(projected[stop.stationIndex] ?: return@forEach), density, size, placed,
                 )
             }
         }
@@ -220,7 +233,7 @@ fun SubwayMapView(
             // user is looking at should keep its name.
             val centre = Offset(size.width / 2f, size.height / 2f)
             network.stations.indices
-                .map { it to camera.toScreen(projected[it]) }
+                .mapNotNull { i -> projected[i]?.let { i to camera.toScreen(it) } }
                 .filter { (_, p) ->
                     p.x > -LabelMargin && p.y > -60f &&
                         p.x < size.width + LabelMargin && p.y < size.height + 60f
@@ -236,14 +249,19 @@ fun SubwayMapView(
 }
 
 private fun nearestStation(
-    projected: List<Offset>,
+    /**
+     * 순번대로 늘어놓은 역 자리. 도식도에 자리가 없는 역은 null이고, 그런 역과
+     * 그 역에 닿는 선은 그리지 않는다 — 엉뚱한 데 찍느니 비우는 편이 낫다.
+     */
+    projected: List<Offset?>,
     camera: MapCameraState,
     tap: Offset,
     slop: Float,
 ): Int? {
     var best = -1
     var bestDistance = slop
-    projected.forEachIndexed { index, p ->
+    projected.forEachIndexed { index, point ->
+        val p = point ?: return@forEachIndexed
         val s = camera.toScreen(p)
         val d = hypot(s.x - tap.x, s.y - tap.y)
         if (d < bestDistance) {
@@ -335,7 +353,34 @@ const val MapContentSpan = 1000f
  * would make the camera's scale limits meaningless: the network is only ~0.5°
  * wide, so fitting it to a phone needs a factor of ~2000.
  */
-fun projectStations(network: SubwayNetwork): List<Offset> {
+/**
+ * 역 자리를 화면 좌표로.
+ *
+ * 도식이든 지리든 결과는 같은 모양 — 순번대로 늘어놓은, [MapContentSpan] 상자에
+ * 맞춘 점들이다. 그래서 그리는 쪽은 어느 모양인지 몰라도 된다.
+ *
+ * 도식에 자리가 없는 역은 지리 좌표를 도식 상자에 욱여넣지 않는다. 엉뚱한 데
+ * 찍히느니 안 그리는 편이 낫다 — 그런 역은 null로 남는다.
+ */
+fun projectStations(
+    network: SubwayNetwork,
+    schematic: SchematicMap = SchematicMap(),
+    style: MapStyle = MapStyle.GEOGRAPHIC,
+): List<Offset?> {
+    if (style == MapStyle.SCHEMATIC && !schematic.isEmpty) {
+        val raw = network.stations.indices.map { i ->
+            schematic.at(i)?.let { (x, y) -> Offset(x, y) }
+        }
+        val known = raw.filterNotNull()
+        val bounds = boundsOf(known) ?: return raw
+        val span = max(bounds.width, bounds.height).takeIf { it > 0f } ?: return raw
+        val f = MapContentSpan / span
+        return raw.map { it?.let { p -> Offset((p.x - bounds.left) * f, (p.y - bounds.top) * f) } }
+    }
+    return projectGeographically(network)
+}
+
+private fun projectGeographically(network: SubwayNetwork): List<Offset> {
     if (network.stations.isEmpty()) return emptyList()
     val lat0 = network.stations.sumOf { it.lat } / network.stations.size
     val k = cos(Math.toRadians(lat0)).toFloat()
@@ -346,16 +391,19 @@ fun projectStations(network: SubwayNetwork): List<Offset> {
     return raw.map { Offset((it.x - bounds.left) * f, (it.y - bounds.top) * f) }
 }
 
-fun boundsOf(points: List<Offset>): Rect? {
+fun boundsOf(points: List<Offset?>): Rect? {
     if (points.isEmpty()) return null
     var minX = Float.MAX_VALUE
     var minY = Float.MAX_VALUE
     var maxX = -Float.MAX_VALUE
     var maxY = -Float.MAX_VALUE
-    points.forEach {
+    var any = false
+    points.filterNotNull().forEach {
+        any = true
         minX = min(minX, it.x); maxX = max(maxX, it.x)
         minY = min(minY, it.y); maxY = max(maxY, it.y)
     }
+    if (!any) return null
     return Rect(minX, minY, maxX, maxY)
 }
 
@@ -371,3 +419,22 @@ fun parseColor(hex: String): Color = runCatching {
  * 이름이 먼저 사라진다.
  */
 private const val LabelMargin = 520f
+
+/**
+ * [drop]인 자리에서 끊어 이어진 토막들로. 자리를 모르는 역을 건너뛰고 선을 그으면
+ * 없는 구간이 생기므로, 아예 끊어 놓는다.
+ */
+private fun List<Int>.split(drop: (Int) -> Boolean): List<List<Int>> {
+    val runs = mutableListOf<List<Int>>()
+    var run = mutableListOf<Int>()
+    forEach { item ->
+        if (drop(item)) {
+            if (run.size > 1) runs += run
+            run = mutableListOf()
+        } else {
+            run += item
+        }
+    }
+    if (run.size > 1) runs += run
+    return runs
+}

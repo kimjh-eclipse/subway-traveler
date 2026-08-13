@@ -71,6 +71,31 @@ class RouteModelsTest {
         assertEquals(null, timeline[0].transferStation)
     }
 
+    /**
+     * 체류가 없는 경로에서 `체류만`을 누르면 빈 화면이 됐다. 탭을 잠그려면 갈래마다
+     * 볼 것이 있는지 먼저 알아야 한다.
+     */
+    @Test
+    fun `갈래가 비었는지 알려준다`() {
+        val timeline = route.toTimeline()
+        assertTrue(RouteFilter.ALL.isNotEmpty(timeline))
+        assertTrue(RouteFilter.MOVE.isNotEmpty(timeline))
+        assertTrue(RouteFilter.STAY.isNotEmpty(timeline))
+
+        val noStay = Route(
+            id = "t2",
+            title = "쭉 이동만",
+            dayOfWeek = "",
+            createdAt = 0L,
+            origin = "강남",
+            segments = listOf(
+                RouteSegment.Move("2호선", "선릉", ClockTime.parse("09:00"), ClockTime.parse("09:10"), 10),
+            ),
+        ).toTimeline()
+        assertTrue(RouteFilter.MOVE.isNotEmpty(noStay))
+        assertFalse(RouteFilter.STAY.isNotEmpty(noStay))
+    }
+
     @Test
     fun `filters partition the timeline`() {
         val timeline = route.toTimeline()

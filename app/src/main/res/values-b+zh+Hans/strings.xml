@@ -107,6 +107,8 @@
     <string name="wait_chip_at">%1$s 换乘等待 %2$d 分钟</string>
 
     <string name="map_this_route">本路线</string>
+    <string name="map_schematic">示意图</string>
+    <string name="map_geographic">地理</string>
     <string name="map_whole">全部线路图</string>
     <string name="map_close">关闭</string>
     <string name="map_stations">车站 %1$d 个</string>

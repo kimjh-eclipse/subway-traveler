@@ -106,6 +106,8 @@
     <string name="wait_chip">乗換待ち %1$d分</string>
 
     <string name="map_this_route">このルート</string>
+    <string name="map_schematic">路線図</string>
+    <string name="map_geographic">地理</string>
     <string name="map_whole">全路線図</string>
     <string name="map_close">閉じる</string>
     <string name="map_stations">駅 %1$dか所</string>

@@ -35,6 +35,13 @@ import com.actimedi.travle.ui.theme.AmColor
 import com.actimedi.travle.ui.theme.RouteColor
 import com.actimedi.travle.ui.theme.SuitFamily
 import com.actimedi.travle.ui.theme.SuiteFamily
+import com.actimedi.travle.data.SchematicMapLoader
+import com.actimedi.travle.data.MapStyle
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.platform.LocalContext
 
 /** The full Seoul network with this route drawn on top of it. */
 @Composable
@@ -47,7 +54,14 @@ fun RouteMapScreen(
     BackHandler(onBack = onClose)
 
     val mapped = remember(route, network) { route.mapOnto(network) }
-    val projected = remember(network) { projectStations(network) }
+    val context = LocalContext.current
+    val schematic = remember(context) { SchematicMapLoader.load(context) }
+    // 도식이 기본이다 — 어디서 어디로 가는지 읽는 데는 지리적 정확함보다 선이
+    // 곧은 것이 낫다. 실제 위치가 궁금할 때만 지리로 바꾼다.
+    var style by rememberSaveable { mutableStateOf(MapStyle.SCHEMATIC) }
+    val projected = remember(network, schematic, style) {
+        projectStations(network, schematic, style)
+    }
     val camera = rememberMapCameraState()
 
     val routeBounds = remember(mapped, projected) {
@@ -80,6 +94,19 @@ fun RouteMapScreen(
             ) {
                 MapChip(stringResource(R.string.map_this_route)) { camera.frame(routeBounds) }
                 MapChip(stringResource(R.string.map_whole)) { camera.frame(boundsOf(projected)) }
+                MapChip(
+                    if (style == MapStyle.SCHEMATIC) {
+                        stringResource(R.string.map_geographic)
+                    } else {
+                        stringResource(R.string.map_schematic)
+                    },
+                ) {
+                    style = if (style == MapStyle.SCHEMATIC) {
+                        MapStyle.GEOGRAPHIC
+                    } else {
+                        MapStyle.SCHEMATIC
+                    }
+                }
             }
 
             Attribution(

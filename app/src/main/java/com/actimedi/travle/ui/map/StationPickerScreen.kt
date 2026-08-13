@@ -84,8 +84,9 @@ fun StationPickerScreen(
         val focus = initialStation?.let { network.findStation(it) }
             ?: focusStation?.let { network.findStation(it) }
             ?: network.findStation(DefaultFocusStation)
-        if (focus != null) {
-            camera.centerOn(projected[focus], camera.fitScaleFor(whole) * PickerZoomFactor)
+        val at = focus?.let { projected[it] }
+        if (at != null) {
+            camera.centerOn(at, camera.fitScaleFor(whole) * PickerZoomFactor)
         } else {
             camera.frame(whole)
         }
