@@ -16,7 +16,7 @@
 짧은 쪽을 남긴다.
 
 순번이 밀리므로 노선 경로와 역간 소요시간도 함께 고쳐 쓴다. 도식 좌표는 순번으로
-담겨 있어 이 뒤에 tools/schematic_map.py를 다시 돌려야 한다.
+담겨 있어 이 뒤에 tools/seoul_schematic.py를 다시 돌려야 한다.
 
 사용법:
     python3 tools/dedupe_stations.py
@@ -130,7 +130,7 @@ def main():
     print(f"합친 노드 {len(merge_into)}개 · 역 {len(stations)} → {len(survivors)}")
     for gone, keep in merged_pairs:
         print(f"   {gone}  →  {keep}")
-    print("\n도식 좌표는 순번으로 담겨 있다. tools/schematic_map.py를 다시 돌릴 것.")
+    print("\n도식 좌표는 순번으로 담겨 있다. tools/seoul_schematic.py를 다시 돌릴 것.")
 
 
 if __name__ == "__main__":

@@ -138,9 +138,9 @@
 
     <string name="line_needs_transfer">没有直达线路。这段需要换乘，请用查找路线来填写。</string>
     <string name="about_schematic_title">示意图线路图</string>
-    <string name="about_schematic_body">Sinseiki/opensource-seoul-subway-map · MIT
-仅车站位置来自该资料，线路连接仍依据 OpenStreetMap。收录 670 个车站。</string>
-    <string name="map_credit_schematic">© Sinseiki (MIT) · © OpenStreetMap (ODbL)</string>
+    <string name="about_schematic_body">首尔交通公社《首都圈地铁线路图》 · KOGL 第1类型
+示意图的线路与车站位置来自该资料。线路连接与实际位置仍依据 OpenStreetMap。收录 621 个车站。</string>
+    <string name="map_credit_schematic">© 首尔交通公社 (KOGL 第1类型) · © OpenStreetMap (ODbL)</string>
     <string name="about_network_title">线路图数据</string>
     <string name="about_network_body">© OpenStreetMap contributors · ODbL 1.0
 首都圈 676 个车站，24 条线路。</string>

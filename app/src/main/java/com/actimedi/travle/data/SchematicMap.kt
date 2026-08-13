@@ -16,14 +16,14 @@ import kotlinx.serialization.json.Json
  * 자리는 역 이름이 아니라 **노선망의 순번**으로 담는다. 같은 이름의 역이 20쌍 있어
  * (5호선 양평과 경의중앙선 양평은 서로 다른 역이다) 이름으로는 담을 수 없다.
  *
- * `tools/schematic_map.py`가 MIT 라이선스 SVG에서 캐낸다.
+ * `tools/seoul_schematic.py`가 서울교통공사 공식 노선도(공공누리 1유형)에서 캐낸다.
  */
 /** 도식도의 선 한 토막. 자리는 원본 SVG 좌표 그대로이고, 화면 좌표로는 그릴 때 옮긴다. */
 @Serializable
 data class SchematicSegment(
     @SerialName("a") val from: List<Float> = emptyList(),
     @SerialName("b") val to: List<Float> = emptyList(),
-    /** `#00a9dc` 꼴. 노선 색이 자료에 이미 들어 있어 우리가 고를 것이 없다. */
+    /** `#24528d` 꼴. 노선 색이 자료에 이미 들어 있어 우리가 고를 것이 없다. */
     @SerialName("c") val colour: String = "",
     @SerialName("w") val width: Float = 3f,
 ) {
@@ -42,8 +42,7 @@ data class SchematicMap(
      * 도식도의 선 그 자체 — `[x1, y1, x2, y2, 색, 굵기]`.
      *
      * 역끼리 직선으로 이어 그리면 도식처럼 보이지 않는다. 진짜 도식도는 역이 아닌
-     * 자리에서도 꺾이고 그 꺾임이 그림의 성격을 만든다. 굵은 하늘색 한 줄기는
-     * 한강이라 노선은 아니지만, 그려야 서울로 읽힌다.
+     * 자리에서도 꺾이고 그 꺾임이 그림의 성격을 만든다.
      */
     @SerialName("s") val segments: List<SchematicSegment> = emptyList(),
 ) {

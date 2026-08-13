@@ -136,9 +136,9 @@
     </string-array>
     <string name="line_needs_transfer">No single line connects these two. You will need to change — use Find a way.</string>
     <string name="about_schematic_title">Diagram map</string>
-    <string name="about_schematic_body">Sinseiki/opensource-seoul-subway-map · MIT
-Only the station positions come from this; the line topology still follows OpenStreetMap. 670 stations placed.</string>
-    <string name="map_credit_schematic">© Sinseiki (MIT) · © OpenStreetMap (ODbL)</string>
+    <string name="about_schematic_body">Seoul Metro “Seoul Metropolitan Subway Map” · KOGL Type 1
+The diagram\'s lines and station positions come from this. Line topology and real positions still follow OpenStreetMap. 621 stations placed.</string>
+    <string name="map_credit_schematic">© Seoul Metro (KOGL Type 1) · © OpenStreetMap (ODbL)</string>
     <string name="about_network_title">Network data</string>
     <string name="about_network_body">© OpenStreetMap contributors · ODbL 1.0
 676 stations, 24 lines across the Seoul metropolitan area.</string>

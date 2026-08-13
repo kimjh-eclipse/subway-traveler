@@ -36,3 +36,7 @@ google-services.json
 # Android Profiling
 *.hprof
 tools/.osm_stations.json
+
+# tools/ocr_labels.swift 를 컴파일한 것. 자료가 아니라 도구다.
+tools/ocr_labels
+__pycache__/
