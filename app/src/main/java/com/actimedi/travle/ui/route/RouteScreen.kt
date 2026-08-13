@@ -166,6 +166,8 @@ fun RouteScreen(
                 expandedContentPx = expandedContentPx.floatValue,
                 collapsePx = collapsePx.floatValue,
                 onContentMeasured = { expandedContentPx.floatValue = it },
+                origin = route.origin,
+                network = network,
             )
             FilterTabs(selected = filter, onSelect = { filter = it })
             TravelModeBar(isTravelling = isTravelling, onToggle = { isTravelling = it })
@@ -257,6 +259,8 @@ private fun RouteHeader(
     startTime: String,
     dayOfWeek: String,
     summary: RouteSummary,
+    origin: String,
+    network: SubwayNetwork,
     expandedContentPx: Float,
     collapsePx: Float,
     onContentMeasured: (Float) -> Unit,
@@ -300,6 +304,8 @@ private fun RouteHeader(
                 startTime = startTime,
                 dayOfWeek = dayOfWeek,
                 summary = summary,
+                origin = origin,
+                network = network,
                 alpha = expandedAlpha,
                 // Slight parallax so the content leaves faster than the box shrinks.
                 offsetY = -collapsePx * 0.35f,
@@ -362,6 +368,8 @@ private fun ExpandedHeaderContent(
     startTime: String,
     dayOfWeek: String,
     summary: RouteSummary,
+    origin: String,
+    network: SubwayNetwork,
     alpha: Float,
     offsetY: Float,
     onContentMeasured: (Float) -> Unit,
@@ -424,6 +432,27 @@ private fun ExpandedHeaderContent(
             letterSpacing = (-0.01).em,
             color = AmColor.White,
         )
+
+        // 제목은 사용자가 붙인 이름이라 `11`처럼 아무것도 안 알려줄 수 있다.
+        // 어디서 어디로 가는 하루인지는 언제나 여기서 읽힌다.
+        if (origin.isNotBlank() && summary.finishPlace.isNotBlank()) {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = stringResource(
+                    R.string.header_span,
+                    stationLabel(origin, network),
+                    stationLabel(summary.finishPlace, network),
+                    summary.finishTime.format(),
+                ),
+                fontFamily = SuitFamily,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 13.sp,
+                lineHeight = 18.sp,
+                color = AmColor.White.copy(alpha = 0.85f),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
 
         Spacer(Modifier.height(16.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

@@ -94,6 +94,7 @@
     <string name="dur_hours_minutes">%1$d h %2$d min</string>
     <string name="fare_amount">₩%1$s</string>
 
+    <string name="header_span">%1$s → %2$s · arrives %3$s</string>
     <string name="header_departure">Departs %1$s</string>
     <string name="finish_arrival">%1$s · Arrive %2$s</string>
     <string name="finish_counts">%1$d transfers · %2$d rides · %3$d stays</string>

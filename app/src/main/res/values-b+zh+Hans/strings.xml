@@ -94,6 +94,7 @@
     <string name="dur_hours_minutes">%1$d 小时 %2$d 分</string>
     <string name="fare_amount">%1$s 韩元</string>
 
+    <string name="header_span">%1$s → %2$s · %3$s 到达</string>
     <string name="header_departure">%1$s 出发</string>
     <string name="finish_arrival">%1$s · 到达 %2$s</string>
     <string name="finish_counts">换乘 %1$d 次 · 乘车 %2$d 段 · 停留 %3$d 处</string>

@@ -94,6 +94,7 @@
     <string name="dur_hours_minutes">%1$d時間 %2$d分</string>
     <string name="fare_amount">%1$sウォン</string>
 
+    <string name="header_span">%1$s → %2$s · %3$s 到着</string>
     <string name="header_departure">%1$s 出発</string>
     <string name="finish_arrival">%1$s · %2$s 到着</string>
     <string name="finish_counts">乗換 %1$d回 · 乗車 %2$d区間 · 滞在 %3$dか所</string>

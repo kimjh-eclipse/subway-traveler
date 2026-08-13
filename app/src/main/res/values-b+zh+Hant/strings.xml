@@ -99,6 +99,7 @@
     <string name="dur_hours_minutes">%1$d 小時 %2$d 分</string>
     <string name="fare_amount">%1$s 韓圜</string>
 
+    <string name="header_span">%1$s → %2$s · %3$s 到達</string>
     <string name="header_departure">%1$s 出發</string>
     <string name="finish_arrival">%1$s · 到達 %2$s</string>
     <string name="finish_counts">轉乘 %1$d 次 · 乘車 %2$d 段 · 停留 %3$d 處</string>
