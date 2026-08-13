@@ -85,6 +85,9 @@ fun StationPickerScreen(
     val backdrop = remember(network, schematic, style) {
         if (style == MapStyle.SCHEMATIC) placeSegments(network, schematic) else emptyList()
     }
+    val waters = remember(network, schematic, style) {
+        if (style == MapStyle.SCHEMATIC) placeWaters(network, schematic) else emptyList()
+    }
     // 도식은 역보다 선이 더 멀리 뻗는다 — 선까지 담아야 전체 보기에서 잘리지 않는다.
     val wholeBounds = remember(projected, backdrop) {
         boundsOf(projected + backdrop.flatMap { listOf(it.from, it.to) })
@@ -156,6 +159,7 @@ fun StationPickerScreen(
                 network = network,
                 projected = projected,
                 backdrop = backdrop,
+                waters = waters,
                 camera = camera,
                 selectedStation = selected,
                 onStationTap = {

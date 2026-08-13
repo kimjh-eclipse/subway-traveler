@@ -30,6 +30,21 @@ data class SchematicSegment(
     val isUsable: Boolean get() = from.size >= 2 && to.size >= 2 && colour.startsWith("#")
 }
 
+/**
+ * 물 한 덩이 — 채워 그리는 다각형.
+ *
+ * 한강이 노선은 아니지만, 그려야 서울로 읽힌다. 강북과 강남을 가르는 것이
+ * 이 도시 지리의 뼈대라, 강이 없으면 도식이 어느 도시인지 말해 주지 않는다.
+ */
+@Serializable
+data class SchematicWater(
+    /** `[x1, y1, x2, y2, …]` 로 이어지는 테두리. */
+    @SerialName("p") val points: List<Float> = emptyList(),
+    @SerialName("c") val colour: String = "",
+) {
+    val isUsable: Boolean get() = points.size >= 6 && colour.startsWith("#")
+}
+
 @Serializable
 data class SchematicMap(
     val source: String = "",
@@ -38,6 +53,8 @@ data class SchematicMap(
     @SerialName("h") val height: Float = 0f,
     /** 순번대로 늘어놓은 `[x, y]`. 자리를 못 찾은 역은 null. */
     @SerialName("p") val points: List<List<Float>?> = emptyList(),
+    /** 강. 노선보다 먼저, 맨 밑에 깔린다. */
+    @SerialName("g") val waters: List<SchematicWater> = emptyList(),
     /**
      * 도식도의 선 그 자체 — `[x1, y1, x2, y2, 색, 굵기]`.
      *

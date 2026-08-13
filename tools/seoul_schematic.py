@@ -66,6 +66,9 @@ LEGEND_BOX = (0.0, 0.0, 1650.0, 250.0)
 
 # 곡선을 자를 잣대(pt). 제어점을 이은 길이를 이 값으로 나눠 토막 수를 정한다.
 CURVE_STEP = 6.0
+# 물의 색과, 물로 볼 최소 크기(pt). 같은 색의 작은 조각은 글자 장식이다.
+WATER_COLOUR = "#d9f3fd"
+WATER_MIN_SPAN = 100.0
 # 역이 선에서 이보다 멀리 떨어져 있으면 선 위로 끌어다 놓는다(px). 공식 그림에도
 # 작도 오류가 있다 — 동수는 원이 인천1호선에서 90px 떨어진 허공에 찍혀 있다.
 # 나란한 두 노선 사이의 환승역이 27px까지 떨어지므로 그보다 넉넉히 잡는다.
@@ -225,6 +228,35 @@ def segments_from(svg_text, min_width=3.0):
                     continue
                 segments.append((first, second, colour, float(width.group(1))))
     return segments
+
+
+def waters_from(svg_text):
+    """강. 한강이 노선은 아니지만, 그려야 서울로 읽힌다.
+
+    공식 그림에서 물은 #d9f3fd 로 채운 다각형이다. 큰 것 둘이 한강 본체와
+    임진강 물줄기이고, 같은 색의 작은 조각들은 글자 장식이라 크기로 거른다.
+    """
+    body = svg_text[svg_text.find("</defs>"):]
+    waters = []
+    for match in re.finditer(r"<path([^>]*)>", body):
+        attributes = match.group(1)
+        fill = re.search(r'fill="rgb\(([^)]*)\)"', attributes)
+        if not fill:
+            continue
+        channels = [float(v) for v in re.findall(r"([\d.]+)%", fill.group(1))]
+        colour = "#%02x%02x%02x" % tuple(round(c * 255 / 100) for c in channels[:3])
+        if colour != WATER_COLOUR:
+            continue
+        drawing = re.search(r'\bd="([^"]*)"', attributes)
+        if not drawing:
+            continue
+        for ring in flatten(drawing.group(1), [1, 0, 0, 1, 0, 0]):
+            xs = [x for x, _ in ring]
+            ys = [y for _, y in ring]
+            if max(max(xs) - min(xs), max(ys) - min(ys)) < WATER_MIN_SPAN:
+                continue
+            waters.append((ring, colour))
+    return waters
 
 
 def merge_rings(marks, gap=8.0):
@@ -390,6 +422,10 @@ def main():
         ((a[0] * scale, a[1] * scale), (b[0] * scale, b[1] * scale), colour, width * scale)
         for a, b, colour, width in segments_from(svg_text)
     ]
+    waters = [
+        ([round(v * scale, 1) for point in ring for v in point], colour)
+        for ring, colour in waters_from(svg_text)
+    ]
 
     network = json.loads(NETWORK.read_text(encoding="utf-8"))
     wanted = {normalize(station["n"]) for station in network["stations"]}
@@ -412,7 +448,7 @@ def main():
             placed[index] = [round(x, 1), round(y, 1)]
 
     found = sum(1 for point in placed if point)
-    print(f"역 표시 {len(marks)} · 이름 {len(labels)} · 선 토막 {len(segments)} · 자리 찾은 역 {found}/{len(placed)}")
+    print(f"역 표시 {len(marks)} · 이름 {len(labels)} · 선 토막 {len(segments)} · 물 {len(waters)} · 자리 찾은 역 {found}/{len(placed)}")
     missing = [s["n"] for s, p in zip(network["stations"], placed) if not p]
     if missing:
         print(f"못 찾은 역 {len(missing)}: {', '.join(missing)}")
@@ -429,6 +465,7 @@ def main():
                 "w": round(box[2] * scale, 1),
                 "h": round(box[3] * scale, 1),
                 "p": placed,
+                "g": [{"p": points, "c": colour} for points, colour in waters],
                 "s": [
                     {
                         "a": [round(a[0], 1), round(a[1], 1)],

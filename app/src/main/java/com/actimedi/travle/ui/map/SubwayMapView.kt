@@ -116,6 +116,8 @@ fun SubwayMapView(
     projected: List<Offset?>,
     /** 도식일 때 배경으로 깔 선. 비어 있으면 역끼리 이어 그린다. */
     backdrop: List<PlacedSegment> = emptyList(),
+    /** 도식일 때 맨 밑에 깔 강. */
+    waters: List<PlacedWater> = emptyList(),
     camera: MapCameraState,
     modifier: Modifier = Modifier,
     mapped: MappedRoute? = null,
@@ -172,6 +174,17 @@ fun SubwayMapView(
             0.30f
         }
         if (backdrop.isNotEmpty()) {
+            // 강이 맨 밑이다. 한강이 노선은 아니지만, 그려야 서울로 읽힌다.
+            // 노선처럼 흐리게 하지 않는다 — 원래 옅은 색이라 더 빼면 사라진다.
+            waters.forEach { water ->
+                val path = Path()
+                water.outline.forEachIndexed { i, point ->
+                    val at = camera.toScreen(point)
+                    if (i == 0) path.moveTo(at.x, at.y) else path.lineTo(at.x, at.y)
+                }
+                path.close()
+                drawPath(path, water.colour)
+            }
             // 도식일 때는 그림에 들어 있던 선을 그대로 쓴다. 역끼리 직선으로 이으면
             // 역이 아닌 자리의 꺾임이 사라져 도식처럼 보이지 않는다.
             backdrop.forEach { segment ->
@@ -466,6 +479,27 @@ private fun List<Int>.split(drop: (Int) -> Boolean): List<List<Int>> {
 
 /** 화면에 그릴 준비가 끝난 도식 선 한 토막. */
 data class PlacedSegment(val from: Offset, val to: Offset, val colour: Color, val width: Float)
+
+/** 화면에 그릴 준비가 끝난 물 한 덩이. */
+data class PlacedWater(val outline: List<Offset>, val colour: Color)
+
+/** 도식도의 강을 역 자리와 같은 자로 옮긴다. [placeSegments]와 같은 이유, 같은 셈. */
+fun placeWaters(network: SubwayNetwork, schematic: SchematicMap): List<PlacedWater> {
+    if (schematic.isEmpty || schematic.waters.isEmpty()) return emptyList()
+    val raw = network.stations.indices.mapNotNull { schematic.at(it)?.let { (x, y) -> Offset(x, y) } }
+    val bounds = boundsOf(raw) ?: return emptyList()
+    val span = max(bounds.width, bounds.height).takeIf { it > 0f } ?: return emptyList()
+    val f = MapContentSpan / span
+
+    return schematic.waters.filter { it.isUsable }.map { water ->
+        PlacedWater(
+            outline = water.points.chunked(2).map {
+                Offset((it[0] - bounds.left) * f, (it[1] - bounds.top) * f)
+            },
+            colour = parseColor(water.colour),
+        )
+    }
+}
 
 /**
  * 도식도의 선을 역 자리와 **같은 자로** 옮긴다.
