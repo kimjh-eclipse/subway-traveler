@@ -115,7 +115,7 @@ fun SubwayMapView(
      */
     projected: List<Offset?>,
     /** 도식일 때 배경으로 깔 선. 비어 있으면 역끼리 이어 그린다. */
-    backdrop: List<PlacedSegment> = emptyList(),
+    backdrop: List<PlacedStroke> = emptyList(),
     /** 도식일 때 맨 밑에 깔 강. */
     waters: List<PlacedWater> = emptyList(),
     camera: MapCameraState,
@@ -187,13 +187,20 @@ fun SubwayMapView(
             }
             // 도식일 때는 그림에 들어 있던 선을 그대로 쓴다. 역끼리 직선으로 이으면
             // 역이 아닌 자리의 꺾임이 사라져 도식처럼 보이지 않는다.
-            backdrop.forEach { segment ->
-                drawLine(
-                    color = segment.colour.copy(alpha = alpha),
-                    start = camera.toScreen(segment.from),
-                    end = camera.toScreen(segment.to),
-                    strokeWidth = segment.width * camera.scale,
-                    cap = StrokeCap.Round,
+            backdrop.forEach { stroke ->
+                val path = Path()
+                stroke.points.forEachIndexed { i, point ->
+                    val at = camera.toScreen(point)
+                    if (i == 0) path.moveTo(at.x, at.y) else path.lineTo(at.x, at.y)
+                }
+                drawPath(
+                    path = path,
+                    color = stroke.colour.copy(alpha = alpha),
+                    style = Stroke(
+                        width = stroke.width * camera.scale,
+                        cap = StrokeCap.Round,
+                        join = StrokeJoin.Round,
+                    ),
                 )
             }
         } else {
@@ -477,8 +484,14 @@ private fun List<Int>.split(drop: (Int) -> Boolean): List<List<Int>> {
 }
 
 
-/** 화면에 그릴 준비가 끝난 도식 선 한 토막. */
-data class PlacedSegment(val from: Offset, val to: Offset, val colour: Color, val width: Float)
+/**
+ * 화면에 그릴 준비가 끝난 도식 선 한 획 — 이어지는 꺾은선.
+ *
+ * 토막마다 따로 그으면 안 된다. 반투명으로 그릴 때 둥근 끝단이 겹치는 자리마다
+ * 두 번 칠해져 진해지고, 선이 비늘처럼 얼룩덜룩해진다. 이어지는 토막을 한 획으로
+ * 묶어 한 번에 그리면 겹침이 한 획 안의 일이 되어 얼룩이 사라진다.
+ */
+data class PlacedStroke(val points: List<Offset>, val colour: Color, val width: Float)
 
 /** 화면에 그릴 준비가 끝난 물 한 덩이. */
 data class PlacedWater(val outline: List<Offset>, val colour: Color)
@@ -507,7 +520,7 @@ fun placeWaters(network: SubwayNetwork, schematic: SchematicMap): List<PlacedWat
  * 둘이 어긋나면 역이 선 위에 얹히지 않는다. 그래서 자리를 옮기는 셈을 한 군데서만
  * 한다 — 역 자리로 잡은 틀을 선에도 그대로 쓴다.
  */
-fun placeSegments(network: SubwayNetwork, schematic: SchematicMap): List<PlacedSegment> {
+fun placeSegments(network: SubwayNetwork, schematic: SchematicMap): List<PlacedStroke> {
     if (schematic.isEmpty || schematic.segments.isEmpty()) return emptyList()
     val raw = network.stations.indices.mapNotNull { schematic.at(it)?.let { (x, y) -> Offset(x, y) } }
     val bounds = boundsOf(raw) ?: return emptyList()
@@ -516,7 +529,25 @@ fun placeSegments(network: SubwayNetwork, schematic: SchematicMap): List<PlacedS
 
     fun place(v: List<Float>) = Offset((v[0] - bounds.left) * f, (v[1] - bounds.top) * f)
 
-    return schematic.segments.filter { it.isUsable }.map {
-        PlacedSegment(place(it.from), place(it.to), parseColor(it.colour), it.width * f)
+    // 자료는 토막의 나열이고, 이어지는 토막은 끝점을 공유한다. 끝이 맞닿고 색과
+    // 굵기가 같은 동안 한 획으로 잇는다.
+    val strokes = mutableListOf<PlacedStroke>()
+    var run = mutableListOf<Offset>()
+    var colour = ""
+    var width = 0f
+    schematic.segments.filter { it.isUsable }.forEach { segment ->
+        val from = place(segment.from)
+        val to = place(segment.to)
+        val chains = run.isNotEmpty() && run.last() == from &&
+            colour == segment.colour && width == segment.width
+        if (!chains) {
+            if (run.size > 1) strokes += PlacedStroke(run, parseColor(colour), width * f)
+            run = mutableListOf(from)
+            colour = segment.colour
+            width = segment.width
+        }
+        run += to
     }
+    if (run.size > 1) strokes += PlacedStroke(run, parseColor(colour), width * f)
+    return strokes
 }
