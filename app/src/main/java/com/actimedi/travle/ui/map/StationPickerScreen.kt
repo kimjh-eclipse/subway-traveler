@@ -57,6 +57,14 @@ import androidx.compose.ui.platform.LocalContext
 private const val PickerZoomFactor = 8f
 
 /**
+ * 실마리가 없을 때 — 첫 경로의 첫 정거장 — 여는 배율.
+ *
+ * 강남을 기본값으로 두면 늘 강남부터 보게 되고, 전체를 보여 주면 이름이 안 보여
+ * 한참 확대해야 한다. 중간이 맞다: 노선도 한가운데(도심)를 이름이 읽히는 배율로.
+ */
+private const val FirstOpenZoomFactor = 4f
+
+/**
  * Pick a station by tapping the map.
  *
  * Returns both the station name and the line the user tapped in the chip row, so
@@ -100,9 +108,9 @@ fun StationPickerScreen(
     // then the previous stop on the route. Deliberately not keyed on `selected`,
     // so tapping around does not yank the camera back.
     //
-    // 아무 실마리가 없으면(첫 경로의 첫 정거장) 전체 노선도로 연다. 강남을
-    // 기본값으로 두었더니 어디를 고르려던 사람이든 늘 강남부터 보게 됐다 —
-    // 임의의 역을 고르느니 전체를 보여 주고 확대하게 두는 편이 낫다.
+    // 아무 실마리가 없으면(첫 경로의 첫 정거장) 도심을 적당히 확대해 연다.
+    // 특정 역을 기본값으로 두면 늘 그 역부터 보게 되고(강남이 그랬다), 전체를
+    // 보여 주면 이름이 안 보여 한참 확대해야 한다.
     LaunchedEffect(camera.viewport, projected, style) {
         if (projected.isEmpty()) return@LaunchedEffect
         val whole = wholeBounds
@@ -111,8 +119,8 @@ fun StationPickerScreen(
         val at = focus?.let { projected[it] }
         if (at != null) {
             camera.centerOn(at, camera.fitScaleFor(whole) * PickerZoomFactor)
-        } else {
-            camera.frame(whole)
+        } else if (whole != null) {
+            camera.centerOn(whole.center, camera.fitScaleFor(whole) * FirstOpenZoomFactor)
         }
     }
 
