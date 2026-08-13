@@ -49,9 +49,12 @@ import androidx.compose.ui.platform.LocalContext
 
 /**
  * How much tighter than a whole-network fit the picker opens.
- * Roughly four and a half doublings — station names read comfortably.
+ *
+ * 24였다가 8로 내렸다. 서울교통공사 도식으로 갈아탄 뒤에는 24배가 역 셋만
+ * 보일 만큼 깊었다 — 이름이 편히 읽히면서도 이웃 역이 한 화면에 들어오는
+ * 배율이 이쯤이다. 라벨은 절대 배율 1.4부터 나오므로 넉넉히 위다.
  */
-private const val PickerZoomFactor = 24f
+private const val PickerZoomFactor = 8f
 
 /** Where the very first pick starts, before the route has any stations. */
 private const val DefaultFocusStation = "강남"
