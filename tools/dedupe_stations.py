@@ -33,9 +33,17 @@ ASSET = ROOT / "app/src/main/assets/subway_map.json"
 # 이 안에 있으면 같은 역. 실제 자료는 458m와 53km로 뚜렷이 갈린다.
 SAME_STATION_METRES = 600.0
 
+# 이름이 달라도 같은 역인 것들. 이름이 같아야 후보가 되는 규칙으로는 못 잡는다.
+#   * 이수: 7호선 역명. 4호선 쪽은 총신대입구다 — 한 역이 노선마다 다른 이름을 쓴다.
+#     갈라져 있으면 4↔7호선 환승 경로를 못 찾는다.
+#   * 서해구청: OpenStreetMap의 유령 노드. 인천2호선의 실제 역명은 서구청이고
+#     100m 옆에 서구청 노드가 따로 있다. 서해구청이라는 역은 없다.
+ALIASES = {"이수": "총신대입구", "서해구청": "서구청"}
+
 
 def normalize(name):
-    return re.sub(r"\s", "", name).split("(")[0].removesuffix("역")
+    bare = re.sub(r"\s", "", name).split("(")[0].removesuffix("역")
+    return ALIASES.get(bare, bare)
 
 
 def metres_between(a, b):
@@ -75,7 +83,13 @@ def main():
         cluster = sorted({i for pair in close for i in pair})
         keep = max(
             cluster,
-            key=lambda i: (len(stations[i].get("l", [])), len(neighbours[i]), -len(stations[i]["n"])),
+            key=lambda i: (
+                # 별칭으로 불려 온 쪽은 본명에게 진다 — 이수가 아니라 총신대입구가 남는다.
+                re.sub(r"\s", "", stations[i]["n"]).split("(")[0].removesuffix("역") not in ALIASES,
+                len(stations[i].get("l", [])),
+                len(neighbours[i]),
+                -len(stations[i]["n"]),
+            ),
         )
         for index in cluster:
             if index != keep:

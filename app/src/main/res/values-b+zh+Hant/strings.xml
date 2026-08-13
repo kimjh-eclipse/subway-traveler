@@ -144,11 +144,11 @@
     <string name="line_needs_transfer">沒有直達路線。這段需要轉乘，請用尋找路線填寫。</string>
     <string name="about_schematic_title">示意圖路線圖</string>
     <string name="about_schematic_body">首爾交通公社《首都圈地鐵路線圖》 · KOGL 第1類型
-示意圖的路線與車站位置來自該資料。路線連接與實際位置仍依據 OpenStreetMap。收錄 621 個車站。</string>
+示意圖的路線與車站位置來自該資料。路線連接與實際位置仍依據 OpenStreetMap。收錄 654 個車站(都羅山未見於官方路線圖)。</string>
     <string name="map_credit_schematic">© 首爾交通公社 (KOGL 第1類型) · © OpenStreetMap (ODbL)</string>
     <string name="about_network_title">路線圖資料</string>
     <string name="about_network_body">© OpenStreetMap contributors · ODbL 1.0
-首都圈 676 個車站，24 條路線。</string>
+首都圈 655 個車站，24 條路線。</string>
     <string name="about_times_title">站間所需時間</string>
     <string name="about_times_body">首爾交通公社《站間距離及所需時間》· KOGL 第 1 類型
 1～8 號線的 264 個路段為實測值，其餘路線以平均值（每站 1 分 32 秒）補上，屬預估值。</string>

@@ -66,11 +66,25 @@ LEGEND_BOX = (0.0, 0.0, 1650.0, 250.0)
 
 # 곡선을 자를 잣대(pt). 제어점을 이은 길이를 이 값으로 나눠 토막 수를 정한다.
 CURVE_STEP = 6.0
+# 역이 선에서 이보다 멀리 떨어져 있으면 선 위로 끌어다 놓는다(px). 공식 그림에도
+# 작도 오류가 있다 — 동수는 원이 인천1호선에서 90px 떨어진 허공에 찍혀 있다.
+# 나란한 두 노선 사이의 환승역이 27px까지 떨어지므로 그보다 넉넉히 잡는다.
+SNAP_IF_FURTHER = 40.0
 
 
 def in_legend(x, y):
     left, top, right, bottom = LEGEND_BOX
     return left <= x <= right and top <= y <= bottom
+
+
+def closest_on(point, start, end):
+    """선 토막 위에서 점에 가장 가까운 자리."""
+    dx, dy = end[0] - start[0], end[1] - start[1]
+    length = dx * dx + dy * dy
+    along = 0.0 if length == 0 else max(
+        0.0, min(1.0, ((point[0] - start[0]) * dx + (point[1] - start[1]) * dy) / length)
+    )
+    return start[0] + along * dx, start[1] + along * dy
 
 
 def numbers(text):
@@ -266,12 +280,17 @@ def place(network, marks, labels):
         cost[i, j] = min(cost[i, j], distance)
 
     placed = [None] * len(stations)
+    taken = set()
     for i, j in zip(*linear_sum_assignment(cost)):
         if cost[i, j] >= far:
             continue
         x, y, _, _ = marks[columns[j]]
         placed[rows[i]] = [round(x, 1), round(y, 1)]
-    return placed
+        taken.add(columns[j])
+    # 임자를 못 찾은 표시. 이름을 못 읽어 비어 있는 역이 여기 어딘가에 있으므로,
+    # 그 자리만 더 큰 배율로 다시 읽으면 된다 — tools/ocr_focus.py 가 그 일을 한다.
+    spare = [(x, y) for mark, (x, y, _, _) in enumerate(marks) if mark not in taken]
+    return placed, spare
 
 
 def read_labels(path, wanted):
@@ -282,11 +301,30 @@ def read_labels(path, wanted):
     """
     chunks = []
     for item in json.loads(pathlib.Path(path).read_text(encoding="utf-8")):
-        korean = re.sub(r"[^가-힣0-9·\-]", "", item["t"])
+        text = item["t"]
+        x, y = item["x"], item["y"]
+        width, height = item.get("w", 24.0), item.get("h", 24.0)
+        korean = re.sub(r"[^가-힣0-9·\-]", "", text)
         if korean:
-            chunks.append(
-                (korean, item["x"], item["y"], item.get("w", 24.0) / 2, item.get("h", 24.0) / 2)
-            )
+            chunks.append((korean, x, y, width / 2, height / 2))
+        # 이웃한 역 이름이 한 줄로 붙어 읽히기도 한다 — 「오류동 개봉 구일」.
+        # 통짜 덩어리로는 어느 역도 못 가리키므로, 공백으로 쪼개 낱말마다
+        # 글자 수에 비례한 제 자리를 준다.
+        words = [w for w in re.split(r"\s+", text.strip()) if re.search(r"[가-힣]", w)]
+        if len(words) < 2:
+            continue
+        total = sum(len(w) for w in words) + len(words) - 1
+        left = x - width / 2
+        offset = 0
+        for word in words:
+            korean = re.sub(r"[^가-힣0-9·\-]", "", word)
+            share = width * len(word) / total
+            if korean:
+                chunks.append((
+                    korean, left + width * offset / total + share / 2, y,
+                    share / 2, height / 2,
+                ))
+            offset += len(word) + 1
 
     labels = [
         (normalize(text), x, y, half_width, half_height)
@@ -303,10 +341,16 @@ def read_labels(path, wanted):
         close = [
             (SequenceMatcher(None, name, candidate).ratio(), candidate)
             for candidate in wanted
-            if abs(len(candidate) - len(name)) <= 1
+            if abs(len(candidate) - len(name)) <= 2
         ]
-        if close and max(close)[0] >= FUZZY_FLOOR:
-            labels.append((max(close)[1], x, y, half_width, half_height))
+        if not close:
+            continue
+        ratio, candidate = max(close)
+        # 두 글자까지 다른 것도 받되 문턱을 올린다 — 「용인중앙시장」이 「용인중앙」으로
+        # 잘려 읽히는 것은 받고(0.80), 「중앙」이 아무 데나 붙는 것은 막는다.
+        floor = FUZZY_FLOOR if abs(len(candidate) - len(name)) <= 1 else 0.8
+        if ratio >= floor:
+            labels.append((candidate, x, y, half_width, half_height))
     # 두 줄로 꺾인 이름. 아래 줄을 위 줄에 붙여 본다.
     for text, x, y, half_width, half_height in chunks:
         for other, ox, oy, other_half_width, other_half_height in chunks:
@@ -329,6 +373,10 @@ def main():
     parser.add_argument("svg", help="PDF를 pdftocairo -svg 로 바꾼 것")
     parser.add_argument("labels", help="tools/ocr_map.py 가 내놓은 .labels.json")
     parser.add_argument("--dpi", type=float, default=300.0, help="OCR에 쓴 그림의 해상도")
+    parser.add_argument(
+        "--spare",
+        help="임자를 못 찾은 표시의 자리를 적어 둘 곳. tools/ocr_focus.py 가 받는다.",
+    )
     options = parser.parse_args()
 
     svg_text = pathlib.Path(options.svg).read_text(encoding="utf-8", errors="replace")
@@ -346,13 +394,33 @@ def main():
     network = json.loads(NETWORK.read_text(encoding="utf-8"))
     wanted = {normalize(station["n"]) for station in network["stations"]}
     labels = read_labels(options.labels, wanted)
-    placed = place(network, marks, labels)
+    placed, spare = place(network, marks, labels)
+
+    # 선에서 떨어져 찍힌 역을 선 위로. 공식 그림에도 작도 오류가 있어 —
+    # 동수의 원은 인천1호선에서 90px 떨어진 허공에 있다 — 원본 충실과 어긋나지만,
+    # 노선도에서 역이 선 밖에 뜬 것은 그냥 틀린 그림이다.
+    for index, point in enumerate(placed):
+        if point is None:
+            continue
+        gap, (x, y) = min(
+            (math.hypot(point[0] - cx, point[1] - cy), (cx, cy))
+            for a, b, _, _ in segments
+            for cx, cy in [closest_on(point, a, b)]
+        )
+        if gap > SNAP_IF_FURTHER:
+            print(f"선 밖에 뜬 역을 끌어다 놓는다: {network['stations'][index]['n']} ({gap:.0f}px)")
+            placed[index] = [round(x, 1), round(y, 1)]
 
     found = sum(1 for point in placed if point)
     print(f"역 표시 {len(marks)} · 이름 {len(labels)} · 선 토막 {len(segments)} · 자리 찾은 역 {found}/{len(placed)}")
     missing = [s["n"] for s, p in zip(network["stations"], placed) if not p]
     if missing:
         print(f"못 찾은 역 {len(missing)}: {', '.join(missing)}")
+    if options.spare:
+        pathlib.Path(options.spare).write_text(
+            json.dumps([[round(x, 1), round(y, 1)] for x, y in spare]), encoding="utf-8"
+        )
+        print(f"임자 없는 표시 {len(spare)} → {options.spare}")
 
     OUT.write_text(
         json.dumps(

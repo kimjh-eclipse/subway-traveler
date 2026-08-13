@@ -137,11 +137,11 @@
     <string name="line_needs_transfer">直通の路線がありません。乗り換えが必要な区間なので、ルート検索から埋めてください。</string>
     <string name="about_schematic_title">路線図（模式）</string>
     <string name="about_schematic_body">ソウル交通公社「首都圏地下鉄路線図」 · KOGL 第1類型
-模式図の線と駅の位置はこの資料から来ています。路線のつながりと実際の位置は OpenStreetMap に従います。621駅を収録。</string>
+模式図の線と駅の位置はこの資料から来ています。路線のつながりと実際の位置は OpenStreetMap に従います。654駅を収録(都羅山は公式路線図に載っていません)。</string>
     <string name="map_credit_schematic">© ソウル交通公社 (KOGL 第1類型) · © OpenStreetMap (ODbL)</string>
     <string name="about_network_title">路線データ</string>
     <string name="about_network_body">© OpenStreetMap contributors · ODbL 1.0
-首都圏676駅、24路線。</string>
+首都圏655駅、24路線。</string>
     <string name="about_times_title">駅間の所要時間</string>
     <string name="about_times_body">ソウル交通公社「駅間距離および所要時間」· 公共ヌリ第1類型
 1〜8号線の264区間は実測値、その他の路線は平均（1駅あたり1分32秒）で補った目安です。</string>

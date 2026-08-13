@@ -137,11 +137,11 @@
     <string name="line_needs_transfer">No single line connects these two. You will need to change — use Find a way.</string>
     <string name="about_schematic_title">Diagram map</string>
     <string name="about_schematic_body">Seoul Metro “Seoul Metropolitan Subway Map” · KOGL Type 1
-The diagram\'s lines and station positions come from this. Line topology and real positions still follow OpenStreetMap. 621 stations placed.</string>
+The diagram\'s lines and station positions come from this. Line topology and real positions still follow OpenStreetMap. 654 stations placed (Dorasan is absent from the official map).</string>
     <string name="map_credit_schematic">© Seoul Metro (KOGL Type 1) · © OpenStreetMap (ODbL)</string>
     <string name="about_network_title">Network data</string>
     <string name="about_network_body">© OpenStreetMap contributors · ODbL 1.0
-676 stations, 24 lines across the Seoul metropolitan area.</string>
+655 stations, 24 lines across the Seoul metropolitan area.</string>
     <string name="about_times_title">Station-to-station times</string>
     <string name="about_times_body">Seoul Metro “Inter-station distance and travel time” · KOGL Type 1
 264 segments on lines 1–8 are measured; other lines fall back to the average of 1 min 32 s per station.</string>

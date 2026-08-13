@@ -177,11 +177,17 @@ class SeoulTimetable(
      * 우리 자료는 `강남역`처럼 '역'을 붙여 두는데 시간표는 `강남`으로만 찾는다 —
      * `강남역`으로 물으면 오류 없이 0건이 온다. 괄호 병기(`총신대입구(이수)`)도 뗀다.
      * `서울역`은 떼도 붙여도 같은 결과라 굳이 예외로 두지 않는다.
+     *
+     * 괄호 안의 이름도 후보로 내놓는다. 총신대입구(이수)는 한 역인데 4호선에서는
+     * 총신대입구, 7호선에서는 이수다 — 7호선 시간표를 총신대입구로 물으면 오류
+     * 없이 0건이 오므로, 앞 이름이 빈손이면 괄호 안 이름으로 다시 묻는다.
+     * 교대(법원·검찰청)처럼 괄호가 부제인 곳은 그 이름이 0건이라 그냥 지나간다.
      */
     internal fun variants(name: String): List<String> {
         val bare = name.substringBefore('(').trim()
         val noSuffix = bare.removeSuffix("역").takeIf { it.length > 1 } ?: bare
-        return listOf(noSuffix, bare, name).distinct().filter { it.isNotBlank() }
+        val inParens = name.substringAfter('(', "").substringBefore(')').trim()
+        return listOf(noSuffix, bare, inParens, name).distinct().filter { it.isNotBlank() }
     }
 
     private fun fetch(

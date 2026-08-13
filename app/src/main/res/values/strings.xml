@@ -148,11 +148,11 @@
     <string name="line_needs_transfer">직결 노선이 없습니다. 갈아타야 하는 구간이니 길찾기로 채워 보세요.</string>
     <string name="about_schematic_title">도식 노선도</string>
     <string name="about_schematic_body">서울교통공사 「수도권 지하철 노선도」 · 공공누리 제1유형
-도식의 선과 역 자리를 이 자료에서 가져왔습니다. 노선 연결과 실제 위치는 OpenStreetMap을 따릅니다. 621개 역의 자리를 담았습니다.</string>
+도식의 선과 역 자리를 이 자료에서 가져왔습니다. 노선 연결과 실제 위치는 OpenStreetMap을 따릅니다. 654개 역의 자리를 담았습니다(도라산은 공식 그림에 없습니다).</string>
     <string name="map_credit_schematic">© 서울교통공사 (공공누리 1유형) · © OpenStreetMap (ODbL)</string>
     <string name="about_network_title">노선도 데이터</string>
     <string name="about_network_body">© OpenStreetMap contributors · ODbL 1.0
-수도권 676개 역, 24개 노선.</string>
+수도권 655개 역, 24개 노선.</string>
     <string name="about_times_title">역간 소요시간</string>
     <string name="about_times_body">서울교통공사 「역간거리 및 소요시간」 · 공공누리 제1유형
 1~8호선 264개 구간은 실측값이고, 나머지 노선은 평균(역당 1분 32초)으로 메운 예상치입니다.</string>

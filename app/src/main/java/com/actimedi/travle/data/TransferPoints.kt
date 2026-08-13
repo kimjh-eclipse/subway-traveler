@@ -45,7 +45,23 @@ data class TransferTable(
     val isEmpty: Boolean get() = rows.isEmpty()
 
     private val byStation: Map<String, List<TransferPoint>> by lazy {
-        rows.mapNotNull { it.toPoint() }.groupBy { it.station }
+        // 한 역이 이름 여럿으로 불린다. 총신대입구(이수)는 자료에 `총신대입구 (이수)`와
+        // `이수` 두 이름으로 줄이 흩어져 있는데, 노선망에서는 한 역이다. 이름마다
+        // 키를 하나씩 두어 어느 이름으로 물어도 그 역의 줄이 모두 나오게 한다.
+        buildMap<String, MutableList<TransferPoint>> {
+            rows.mapNotNull { it.toPoint() }.forEach { point ->
+                keysOf(point.station).forEach { key ->
+                    getOrPut(key) { mutableListOf() }.add(point)
+                }
+            }
+        }
+    }
+
+    /** 역 이름이 가리키는 키들 — 괄호 밖 이름과 괄호 안 이름. */
+    private fun keysOf(name: String): List<String> {
+        val bare = name.substringBefore('(').trim()
+        val inParens = name.substringAfter('(', "").substringBefore(')').trim()
+        return listOf(bare, inParens).filter { it.isNotBlank() }.distinct()
     }
 
     private fun List<String?>.toPoint(): TransferPoint? {
@@ -77,7 +93,10 @@ data class TransferTable(
         toLine: String,
         toTowards: String,
     ): TransferPoint? {
-        val here = byStation[station] ?: return null
+        // 키마다 다른 줄이 들어 있을 수 있다 — 자료가 4호선 쪽은 총신대입구로,
+        // 7호선 쪽은 이수로 적었다면 두 키를 합쳐야 온전한 표가 된다.
+        val here = keysOf(station).flatMap { byStation[it].orEmpty() }.distinct()
+        if (here.isEmpty()) return null
         val onLines = here.filter { it.fromLine == fromLine && it.toLine == toLine }
         if (onLines.isEmpty()) return null
 

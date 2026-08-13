@@ -22,7 +22,7 @@ import kotlin.math.hypot
 class SchematicMapAssetTest {
 
     /** 자산에 자리가 담긴 역이 이보다 적으면 캐내는 일이 어딘가 무너진 것이다. */
-    private val leastPlaced = 600
+    private val leastPlaced = 650
 
     /**
      * 역이 선에서 이만큼까지는 떨어져 있어도 된다.

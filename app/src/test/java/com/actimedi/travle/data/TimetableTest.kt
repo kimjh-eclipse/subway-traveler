@@ -146,6 +146,9 @@ class TimetableTest {
         assertEquals("서울", source.variants("서울역").first())
         // 원래 이름도 뒤에 남겨 둔다 — 뗀 쪽이 빈손일 때를 대비한다.
         assertTrue(source.variants("강남역").contains("강남역"))
+        // 괄호 안 이름도 후보다. 총신대입구(이수)는 7호선에서 이수라서,
+        // 총신대입구로 물으면 7호선 시간표가 오류 없이 0건이 온다.
+        assertTrue(source.variants("총신대입구 (이수)").contains("이수"))
         // 이미 붙임말이 없으면 한 가지뿐이다.
         assertEquals(listOf("강남"), source.variants("강남"))
         // 한 글자만 남는 이름은 떼지 않는다.

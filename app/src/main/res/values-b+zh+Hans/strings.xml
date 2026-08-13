@@ -139,11 +139,11 @@
     <string name="line_needs_transfer">没有直达线路。这段需要换乘，请用查找路线来填写。</string>
     <string name="about_schematic_title">示意图线路图</string>
     <string name="about_schematic_body">首尔交通公社《首都圈地铁线路图》 · KOGL 第1类型
-示意图的线路与车站位置来自该资料。线路连接与实际位置仍依据 OpenStreetMap。收录 621 个车站。</string>
+示意图的线路与车站位置来自该资料。线路连接与实际位置仍依据 OpenStreetMap。收录 654 个车站(都罗山未见于官方线路图)。</string>
     <string name="map_credit_schematic">© 首尔交通公社 (KOGL 第1类型) · © OpenStreetMap (ODbL)</string>
     <string name="about_network_title">线路图数据</string>
     <string name="about_network_body">© OpenStreetMap contributors · ODbL 1.0
-首都圈 676 个车站，24 条线路。</string>
+首都圈 655 个车站，24 条线路。</string>
     <string name="about_times_title">站间所需时间</string>
     <string name="about_times_body">首尔交通公社《站间距离及所需时间》· KOGL 第 1 类型
 1～8 号线的 264 个区间为实测值，其余线路以平均值（每站 1 分 32 秒）补足，为预估值。</string>
