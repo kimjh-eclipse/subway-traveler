@@ -32,6 +32,8 @@ import time
 import urllib.parse
 import urllib.request
 
+from cjk import tidy_chinese, tidy_japanese
+
 try:
     import zhconv
 except ImportError:
@@ -50,6 +52,7 @@ AGENT = {"User-Agent": "subway-traveler/1.0 (station name table)"}
 BBOX = "36.55,126.20,38.25,127.95"
 
 HANJA_IN_PARENS = re.compile(r"[（(]([一-鿿・･\s]+)[)）]")
+
 
 # OSM이 틀린 자리. 위키데이터의 영문 라벨과 전수 대조해 찾았고, 표기 방식 차이가
 # 아니라 **다른 역의 이름**이 붙은 것만 골랐다.
@@ -121,8 +124,12 @@ def index_by_name(elements):
     return {k: v[1] for k, v in best.items()}
 
 
-def tidy_japanese(text):
-    """같은 이름의 역을 가르려고 붙인 꼬리표는 화면에 쓸 것이 아니다."""
+def strip_tag(text):
+    """같은 이름의 역을 가르려고 붙인 꼬리표는 화면에 쓸 것이 아니다.
+
+    `シンチョン(新村)[国鉄駅]` → `シンチョン(新村)`. 괄호는 남긴다 — 중국어를
+    못 구했을 때 그 안의 한자가 마지막 수단이기 때문이다.
+    """
     if not text:
         return None
     return DISAMBIGUATION.sub("", text).strip() or None
@@ -132,16 +139,6 @@ def hanja_from_japanese(japanese):
     """`カンナム(江南)` → `江南`."""
     found = HANJA_IN_PARENS.search(japanese or "")
     return re.sub(r"[\s・･]", "", found.group(1)) if found else None
-
-
-def tidy_chinese(text):
-    """위키데이터 라벨은 `三松站`처럼 역을 뜻하는 글자를 달고 온다."""
-    if not text:
-        return None
-    text = text.strip()
-    if len(text) > 1 and text.endswith(("站", "驛", "驿")):
-        text = text[:-1]
-    return text or None
 
 
 def wikidata_labels(ids):
@@ -181,20 +178,21 @@ def main():
         if not tags:
             continue
         station = {"n": name}
-        japanese = tidy_japanese(tags.get("name:ja"))
+        # 괄호를 뗀 것은 화면용이고, 한자를 건지는 것은 괄호가 붙은 원본에서 한다.
+        raw = strip_tag(tags.get("name:ja"))
         rows[station["n"]] = {
             "e": ENGLISH_OVERRIDES.get(station["n"], tags.get("name:en")),
-            "j": japanese,
+            "j": tidy_japanese(raw),
             "zh": tidy_chinese(
                 tags.get("name:zh-Hans") or tags.get("name:zh") or tags.get("name:zh-Hant")
             ),
-            "hanja": tidy_chinese(hanja_from_japanese(japanese)),
+            "hanja": tidy_chinese(hanja_from_japanese(raw)),
         }
         if not rows[station["n"]]["zh"] and tags.get("wikidata"):
             pending.append((station["n"], tags["wikidata"]))
 
     for name, fixed in MANUAL.items():
-        rows[name] = dict(fixed, hanja=None)
+        rows[name] = dict(fixed, j=tidy_japanese(fixed["j"]), hanja=None)
         pending = [p for p in pending if p[0] != name]
 
     print(f"위키데이터로 메울 역 {len(pending)}개…")

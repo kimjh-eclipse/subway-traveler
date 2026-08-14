@@ -47,6 +47,8 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+from cjk import tidy_chinese, tidy_japanese
+
 try:
     import zhconv
 except ImportError:  # pragma: no cover
@@ -156,39 +158,6 @@ def fetch_places(names):
     elements = json.load(urllib.request.urlopen(request, timeout=200))["elements"]
     CACHE.write_text(json.dumps(elements, ensure_ascii=False), encoding="utf-8")
     return elements
-
-
-# 괄호 안이 가나·로마자뿐이면 그것은 읽는 법이지 이름이 아니다.
-READING_IN_PARENS = re.compile(r"[（(][\u3040-\u30ff\uff66-\uff9fA-Za-z\s・･-]+[)）]")
-
-
-def tidy_japanese(text):
-    """`キョンボックン(景福宮)` → `景福宮`, `光化門(クァンファムン)広場` → `光化門広場`.
-
-    음차와 한자를 나란히 적는 표기가 흔하다. 화면은 좁고, 한자 쪽이 짧고 읽기 쉽다.
-    """
-    if not text:
-        return None
-    text = text.strip()
-    # 앞이 통째로 음차면 뒤가 이름이다 — `ソウルスプ(ソウルの森)`.
-    whole = re.fullmatch(r"([^()（）]+)[（(](.+)[)）]", text)
-    if whole and re.fullmatch(r"[\u30a0-\u30ff\uff66-\uff9fA-Za-z\s・･-]+", whole.group(1)):
-        return whole.group(2).strip() or None
-    return READING_IN_PARENS.sub("", text).strip() or None
-
-
-def tidy_chinese(text):
-    """`奉恩寺站` → `奉恩寺`.
-
-    같은 이름의 요소를 합치다 보면 **지하철역**이 섞여 든다. 봉은사역의 중국어는
-    `奉恩寺站`인데, 우리가 가리키는 것은 절이지 역이 아니다.
-    """
-    if not text:
-        return None
-    text = text.strip()
-    if len(text) > 1 and text.endswith(("站", "驛", "驿")):
-        text = text[:-1]
-    return text or None
 
 
 def merge_tags(candidates):
