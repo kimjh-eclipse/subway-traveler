@@ -53,6 +53,21 @@ class HotspotsAssetTest {
         assertEquals("北村韓屋村", bukchon.traditional)
     }
 
+    /**
+     * 다섯 언어를 지원하는데 한 곳이라도 이름이 비면 그 줄만 한국어로 남는다.
+     * 한국어를 못 읽는 사람에게 보여 주려고 만든 칸이라, 비는 것을 막아 둔다.
+     * 새 곳을 씨앗에 넣고 이름을 안 채우면 여기서 걸린다.
+     */
+    @Test
+    fun `모든 곳에 네 나라 이름이 있다`() {
+        table.spots.forEach {
+            assertTrue("${it.name}: 영어 없음", !it.english.isNullOrBlank())
+            assertTrue("${it.name}: 일본어 없음", !it.japanese.isNullOrBlank())
+            assertTrue("${it.name}: 간체 없음", !it.simplified.isNullOrBlank())
+            assertTrue("${it.name}: 번체 없음", !it.traditional.isNullOrBlank())
+        }
+    }
+
     /** 중국어는 한 벌만 구해 간체·번체로 나눈다. 한쪽만 있으면 나누다 만 것이다. */
     @Test
     fun `중국어는 간체와 번체가 짝을 이룬다`() {
