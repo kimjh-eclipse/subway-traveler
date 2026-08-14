@@ -97,6 +97,23 @@ fun TimelineRow(
                 .weight(1f)
                 .padding(bottom = 10.dp),
         ) {
+            // 기다림이 0분이어도 갈아타는 자리는 내놓는다 — 거기서 다음 열차를 봐야 한다.
+            //
+            // **이동 줄보다 위에 그린다.** [TimelineEntry.transferStation]은 이 구간을
+            // 타는 곳이지 내리는 곳이 아닌데, 아래에 두었더니 `신분당선 강남역` 다음에
+            // `미금역 환승`이 와서 미금역이 어느 구간에 걸린 말인지 읽히지 않았다.
+            // 갈아타고 → 탄다. 읽는 차례가 그렇다.
+            if (entry.transferStation != null || entry.transferWaitMinutes > 0) {
+                TransferWait(
+                    minutes = entry.transferWaitMinutes,
+                    station = entry.transferStation,
+                    entry = entry,
+                    network = network,
+                    live = live,
+                    dayOfWeek = dayOfWeek,
+                )
+                Spacer(Modifier.height(6.dp))
+            }
             when (val segment = entry.segment) {
                 is RouteSegment.Move -> MoveRow(segment, network)
                 is RouteSegment.Stay -> StayCard(
@@ -106,18 +123,6 @@ fun TimelineRow(
                     onToggle = onToggle,
                     network = network,
                     live = live,
-                )
-            }
-            // 기다림이 0분이어도 갈아타는 자리는 내놓는다 — 거기서 다음 열차를 봐야 한다.
-            if (entry.transferStation != null || entry.transferWaitMinutes > 0) {
-                Spacer(Modifier.height(6.dp))
-                TransferWait(
-                    minutes = entry.transferWaitMinutes,
-                    station = entry.transferStation,
-                    entry = entry,
-                    network = network,
-                    live = live,
-                    dayOfWeek = dayOfWeek,
                 )
             }
         }
