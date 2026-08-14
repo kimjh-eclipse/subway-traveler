@@ -19,6 +19,19 @@ object MapAppLinks {
 
     private const val TAG = "MapAppLinks"
 
+    /**
+     * 그 자리를 지도에서 연다. 맛집 검색어를 붙이지 않는다 — `광장시장 맛집`이 아니라
+     * `광장시장`을 찾아야 그곳이 나온다.
+     */
+    fun openPlace(context: Context, query: String, lat: Double?, lon: Double?) {
+        val encoded = Uri.encode(query)
+        val candidates = buildList {
+            if (lat != null && lon != null) add("geo:$lat,$lon?q=$encoded")
+            add("https://www.google.com/maps/search/?api=1&query=$encoded")
+        }
+        launchFirst(context, candidates)
+    }
+
     fun openGoogleMaps(context: Context, place: String, lat: Double?, lon: Double?) {
         val query = Uri.encode("$place ${context.getString(R.string.nearby_food_query)}")
         val candidates = buildList {

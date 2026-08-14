@@ -214,4 +214,15 @@
     <string name="arrival_prev_entering">前駅進入</string>
     <string name="arrival_prev_arrived">前駅到着</string>
     <string name="arrival_prev_departed">前駅発車</string>
+
+    <string name="spots_title">立ち寄れる場所</string>
+    <string name="spots_walk">徒歩 %1$d分</string>
+    <string name="spots_at_station">駅のすぐ前</string>
+    <string name="spots_as_of">%1$s 時点</string>
+    <string name="spot_kind_area">街</string>
+    <string name="spot_kind_landmark">名所</string>
+    <string name="spot_kind_market">市場</string>
+    <string name="spot_kind_park">公園</string>
+    <string name="spot_kind_palace">古宮</string>
+    <string name="spot_kind_shopping">買い物</string>
 </resources>

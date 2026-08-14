@@ -227,4 +227,16 @@
     <string name="arrival_prev_entering">전역 진입</string>
     <string name="arrival_prev_arrived">전역 도착</string>
     <string name="arrival_prev_departed">전역 출발</string>
+
+    <!-- 역에서 내려 갈 만한 곳 -->
+    <string name="spots_title">가 볼 만한 곳</string>
+    <string name="spots_walk">도보 %1$d분</string>
+    <string name="spots_at_station">역 바로 앞</string>
+    <string name="spots_as_of">%1$s 기준</string>
+    <string name="spot_kind_area">동네</string>
+    <string name="spot_kind_landmark">명소</string>
+    <string name="spot_kind_market">시장</string>
+    <string name="spot_kind_park">공원</string>
+    <string name="spot_kind_palace">고궁</string>
+    <string name="spot_kind_shopping">쇼핑</string>
 </resources>

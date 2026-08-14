@@ -222,4 +222,15 @@
     <string name="arrival_prev_entering">進入前一站</string>
     <string name="arrival_prev_arrived">已到前一站</string>
     <string name="arrival_prev_departed">已離開前一站</string>
+
+    <string name="spots_title">值得一去</string>
+    <string name="spots_walk">步行 %1$d 分鐘</string>
+    <string name="spots_at_station">就在站前</string>
+    <string name="spots_as_of">%1$s 更新</string>
+    <string name="spot_kind_area">街區</string>
+    <string name="spot_kind_landmark">景點</string>
+    <string name="spot_kind_market">市場</string>
+    <string name="spot_kind_park">公園</string>
+    <string name="spot_kind_palace">古宮</string>
+    <string name="spot_kind_shopping">購物</string>
 </resources>

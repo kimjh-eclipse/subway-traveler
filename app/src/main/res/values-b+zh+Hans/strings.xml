@@ -217,4 +217,15 @@
     <string name="arrival_prev_entering">进入前一站</string>
     <string name="arrival_prev_arrived">已到前一站</string>
     <string name="arrival_prev_departed">已离开前一站</string>
+
+    <string name="spots_title">值得一去</string>
+    <string name="spots_walk">步行 %1$d 分钟</string>
+    <string name="spots_at_station">就在站前</string>
+    <string name="spots_as_of">%1$s 更新</string>
+    <string name="spot_kind_area">街区</string>
+    <string name="spot_kind_landmark">景点</string>
+    <string name="spot_kind_market">市场</string>
+    <string name="spot_kind_park">公园</string>
+    <string name="spot_kind_palace">古宫</string>
+    <string name="spot_kind_shopping">购物</string>
 </resources>

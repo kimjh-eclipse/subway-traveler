@@ -55,6 +55,7 @@ import com.actimedi.travle.ui.common.ArrivalsPanel
 import com.actimedi.travle.ui.common.stationLabel
 import com.actimedi.travle.ui.common.lineLabel
 import com.actimedi.travle.ui.common.SchedulePanel
+import com.actimedi.travle.ui.common.SpotsPanel
 import com.actimedi.travle.ui.common.TransferGuide
 import com.actimedi.travle.ui.common.durationText
 import com.actimedi.travle.data.SubwayNetwork
@@ -353,6 +354,10 @@ private fun StayCard(
                     Spacer(Modifier.height(12.dp))
                     ArrivalsPanel(stationName = segment.place, network = network, live = true)
                 }
+
+                // 머무는 시간 안에 다녀올 수 있는 곳만. 없으면 스스로 사라진다.
+                Spacer(Modifier.height(12.dp))
+                SpotsPanel(station = segment.place, stayMinutes = segment.minutes)
 
                 Spacer(Modifier.height(12.dp))
                 NearbyFoodLinks(place = segment.place, network = network)

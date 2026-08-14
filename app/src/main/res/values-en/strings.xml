@@ -214,4 +214,15 @@ The diagram\'s lines and station positions come from this. Line topology and rea
     <string name="arrival_prev_entering">Nearing prev.</string>
     <string name="arrival_prev_arrived">At prev.</string>
     <string name="arrival_prev_departed">Left prev.</string>
+
+    <string name="spots_title">Worth a look</string>
+    <string name="spots_walk">%1$d min walk</string>
+    <string name="spots_at_station">By the station</string>
+    <string name="spots_as_of">as of %1$s</string>
+    <string name="spot_kind_area">Area</string>
+    <string name="spot_kind_landmark">Sight</string>
+    <string name="spot_kind_market">Market</string>
+    <string name="spot_kind_park">Park</string>
+    <string name="spot_kind_palace">Palace</string>
+    <string name="spot_kind_shopping">Shopping</string>
 </resources>

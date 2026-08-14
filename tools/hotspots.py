@@ -68,14 +68,14 @@ SEED = {
     "회현": [("남대문시장", MARKET, "남대문시장", "Namdaemun Market")],
     "홍대입구": [
         ("홍대 걷고싶은거리", AREA, "홍대 거리", "Hongdae Street"),
-        ("연남동 경의선숲길", PARK, "연남동", "Yeonnam-dong Gyeongui Line Forest Park", "경의선숲길공원"),
+        ("연남동 경의선숲길", PARK, "연남동", "Gyeongui Line Forest Park", "경의선숲길공원"),
     ],
     "상수": [("상수동 카페거리", AREA, "상수동 카페", "Sangsu Cafe Street")],
     "망원": [("망원시장", MARKET, "망원시장", "Mangwon Market")],
     "성수": [("성수동 카페거리", AREA, "성수동 카페", "Seongsu Cafe Street")],
     "뚝섬": [("서울숲", PARK, "서울숲", "Seoul Forest")],
     "건대입구": [("커먼그라운드", SHOPPING, "커먼그라운드", "Common Ground")],
-    "강남": [("강남역 지하상가", SHOPPING, "강남 쇼핑", "Gangnam Station Underground Shopping")],
+    "강남": [("강남역 지하상가", SHOPPING, "강남 쇼핑", "Gangnam Underground Mall")],
     "신사": [("가로수길", AREA, "가로수길", "Garosu-gil")],
     "압구정로데오": [("압구정 로데오거리", AREA, "압구정 로데오", "Apgujeong Rodeo Street", "압구정로데오거리")],
     "삼성": [("코엑스", SHOPPING, "코엑스", "COEX")],
@@ -201,10 +201,15 @@ def main():
                     "x": round(lon, 5),
                     "w": max(1, round(metres / WALK_METRES_PER_MINUTE)),
                 }
-                for key, tag in (("e", "name:en"), ("j", "name:ja"), ("s", "name:zh")):
+                for key, tag in (("j", "name:ja"), ("s", "name:zh")):
                     if tags.get(tag):
                         spot[key] = tags[tag]
-                spot.setdefault("e", english)
+                # 영문은 SEED가 이긴다. OSM에서 찾은 것은 '그 자리에 있는 물체'의
+                # 이름이라 우리가 가리키려는 곳과 다를 때가 있다 — 북촌한옥마을의
+                # 자리를 잡아 준 것은 `북촌마을안내소`였고, 그 `name:en`은
+                # `Bukchon Hanok Village Information Center`였다. 안내소에 가라고
+                # 한 적이 없다. OSM 이름은 SEED가 비었을 때만 쓴다.
+                spot["e"] = english or tags.get("name:en")
             spots.append(spot)
 
     OUT.write_text(
