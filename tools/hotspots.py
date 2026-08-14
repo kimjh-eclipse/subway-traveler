@@ -18,7 +18,15 @@
 씨앗 목록은 손으로 적는다(아래 SEED). 사실만 적는다 — 이름·역·갈래·검색어.
 설명 문장은 남의 큐레이션을 옮기지 않고 직접 쓴다.
 
-좌표와 다국어 이름은 **OpenStreetMap에서 확인해 채운다**. 노선망과 같은
+좌표와 다국어 이름은 **OpenStreetMap에서 확인해 채운다**. OSM이 명소에
+`name:ja`·`name:zh`를 잘 달지 않아, 비면 그 자리에 붙은 `wikidata` 태그를 따라가
+라벨을 가져온다(역 이름과 같은 방식). 중국어는 한 벌만 구해 [zhconv]로 간체·번체를
+각각 만든다 — 출처마다 어느 쪽인지 제각각이라 그대로 두면 번체 사용자에게 간체가 간다.
+
+    python3 -m venv .venv && .venv/bin/pip install zhconv
+    .venv/bin/python3 tools/hotspots.py
+
+ 노선망과 같은
 출처(ODbL)라 라이선스가 일관되고, 무엇보다 내가 지어낸 좌표를 자산에 남기지
 않는다. OSM에서 못 찾는 자리(`망리단길` 같은 별명 골목)는 역 좌표에 앉히고
 `area`로 표시한다 — 점이 아니라 동네라는 뜻이다.
@@ -34,15 +42,24 @@ import math
 import pathlib
 import re
 import time
+import sys
+import urllib.error
 import urllib.parse
 import urllib.request
+
+try:
+    import zhconv
+except ImportError:  # pragma: no cover
+    sys.exit("zhconv 가 필요하다: python3 -m venv .venv && .venv/bin/pip install zhconv")
 
 ROOT = pathlib.Path(__file__).parent.parent
 NETWORK = ROOT / "app/src/main/assets/subway_map.json"
 OUT = ROOT / "app/src/main/assets/hotspots.json"
 CACHE = ROOT / "tools/.osm_places.json"
+WD_CACHE = ROOT / "tools/.wikidata_spots.json"
 
 OVERPASS = "https://overpass-api.de/api/interpreter"
+WIKIDATA = "https://www.wikidata.org/w/api.php"
 AGENT = {"User-Agent": "subway-traveler/1.0 (tourist spots)"}
 AS_OF = "2026-08"
 
@@ -141,6 +158,133 @@ def fetch_places(names):
     return elements
 
 
+# 괄호 안이 가나·로마자뿐이면 그것은 읽는 법이지 이름이 아니다.
+READING_IN_PARENS = re.compile(r"[（(][\u3040-\u30ff\uff66-\uff9fA-Za-z\s・･-]+[)）]")
+
+
+def tidy_japanese(text):
+    """`キョンボックン(景福宮)` → `景福宮`, `光化門(クァンファムン)広場` → `光化門広場`.
+
+    음차와 한자를 나란히 적는 표기가 흔하다. 화면은 좁고, 한자 쪽이 짧고 읽기 쉽다.
+    """
+    if not text:
+        return None
+    text = text.strip()
+    # 앞이 통째로 음차면 뒤가 이름이다 — `ソウルスプ(ソウルの森)`.
+    whole = re.fullmatch(r"([^()（）]+)[（(](.+)[)）]", text)
+    if whole and re.fullmatch(r"[\u30a0-\u30ff\uff66-\uff9fA-Za-z\s・･-]+", whole.group(1)):
+        return whole.group(2).strip() or None
+    return READING_IN_PARENS.sub("", text).strip() or None
+
+
+def tidy_chinese(text):
+    """`奉恩寺站` → `奉恩寺`.
+
+    같은 이름의 요소를 합치다 보면 **지하철역**이 섞여 든다. 봉은사역의 중국어는
+    `奉恩寺站`인데, 우리가 가리키는 것은 절이지 역이 아니다.
+    """
+    if not text:
+        return None
+    text = text.strip()
+    if len(text) > 1 and text.endswith(("站", "驛", "驿")):
+        text = text[:-1]
+    return text or None
+
+
+def merge_tags(candidates):
+    """같은 이름의 요소가 여럿이면 이름표를 합친다.
+
+    좌표는 역에서 가까운 것을 써야 하지만 이름은 그렇지 않다. 경복궁에서 역에
+    가장 가까웠던 것은 `{"name": "경복궁"}`뿐인 맨 노드였고, `名:ja`·`name:zh`를
+    들고 있는 요소는 조금 더 멀리 있었다. 가까운 쪽을 먼저 쓰되 빈 칸은 뒤엣것이
+    메운다 — 같은 역 반경 안에서 이름까지 똑같으면 같은 곳으로 본다.
+    """
+    merged = {}
+    for _, _, tags in candidates:
+        for key, value in tags.items():
+            merged.setdefault(key, value)
+    return merged
+
+
+def chinese_from_tags(tags):
+    """어느 칸에 들어 있든 한 벌만 꺼낸다. 간체·번체는 뒤에서 만든다."""
+    return tags.get("name:zh-Hans") or tags.get("name:zh") or tags.get("name:zh-Hant")
+
+
+def wikidata_labels(ids):
+    """`wikidata` 태그를 따라가 일본어·중국어 라벨을 가져온다. 45개씩 끊어 부른다."""
+    out = {}
+    for start in range(0, len(ids), 45):
+        chunk = "|".join(ids[start : start + 45])
+        url = (
+            f"{WIKIDATA}?action=wbgetentities&format=json&props=labels"
+            f"&languages=ja|zh|zh-hans|zh-cn|zh-hant|zh-tw|zh-hk&ids={chunk}"
+        )
+        entities = get_json(url).get("entities") or {}
+        for qid, entity in entities.items():
+            labels = entity.get("labels") or {}
+            row = {}
+            if "ja" in labels:
+                row["j"] = labels["ja"]["value"]
+            for code in ("zh-hans", "zh-cn", "zh", "zh-hant", "zh-tw", "zh-hk"):
+                if code in labels:
+                    row["zh"] = labels[code]["value"]
+                    break
+            if row:
+                out[qid] = row
+        time.sleep(0.4)
+    return out
+
+
+def get_json(url):
+    """위키데이터는 몰아치면 429를 준다. 물러섰다 다시 묻는다."""
+    for attempt in range(5):
+        try:
+            return json.load(urllib.request.urlopen(urllib.request.Request(url, headers=AGENT), timeout=60))
+        except urllib.error.HTTPError as error:
+            if error.code != 429 or attempt == 4:
+                raise
+            time.sleep(2 ** attempt)
+    raise RuntimeError("unreachable")
+
+
+def wikidata_search(term):
+    """한국어 이름으로 위키데이터를 찾는다. 후보만 돌려주고 고르지는 않는다."""
+    url = (
+        f"{WIKIDATA}?action=wbsearchentities&format=json&type=item"
+        f"&language=ko&uselang=ko&limit=5&search={urllib.parse.quote(term)}"
+    )
+    return [item["id"] for item in (get_json(url).get("search") or [])]
+
+
+def wikidata_placed(ids):
+    """라벨과 함께 좌표(P625)를 가져온다. 좌표가 없는 항목은 버린다."""
+    out = {}
+    for start in range(0, len(ids), 45):
+        chunk = "|".join(ids[start : start + 45])
+        url = (
+            f"{WIKIDATA}?action=wbgetentities&format=json&props=labels|claims"
+            f"&languages=ja|zh|zh-hans|zh-cn|zh-hant|zh-tw|zh-hk&ids={chunk}"
+        )
+        entities = get_json(url).get("entities") or {}
+        for qid, entity in entities.items():
+            claims = ((entity.get("claims") or {}).get("P625") or [])
+            value = claims[0]["mainsnak"].get("datavalue", {}).get("value") if claims else None
+            if not value:
+                continue
+            labels = entity.get("labels") or {}
+            row = {"y": value["latitude"], "x": value["longitude"]}
+            if "ja" in labels:
+                row["j"] = labels["ja"]["value"]
+            for code in ("zh-hans", "zh-cn", "zh", "zh-hant", "zh-tw", "zh-hk"):
+                if code in labels:
+                    row["zh"] = labels[code]["value"]
+                    break
+            out[qid] = row
+        time.sleep(0.4)
+    return out
+
+
 def main():
     stations = json.loads(NETWORK.read_text(encoding="utf-8"))["stations"]
     by_station = {normalise(s["n"]): s for s in stations}
@@ -167,7 +311,7 @@ def main():
             continue
         found.setdefault(name, []).append((lat, lon, tags))
 
-    spots, missing = [], []
+    spots, missing, pending, weak = [], [], [], {}
     for station_name, entries in SEED.items():
         station = by_station.get(normalise(station_name))
         if station is None:
@@ -176,12 +320,11 @@ def main():
 
         for entry in entries:
             name, kind, query, english = entry[:4]
-            candidates = found.get(osm_name[name], [])
-            best = min(
-                candidates,
+            candidates = sorted(
+                found.get(osm_name[name], []),
                 key=lambda c: haversine(station["y"], station["x"], c[0], c[1]),
-                default=None,
             )
+            best = candidates[0] if candidates else None
             spot = {"n": name, "st": station["n"], "c": kind, "q": query}
 
             if best is None:
@@ -191,7 +334,8 @@ def main():
                 spot["e"] = english
                 missing.append(f"{name} → OSM `{osm_name[name]}` 없음 · 역 앞으로")
             else:
-                lat, lon, tags = best
+                lat, lon, _ = best
+                tags = merge_tags(candidates)
                 metres = haversine(station["y"], station["x"], lat, lon)
                 if metres > 1_500:
                     missing.append(f"{name}({int(metres)}m · 너무 멀어 뺌)")
@@ -201,9 +345,25 @@ def main():
                     "x": round(lon, 5),
                     "w": max(1, round(metres / WALK_METRES_PER_MINUTE)),
                 }
-                for key, tag in (("j", "name:ja"), ("s", "name:zh")):
-                    if tags.get(tag):
-                        spot[key] = tags[tag]
+                # 씨앗이 OSM 이름을 따로 적었다면 그 요소는 **자리를 잡아 주는 대리**라
+                # 이름을 그대로 믿을 수 없다 — 북촌한옥마을의 자리를 잡아 준
+                # `북촌마을안내소`의 `name:ja`는 `…韓屋村の案内所`였다. 안내소에 가라고
+                # 한 적이 없다. 그렇다고 버리면 `연세로`의 `延世路`까지 함께 잃는다.
+                # 대리의 이름은 **약한 후보**로 미뤄 두었다가, 위키데이터가 아무것도
+                # 못 가져왔을 때만 쓴다.
+                names = {
+                    "j": tidy_japanese(tags.get("name:ja")),
+                    "zh": tidy_chinese(chinese_from_tags(tags)),
+                }
+                names = {k: v for k, v in names.items() if v}
+                if len(entry) > 4:
+                    weak[len(spots)] = names
+                else:
+                    spot |= names
+                # OSM이 비워 둔 것은 위키데이터에 물어본다. 이 자리에 붙은 QID라
+                # 이름으로 검색해 엉뚱한 동명이인을 물어 올 위험이 없다.
+                if tags.get("wikidata") and not (spot.get("j") and spot.get("zh")):
+                    pending.append((len(spots), tags["wikidata"]))
                 # 영문은 SEED가 이긴다. OSM에서 찾은 것은 '그 자리에 있는 물체'의
                 # 이름이라 우리가 가리키려는 곳과 다를 때가 있다 — 북촌한옥마을의
                 # 자리를 잡아 준 것은 `북촌마을안내소`였고, 그 `name:en`은
@@ -211,6 +371,64 @@ def main():
                 # 한 적이 없다. OSM 이름은 SEED가 비었을 때만 쓴다.
                 spot["e"] = english or tags.get("name:en")
             spots.append(spot)
+
+    # 위키데이터는 비어 있는 칸만 메운다. OSM 표기가 있으면 그쪽이 이긴다 —
+    # 현지 안내판과 맞을 확률이 높다.
+    labels = wikidata_labels(sorted({qid for _, qid in pending}))
+    for index, qid in pending:
+        row = labels.get(qid) or {}
+        if row.get("j"):
+            spots[index].setdefault("j", tidy_japanese(row["j"]))
+        if row.get("zh"):
+            spots[index].setdefault("zh", tidy_chinese(row["zh"]))
+
+    # 아직 빈 칸은 이름으로 찾아본다. 이름 검색은 동명이인을 물어 오므로 **좌표로
+    # 거른다** — 찾아온 항목이 그 자리에서 1.5km 안에 있어야 받아들인다. `명동거리`
+    # 처럼 OSM에 없는 골목은 위키데이터에도 그 이름이 없어서 동네(`명동`)가 걸리는데,
+    # 같은 곳을 가리키므로 그대로 쓴다.
+    hits = json.loads(WD_CACHE.read_text(encoding="utf-8")) if WD_CACHE.exists() else {}
+    searched = []
+    for index, spot in enumerate(spots):
+        if spot.get("j") and spot.get("zh"):
+            continue
+        if spot["n"] not in hits:
+            hits[spot["n"]] = wikidata_search(spot["n"])
+            time.sleep(1.0)
+        searched += [(index, qid) for qid in hits[spot["n"]]]
+    WD_CACHE.write_text(json.dumps(hits, ensure_ascii=False), encoding="utf-8")
+
+    placed = wikidata_placed(sorted({qid for _, qid in searched}))
+    taken = set()
+    for index, qid in searched:
+        spot, row = spots[index], placed.get(qid)
+        if not row or index in taken:
+            continue
+        if haversine(spot["y"], spot["x"], row["y"], row["x"]) > 1_500:
+            continue
+        if not (row.get("j") or row.get("zh")):
+            continue
+        taken.add(index)
+        if row.get("j"):
+            spot.setdefault("j", tidy_japanese(row["j"]))
+        if row.get("zh"):
+            spot.setdefault("zh", tidy_chinese(row["zh"]))
+
+    # 위키데이터가 못 채운 자리를 대리의 이름으로 메운다.
+    for index, names in weak.items():
+        for key, value in names.items():
+            spots[index].setdefault(key, value)
+
+    # 중국어는 여기서 한 벌을 간체·번체로 나눈다.
+    for spot in spots:
+        chinese = spot.pop("zh", None)
+        if chinese:
+            spot["s"] = zhconv.convert(chinese, "zh-hans")
+            spot["t"] = zhconv.convert(chinese, "zh-hant")
+
+    for spot in spots:
+        holes = [tag for tag, key in (("일", "j"), ("중", "s")) if not spot.get(key)]
+        if holes:
+            missing.append(f"{spot['n']} → {'·'.join(holes)} 없음 · 한국어로 보인다")
 
     OUT.write_text(
         json.dumps(

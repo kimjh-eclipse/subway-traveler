@@ -58,6 +58,23 @@ class HotspotsTest {
         assertEquals("다른 역 명소", table.near("노원").first().localized(Locale.ENGLISH))
     }
 
+    /**
+     * 번체 쓰는 사람에게 간체를 보내지 않는다. 홍콩·대만은 지역만 오고 대륙은
+     * `Hans`가 오기도 해서, 문자와 지역을 함께 본다.
+     */
+    @Test
+    fun `중국어는 간체와 번체를 가른다`() {
+        val spot = Spot("경복궁", "경복궁", "palace", "경복궁", simplified = "景福宫", traditional = "景福宮")
+        assertEquals("景福宫", spot.localized(Locale.forLanguageTag("zh-Hans")))
+        assertEquals("景福宫", spot.localized(Locale.forLanguageTag("zh-CN")))
+        assertEquals("景福宮", spot.localized(Locale.forLanguageTag("zh-Hant")))
+        assertEquals("景福宮", spot.localized(Locale.forLanguageTag("zh-TW")))
+        assertEquals("景福宮", spot.localized(Locale.forLanguageTag("zh-HK")))
+        // 번체가 비면 간체라도 보여 준다. 못 읽는 것보다 낫다.
+        val onlyHans = Spot("망원시장", "망원", "market", "망원시장", simplified = "望远市场")
+        assertEquals("望远市场", onlyHans.localized(Locale.forLanguageTag("zh-Hant")))
+    }
+
     @Test
     fun `갈래를 읽는다`() {
         assertEquals(SpotKind.MARKET, table.near("강남")[1].kind)

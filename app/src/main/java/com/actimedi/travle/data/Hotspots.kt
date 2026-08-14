@@ -53,14 +53,16 @@ data class Spot(
     @SerialName("w") val walkMinutes: Int = 0,
     @SerialName("e") val english: String? = null,
     @SerialName("j") val japanese: String? = null,
-    @SerialName("s") val chinese: String? = null,
+    @SerialName("s") val simplified: String? = null,
+    @SerialName("t") val traditional: String? = null,
 ) {
     val kind: SpotKind get() = SpotKind.of(kindCode)
 
+    /** [locale]로 읽을 이름. 자료가 없으면 한국어 그대로 — 못 읽는 것보다 낫다. */
     fun localized(locale: Locale): String = when (locale.language) {
         "en" -> english
         "ja" -> japanese
-        "zh" -> chinese
+        "zh" -> if (locale.isTraditionalChinese()) traditional ?: simplified else simplified
         else -> null
     } ?: name
 }
