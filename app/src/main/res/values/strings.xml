@@ -252,4 +252,6 @@
     <string name="picker_stay_how_long">얼마나 머무를까요?</string>
     <string name="picker_stay_why">왜 머무는지 (선택)</string>
     <string name="picker_stay_add">담기</string>
+    <string name="board_chip">승차</string>
+    <string name="board_chip_at">%1$s에서 승차</string>
 </resources>

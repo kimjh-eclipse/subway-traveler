@@ -238,4 +238,6 @@ The diagram\'s lines and station positions come from this. Line topology and rea
     <string name="picker_stay_how_long">How long will you stay?</string>
     <string name="picker_stay_why">What for (optional)</string>
     <string name="picker_stay_add">Add</string>
+    <string name="board_chip">Board</string>
+    <string name="board_chip_at">Board at %1$s</string>
 </resources>

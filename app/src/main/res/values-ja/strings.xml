@@ -238,4 +238,6 @@
     <string name="picker_stay_how_long">どのくらい滞在しますか？</string>
     <string name="picker_stay_why">目的（任意）</string>
     <string name="picker_stay_add">追加</string>
+    <string name="board_chip">乗車</string>
+    <string name="board_chip_at">%1$sで乗車</string>
 </resources>

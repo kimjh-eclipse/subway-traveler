@@ -148,6 +148,16 @@ data class TimelineEntry(
      */
     val transferStation: String? = null,
     /**
+     * 갈아타지 않고 **처음 타는** 자리. 이 이동을 시작하는 곳이다.
+     *
+     * [transferStation]은 앞 구간도 이동일 때만 찬다. 그래서 하루의 첫 열차와
+     * 머물다 다시 타는 열차는 어디서 타는지가 화면에 없었다 — `구성 출발`이라고
+     * 적혀 있는데 구성에서 무엇을 몇 시에 타는지는 어디에도 없었다.
+     *
+     * 둘 중 하나만 찬다. 같은 칩을 두 번 그릴 이유가 없다.
+     */
+    val boardingStation: String? = null,
+    /**
      * 타고 온 노선과 그 열차를 탄 곳. 환승 안내가 방향별이라 둘 다 있어야 한다 —
      * 같은 역이라도 어느 쪽에서 왔느냐에 따라 내릴 칸이 갈린다.
      */
@@ -183,6 +193,11 @@ fun Route.toTimeline(): List<TimelineEntry> {
         segment = segment,
         transferWaitMinutes = wait,
         transferStation = if (isTransfer) (previous as RouteSegment.Move).destination else null,
+        boardingStation = if (segment is RouteSegment.Move && !isTransfer) {
+            leftFrom.getOrNull(index)
+        } else {
+            null
+        },
         arrivedOnLine = (previous as? RouteSegment.Move)?.line,
         arrivedFrom = leftFrom.getOrNull(index - 1),
         cumulativeMinutes = segment.end - startTime,

@@ -70,6 +70,39 @@ class RouteModelsTest {
         assertEquals("신도림", timeline[1].transferStation)
         // 갈아타지 않는 첫 구간에는 붙지 않는다.
         assertEquals(null, timeline[0].transferStation)
+        // 대신 처음 타는 자리가 붙는다 — 청량리에서 탄다.
+        assertEquals("청량리", timeline[0].boardingStation)
+        // 갈아타는 자리에는 둘 다 붙지 않는다. 같은 칩을 두 번 그릴 이유가 없다.
+        assertEquals(null, timeline[1].boardingStation)
+    }
+
+    /**
+     * `구성 출발`이라고 적혀 있는데 구성에서 무엇을 몇 시에 타는지가 어디에도
+     * 없었다. 갈아타는 자리에만 칩이 붙고 처음 타는 자리에는 안 붙었기 때문이다.
+     */
+    @Test
+    fun `머물다 다시 타는 자리도 타는 곳이 된다`() {
+        val route = Route(
+            id = "t2",
+            title = "머물다 타기",
+            dayOfWeek = "월요일",
+            createdAt = 0L,
+            origin = "구성",
+            segments = listOf(
+                RouteSegment.Move("수인분당선", "선릉", ClockTime.parse("09:00"), ClockTime.parse("09:30"), 30),
+                RouteSegment.Stay("선릉", "점심", ClockTime.parse("09:30"), ClockTime.parse("10:30"), 60),
+                RouteSegment.Move("2호선", "강남", ClockTime.parse("10:30"), ClockTime.parse("10:35"), 5),
+            ),
+        )
+
+        val timeline = route.toTimeline()
+
+        assertEquals("구성", timeline[0].boardingStation)
+        // 체류 구간은 타는 자리가 아니다.
+        assertEquals(null, timeline[1].boardingStation)
+        // 머물다 다시 타는 자리. 갈아타는 것이 아니라 처음 타는 것이다.
+        assertEquals("선릉", timeline[2].boardingStation)
+        assertEquals(null, timeline[2].transferStation)
     }
 
     /**

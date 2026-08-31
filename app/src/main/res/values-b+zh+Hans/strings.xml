@@ -241,4 +241,6 @@
     <string name="picker_stay_how_long">要停留多久？</string>
     <string name="picker_stay_why">停留原因（可选）</string>
     <string name="picker_stay_add">加入</string>
+    <string name="board_chip">乘车</string>
+    <string name="board_chip_at">在%1$s乘车</string>
 </resources>

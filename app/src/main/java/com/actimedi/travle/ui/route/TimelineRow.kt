@@ -113,6 +113,24 @@ fun TimelineRow(
                     dayOfWeek = dayOfWeek,
                 )
                 Spacer(Modifier.height(6.dp))
+            } else if (entry.boardingStation != null && network.findStation(entry.boardingStation) != null) {
+                // 갈아타지 않고 처음 타는 자리도 똑같이 알아야 한다. 하루의 첫
+                // 열차가 그렇고, 머물다 다시 타는 열차가 그렇다.
+                //
+                // 망에 없는 곳은 내놓지 않는다. `교동마을 LG자이`에서 26-2번 버스를
+                // 타는 자리에 시간표가 있을 리 없다 — 누를 수도 없는 `승차` 칩만
+                // 남아 줄 하나를 차지했다. 환승 칩은 대기 시간이라도 말해 주지만
+                // 이것은 아무것도 말하지 않는다.
+                TransferWait(
+                    minutes = 0,
+                    station = entry.boardingStation,
+                    entry = entry,
+                    network = network,
+                    live = live,
+                    dayOfWeek = dayOfWeek,
+                    isTransfer = false,
+                )
+                Spacer(Modifier.height(6.dp))
             }
             when (val segment = entry.segment) {
                 is RouteSegment.Move -> MoveRow(segment, network)
@@ -466,6 +484,8 @@ private fun TransferWait(
     network: SubwayNetwork,
     live: Boolean,
     dayOfWeek: String,
+    /** 갈아타는 자리인가, 처음 타는 자리인가. 문구만 다르고 안에 든 것은 같다. */
+    isTransfer: Boolean = true,
 ) {
     val known = station != null && network.findStation(station) != null
     var expanded by rememberSaveable(station, live) { mutableStateOf(live) }
@@ -475,6 +495,7 @@ private fun TransferWait(
             minutes = minutes,
             station = station.takeIf { known }?.let { stationLabel(it, network) },
             expanded = expanded,
+            isTransfer = isTransfer,
             onClick = { expanded = !expanded }.takeIf { known },
         )
         if (!known || !expanded) return@Column
@@ -514,6 +535,7 @@ private fun WaitChip(
     minutes: Int,
     station: String?,
     expanded: Boolean,
+    isTransfer: Boolean = true,
     onClick: (() -> Unit)?,
 ) {
     Row(
@@ -534,6 +556,9 @@ private fun WaitChip(
         )
         Text(
             text = when {
+                // 처음 타는 자리. 기다림이 아니라 **어디서 타는가**가 알고 싶은 것이다.
+                !isTransfer && station != null -> stringResource(R.string.board_chip_at, station)
+                !isTransfer -> stringResource(R.string.board_chip)
                 // 시간표에 딱 맞아 기다림이 없는 환승도 있다. "대기 0분"은 말이 안 된다.
                 station == null && minutes <= 0 -> stringResource(R.string.transfer_chip)
                 station == null -> stringResource(R.string.wait_chip, minutes)
