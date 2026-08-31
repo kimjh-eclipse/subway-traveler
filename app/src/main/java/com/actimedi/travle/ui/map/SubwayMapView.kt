@@ -139,6 +139,13 @@ fun SubwayMapView(
      */
     labelAllStations: Boolean = false,
     onStationTap: ((Int) -> Unit)? = null,
+    /**
+     * 역이 아닌 빈 자리를 눌렀을 때. 고른 것을 놓는 자리다.
+     *
+     * 지금까지 빈 자리를 누르면 아무 일도 없었다. 역을 골라 시간표를 펴 놓고 나면
+     * 접을 방법이 없어, 다른 역을 누르거나 탭을 옮겨야 했다.
+     */
+    onEmptyTap: (() -> Unit)? = null,
 ) {
     val measurer = rememberTextMeasurer()
     val density = LocalDensity.current.density
@@ -166,12 +173,13 @@ fun SubwayMapView(
                 }
             }
             .then(
-                if (onStationTap == null) {
+                if (onStationTap == null && onEmptyTap == null) {
                     Modifier
                 } else {
                     Modifier.pointerInput(projected) {
                         detectTapGestures { tap ->
-                            nearestStation(projected, camera, tap, tapSlop)?.let(onStationTap)
+                            val at = nearestStation(projected, camera, tap, tapSlop)
+                            if (at != null) onStationTap?.invoke(at) else onEmptyTap?.invoke()
                         }
                     }
                 },

@@ -136,6 +136,8 @@ fun NetworkMapScreen(
                 selectedStation = selected,
                 labelAllStations = true,
                 onStationTap = { selected = it },
+                // 빈 자리를 누르면 접는다. 펴 놓은 시간표를 닫을 길이 없었다.
+                onEmptyTap = { selected = null },
             )
             Column(
                 modifier = Modifier.align(Alignment.BottomStart).padding(16.dp),
