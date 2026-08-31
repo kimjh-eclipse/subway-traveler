@@ -25,6 +25,7 @@
     <string name="nav_route">Route</string>
     <string name="nav_log">History</string>
     <string name="nav_settings">Settings</string>
+    <string name="nav_map">Map</string>
 
     <string name="empty_filtered">Nothing matches this filter.</string>
 
@@ -225,4 +226,6 @@ The diagram\'s lines and station positions come from this. Line topology and rea
     <string name="spot_kind_park">Park</string>
     <string name="spot_kind_palace">Palace</string>
     <string name="spot_kind_shopping">Shopping</string>
+    <string name="map_browse_hint">Tap a station to see its lines.</string>
+    <string name="map_browse_empty">Tap a station and it will show up here.</string>
 </resources>

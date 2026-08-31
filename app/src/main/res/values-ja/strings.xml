@@ -25,6 +25,7 @@
     <string name="nav_route">ルート</string>
     <string name="nav_log">履歴</string>
     <string name="nav_settings">設定</string>
+    <string name="nav_map">路線図</string>
 
     <string name="empty_filtered">この条件に合う区間はありません。</string>
 
@@ -225,4 +226,6 @@
     <string name="spot_kind_park">公園</string>
     <string name="spot_kind_palace">古宮</string>
     <string name="spot_kind_shopping">買い物</string>
+    <string name="map_browse_hint">駅をタップすると通る路線が見られます。</string>
+    <string name="map_browse_empty">駅をタップするとここに出ます。</string>
 </resources>

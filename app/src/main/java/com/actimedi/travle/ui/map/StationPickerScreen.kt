@@ -173,6 +173,7 @@ fun StationPickerScreen(
                 waters = waters,
                 camera = camera,
                 selectedStation = selected,
+                labelAllStations = true,
                 onStationTap = {
                     selected = it
                     chosenLine = null

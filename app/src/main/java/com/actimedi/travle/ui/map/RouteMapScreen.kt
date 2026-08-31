@@ -98,6 +98,8 @@ fun RouteMapScreen(
                 waters = waters,
                 camera = camera,
                 mapped = mapped,
+                // 경로를 보다가 옆 역이 뭔지 궁금해지는 것은 자연스럽다.
+                labelAllStations = true,
             )
 
             Column(

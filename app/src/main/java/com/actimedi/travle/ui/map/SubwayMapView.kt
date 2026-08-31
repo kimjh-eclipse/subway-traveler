@@ -122,6 +122,15 @@ fun SubwayMapView(
     modifier: Modifier = Modifier,
     mapped: MappedRoute? = null,
     selectedStation: Int? = null,
+    /**
+     * 역마다 점과 이름을 찍을지. 충분히 확대했을 때만 나온다.
+     *
+     * 예전에는 `onStationTap != null`로 갈랐다. 누를 수 있는 화면에서만 이름이
+     * 필요할 것이라 여겼기 때문인데, 그러다 보니 **노선도를 그냥 보는 화면에서
+     * 역 이름이 하나도 안 나왔다**. 누를 수 있는 것과 읽을 수 있는 것은 다른
+     * 이야기다.
+     */
+    labelAllStations: Boolean = false,
     onStationTap: ((Int) -> Unit)? = null,
 ) {
     val measurer = rememberTextMeasurer()
@@ -220,7 +229,7 @@ fun SubwayMapView(
         }
 
         // 2 — every station, once they are far enough apart to aim at.
-        if (onStationTap != null && camera.scale >= StationDotScaleThreshold) {
+        if (labelAllStations && camera.scale >= StationDotScaleThreshold) {
             projected.filterNotNull().forEach { p ->
                 val s = camera.toScreen(p)
                 if (s.x in -40f..(size.width + 40f) && s.y in -40f..(size.height + 40f)) {
@@ -272,7 +281,7 @@ fun SubwayMapView(
                 )
             }
         }
-        if (onStationTap != null && camera.scale >= StationDotScaleThreshold) {
+        if (labelAllStations && camera.scale >= StationDotScaleThreshold) {
             // Nearest the middle of the screen wins a contested slot — whatever the
             // user is looking at should keep its name.
             val centre = Offset(size.width / 2f, size.height / 2f)

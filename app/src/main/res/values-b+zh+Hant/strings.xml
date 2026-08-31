@@ -30,6 +30,7 @@
     <string name="nav_route">路線</string>
     <string name="nav_log">記錄</string>
     <string name="nav_settings">設定</string>
+    <string name="nav_map">線路圖</string>
 
     <string name="empty_filtered">沒有符合條件的路段。</string>
 
@@ -233,4 +234,6 @@
     <string name="spot_kind_park">公園</string>
     <string name="spot_kind_palace">古宮</string>
     <string name="spot_kind_shopping">購物</string>
+    <string name="map_browse_hint">點按車站可查看經過的路線。</string>
+    <string name="map_browse_empty">點按車站後會顯示在這裡。</string>
 </resources>

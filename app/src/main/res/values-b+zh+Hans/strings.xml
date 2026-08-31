@@ -25,6 +25,7 @@
     <string name="nav_route">路线</string>
     <string name="nav_log">记录</string>
     <string name="nav_settings">设置</string>
+    <string name="nav_map">线路图</string>
 
     <string name="empty_filtered">没有符合条件的区间。</string>
 
@@ -228,4 +229,6 @@
     <string name="spot_kind_park">公园</string>
     <string name="spot_kind_palace">古宫</string>
     <string name="spot_kind_shopping">购物</string>
+    <string name="map_browse_hint">点按车站可查看经过的线路。</string>
+    <string name="map_browse_empty">点按车站后会显示在这里。</string>
 </resources>

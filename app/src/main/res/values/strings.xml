@@ -25,6 +25,7 @@
     <string name="nav_route">노선</string>
     <string name="nav_log">기록</string>
     <string name="nav_settings">설정</string>
+    <string name="nav_map">노선도</string>
 
     <string name="empty_filtered">해당 조건에 맞는 구간이 없습니다.</string>
 
@@ -239,4 +240,6 @@
     <string name="spot_kind_park">공원</string>
     <string name="spot_kind_palace">고궁</string>
     <string name="spot_kind_shopping">쇼핑</string>
+    <string name="map_browse_hint">역을 누르면 지나는 노선을 봅니다.</string>
+    <string name="map_browse_empty">역을 누르면 여기에 나옵니다.</string>
 </resources>

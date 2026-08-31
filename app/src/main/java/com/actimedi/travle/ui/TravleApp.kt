@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
@@ -49,6 +50,7 @@ import com.actimedi.travle.data.toDraft
 import com.actimedi.travle.ui.common.AboutScreen
 import com.actimedi.travle.ui.editor.RouteEditorScreen
 import com.actimedi.travle.ui.history.HistoryScreen
+import com.actimedi.travle.ui.map.NetworkMapScreen
 import com.actimedi.travle.ui.map.RouteMapScreen
 import com.actimedi.travle.ui.route.NewRouteButton
 import com.actimedi.travle.ui.route.RouteScreen
@@ -94,6 +96,8 @@ private fun EmptyRouteScreen(onCreateRoute: () -> Unit) {
 
 private enum class TravleTab(val labelRes: Int) {
     ROUTE(R.string.nav_route),
+    /** 경로 없이 노선도만 보는 자리. 처음 온 사람은 도시부터 본다. */
+    MAP(R.string.nav_map),
     LOG(R.string.nav_log),
     SETTINGS(R.string.nav_settings),
 }
@@ -176,6 +180,8 @@ fun TravleApp(viewModel: TravleViewModel = viewModel()) {
                     }
                 }
 
+                TravleTab.MAP -> NetworkMapScreen(network = viewModel.network)
+
                 TravleTab.LOG -> HistoryScreen(
                     routes = viewModel.routes,
                     selectedRouteId = viewModel.selectedRoute?.id,
@@ -212,6 +218,7 @@ private fun BottomNav(selected: TravleTab, onSelect: (TravleTab) -> Unit) {
                 .padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 20.dp),
         ) {
             NavItem(TravleTab.ROUTE, RoundedCornerShape(6.dp), selected, onSelect, Modifier.weight(1f))
+            NavItem(TravleTab.MAP, CutCornerShape(6.dp), selected, onSelect, Modifier.weight(1f))
             NavItem(TravleTab.LOG, CircleShape, selected, onSelect, Modifier.weight(1f))
             NavItem(TravleTab.SETTINGS, RoundedCornerShape(4.dp), selected, onSelect, Modifier.weight(1f))
         }
