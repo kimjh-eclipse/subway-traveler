@@ -32,6 +32,25 @@ class RouteSearchTest {
         ),
     )
 
+    /**
+     * 시간표 조회는 '어디로 가는 열차인가'로 방향을 가른다. 노선도에서 역 하나를
+     * 짚었을 때 그 방향을 옆 역에서 얻는다.
+     */
+    @Test
+    fun `옆 역이 곧 방향이다`() {
+        // 가운데 역은 양옆이 있다.
+        assertEquals(listOf(1, 3), network.neighboursOn(2, "1호선"))
+        // 종점은 한쪽뿐이다.
+        assertEquals(listOf(1), network.neighboursOn(0, "1호선"))
+        assertEquals(listOf(4), network.neighboursOn(5, "1호선"))
+        // 지나지 않는 노선을 물으면 빈손이다 — `나`는 2호선에 없다.
+        assertTrue(network.neighboursOn(1, "2호선").isEmpty())
+        assertTrue(network.neighboursOn(0, "없는노선").isEmpty())
+        // 갈아타는 역은 노선마다 옆이 다르다.
+        assertEquals(listOf(0), network.neighboursOn(6, "2호선"))
+        assertEquals(listOf(5), network.neighboursOn(6, "3호선"))
+    }
+
     @Test
     fun `fastest takes the short hop even though it means changing`() {
         val result = RouteSearch.find(network, "가", "바", SearchGoal.FASTEST)!!

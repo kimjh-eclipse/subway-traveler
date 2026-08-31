@@ -227,6 +227,28 @@ data class SubwayNetwork(
      * i.e. both stations sit on the same branch. Shortest run first, so the most
      * direct option is the one the editor auto-fills.
      */
+    /**
+     * 이 역에서 그 노선으로 갈 수 있는 **바로 옆 역**들. 곧 방향이다.
+     *
+     * 시간표 조회는 '어디로 가는 열차인가'를 알아야 방향을 가른다. 종점 이름을
+     * 쓰면 지선·급행에서 어긋나므로 옆 역을 쓴다 — 옆 역을 지나지 않는 열차는
+     * 그 방향 열차가 아니다.
+     *
+     * 2호선처럼 순환하는 노선도 옆이 둘이라 그대로 성립한다. 종점에서는 하나뿐이다.
+     */
+    fun neighboursOn(stationIndex: Int, lineName: String): List<Int> {
+        val line = lines.firstOrNull { it.name == lineName } ?: return emptyList()
+        val out = LinkedHashSet<Int>()
+        line.paths.forEach { path ->
+            path.forEachIndexed { at, index ->
+                if (index != stationIndex) return@forEachIndexed
+                path.getOrNull(at - 1)?.let(out::add)
+                path.getOrNull(at + 1)?.let(out::add)
+            }
+        }
+        return out.toList()
+    }
+
     fun linesBetween(fromIndex: Int, toIndex: Int): List<String> {
         if (fromIndex == toIndex) return emptyList()
         return lines.mapNotNull { line ->

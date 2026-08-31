@@ -14,6 +14,19 @@ enum class DayType {
             dayOfWeek.startsWith("일") -> HOLIDAY
             else -> WEEKDAY
         }
+
+        /**
+         * 오늘. 경로에 딸리지 않은 화면 — 노선도에서 역 하나를 들여다볼 때 —
+         * 에서 쓴다.
+         *
+         * 공휴일은 가리지 못한다. 달력을 들고 있지 않아서다. 평일 공휴일에는
+         * 실제와 다른 시간표를 보여 주게 된다.
+         */
+        fun today(): DayType = when (java.time.LocalDate.now().dayOfWeek) {
+            java.time.DayOfWeek.SATURDAY -> SATURDAY
+            java.time.DayOfWeek.SUNDAY -> HOLIDAY
+            else -> WEEKDAY
+        }
     }
 }
 

@@ -226,7 +226,7 @@
     <string name="spot_kind_park">公園</string>
     <string name="spot_kind_palace">古宮</string>
     <string name="spot_kind_shopping">買い物</string>
-    <string name="map_browse_hint">駅をタップすると通る路線が見られます。</string>
+    <string name="map_browse_hint">駅と路線を順にタップすると時刻表が見られます。</string>
     <string name="map_browse_empty">駅をタップするとここに出ます。</string>
     <string name="editor_add_from_map">地図から追加</string>
     <string name="picker_add_start">出発</string>
@@ -240,4 +240,5 @@
     <string name="picker_stay_add">追加</string>
     <string name="board_chip">乗車</string>
     <string name="board_chip_at">%1$sで乗車</string>
+    <string name="timetable_day">%1$s基準</string>
 </resources>

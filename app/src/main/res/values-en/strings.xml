@@ -226,7 +226,7 @@ The diagram\'s lines and station positions come from this. Line topology and rea
     <string name="spot_kind_park">Park</string>
     <string name="spot_kind_palace">Palace</string>
     <string name="spot_kind_shopping">Shopping</string>
-    <string name="map_browse_hint">Tap a station to see its lines.</string>
+    <string name="map_browse_hint">Tap a station, then a line, to see its timetable.</string>
     <string name="map_browse_empty">Tap a station and it will show up here.</string>
     <string name="editor_add_from_map">Build on the map</string>
     <string name="picker_add_start">Start</string>
@@ -240,4 +240,5 @@ The diagram\'s lines and station positions come from this. Line topology and rea
     <string name="picker_stay_add">Add</string>
     <string name="board_chip">Board</string>
     <string name="board_chip_at">Board at %1$s</string>
+    <string name="timetable_day">for %1$s</string>
 </resources>

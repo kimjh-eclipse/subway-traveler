@@ -229,7 +229,7 @@
     <string name="spot_kind_park">公园</string>
     <string name="spot_kind_palace">古宫</string>
     <string name="spot_kind_shopping">购物</string>
-    <string name="map_browse_hint">点按车站可查看经过的线路。</string>
+    <string name="map_browse_hint">依次点按车站和线路即可查看时刻表。</string>
     <string name="map_browse_empty">点按车站后会显示在这里。</string>
     <string name="editor_add_from_map">在地图上添加</string>
     <string name="picker_add_start">出发</string>
@@ -243,4 +243,5 @@
     <string name="picker_stay_add">加入</string>
     <string name="board_chip">乘车</string>
     <string name="board_chip_at">在%1$s乘车</string>
+    <string name="timetable_day">以%1$s为准</string>
 </resources>

@@ -1,5 +1,12 @@
 package com.actimedi.travle.ui.map
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.res.stringArrayResource
+import com.actimedi.travle.data.ClockTime
+import com.actimedi.travle.data.DayType
+import com.actimedi.travle.ui.common.DayTimetable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -82,8 +89,15 @@ fun NetworkMapScreen(
 
     // 서울 한가운데에서, 이름이 읽히는 배율로 연다. 전체를 담아 열면 글자가 하나도
     // 안 나와서 '이름 없는 노선도'를 다시 보게 된다.
-    LaunchedEffect(camera.viewport, wholeBounds) {
+    //
+    // 처음 한 번, 그리고 도식↔지리를 바꿀 때만 잡는다. 화면 크기가 바뀔 때마다
+    // 다시 잡았더니, 시간표를 펴서 지도가 짧아지는 순간 **배율이 줄어 역 이름이
+    // 통째로 사라졌다** — 이름을 보여 주려고 만든 화면인데.
+    var framedFor by remember { mutableStateOf<MapStyle?>(null) }
+    LaunchedEffect(camera.viewport, wholeBounds, style) {
         val whole = wholeBounds ?: return@LaunchedEffect
+        if (camera.viewport.width <= 0f || framedFor == style) return@LaunchedEffect
+        framedFor = style
         camera.centerOn(whole.center, camera.fitScaleFor(whole) * FirstOpenScale)
     }
 
@@ -160,9 +174,23 @@ fun NetworkMapScreen(
     }
 }
 
-/** 누른 역. 아무것도 안 눌렀으면 무엇을 하면 되는지만 적는다. */
+/**
+ * 누른 역. 아무것도 안 눌렀으면 무엇을 하면 되는지만 적는다.
+ *
+ * 노선을 고르면 그 역의 하루치 시간표를 편다. 방향은 **바로 옆 역**으로 고른다 —
+ * 시간표 조회가 '어디로 가는 열차인가'로 방향을 가르기 때문이다.
+ */
 @Composable
 private fun StationBar(network: SubwayNetwork, selected: Int?) {
+    var line by remember(selected) { mutableStateOf<String?>(null) }
+    var towards by remember(selected, line) { mutableStateOf<Int?>(null) }
+    val days = stringArrayResource(R.array.days_of_week)
+    val today = remember { java.time.LocalDate.now().dayOfWeek.value - 1 }
+    val now = remember {
+        val at = java.time.LocalTime.now()
+        ClockTime(at.hour * 60 + at.minute)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -194,25 +222,70 @@ private fun StationBar(network: SubwayNetwork, selected: Int?) {
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                station.lines.forEach { line -> LineBadge(line) }
+                station.lines.forEach { name ->
+                    LineChip(
+                        line = name,
+                        isSelected = name == line,
+                        // 한 번 더 누르면 접는다. 지도를 다시 넓게 보고 싶을 때가 있다.
+                        onClick = { line = if (name == line) null else name },
+                    )
+                }
             }
         }
+
+        val chosen = line ?: return@Column
+        // 옆 역이 곧 방향이다. 종점에서는 하나뿐이라 고를 것이 없다.
+        val ways = remember(selected, chosen) { network.neighboursOn(selected, chosen) }
+        if (ways.isEmpty()) return@Column
+        val heading = towards ?: ways.first()
+
+        if (ways.size > 1) {
+            Spacer(Modifier.height(8.dp))
+            Row(
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                ways.forEach { way ->
+                    WayChip(
+                        label = stationLabel(network.stations[way].name, network),
+                        isSelected = way == heading,
+                        onClick = { towards = way },
+                    )
+                }
+            }
+        }
+
+        Spacer(Modifier.height(12.dp))
+        DayTimetable(
+            station = station.name,
+            line = chosen,
+            towards = network.stations[heading].name,
+            towardsLabel = stationLabel(network.stations[heading].name, network),
+            dayType = DayType.today(),
+            dayLabel = days.getOrElse(today) { "" },
+            now = now,
+            modifier = Modifier
+                // 하루치는 스무 줄이 넘는다. 지도가 사라지지 않게 여기서 자른다.
+                .heightIn(max = 260.dp)
+                .verticalScroll(rememberScrollState()),
+        )
     }
 }
 
-/** 지나는 노선. 고르는 것이 아니라 알리는 것이라 누를 수 없다. */
+/** 어느 쪽으로 가는 열차인가. 옆 역 이름으로 부른다. */
 @Composable
-private fun LineBadge(line: String) {
-    val color = lineColorFor(line)
+private fun WayChip(label: String, isSelected: Boolean, onClick: () -> Unit) {
     Text(
-        text = lineLabel(line),
+        text = label,
         fontFamily = SuitFamily,
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.SemiBold,
         fontSize = 12.sp,
-        color = color,
+        color = if (isSelected) AmColor.White else AmColor.Navy,
         modifier = Modifier
             .clip(CircleShape)
-            .background(color.copy(alpha = 0.12f))
+            .background(if (isSelected) AmColor.Navy else RouteColor.TabTrack)
+            .clickable(onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 7.dp),
     )
 }
+

@@ -240,7 +240,7 @@
     <string name="spot_kind_park">공원</string>
     <string name="spot_kind_palace">고궁</string>
     <string name="spot_kind_shopping">쇼핑</string>
-    <string name="map_browse_hint">역을 누르면 지나는 노선을 봅니다.</string>
+    <string name="map_browse_hint">역과 노선을 차례로 누르면 그 역의 시간표를 봅니다.</string>
     <string name="map_browse_empty">역을 누르면 여기에 나옵니다.</string>
     <string name="editor_add_from_map">지도에서 담기</string>
     <string name="picker_add_start">출발</string>
@@ -254,4 +254,5 @@
     <string name="picker_stay_add">담기</string>
     <string name="board_chip">승차</string>
     <string name="board_chip_at">%1$s에서 승차</string>
+    <string name="timetable_day">%1$s 기준</string>
 </resources>

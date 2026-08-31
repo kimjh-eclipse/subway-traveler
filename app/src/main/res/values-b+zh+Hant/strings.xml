@@ -234,7 +234,7 @@
     <string name="spot_kind_park">公園</string>
     <string name="spot_kind_palace">古宮</string>
     <string name="spot_kind_shopping">購物</string>
-    <string name="map_browse_hint">點按車站可查看經過的路線。</string>
+    <string name="map_browse_hint">依序點按車站和路線即可查看時刻表。</string>
     <string name="map_browse_empty">點按車站後會顯示在這裡。</string>
     <string name="editor_add_from_map">在地圖上新增</string>
     <string name="picker_add_start">出發</string>
@@ -248,4 +248,5 @@
     <string name="picker_stay_add">加入</string>
     <string name="board_chip">乘車</string>
     <string name="board_chip_at">在%1$s乘車</string>
+    <string name="timetable_day">以%1$s為準</string>
 </resources>
