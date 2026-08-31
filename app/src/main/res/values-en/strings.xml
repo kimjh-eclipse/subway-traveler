@@ -234,4 +234,8 @@ The diagram\'s lines and station positions come from this. Line topology and rea
     <string name="picker_add_stay">Stay</string>
     <string name="picker_build_empty">Tap a station, then add it as a start, a change, or a stay.</string>
     <string name="picker_build_count">%1$d added. Keep going, or close when you are done.</string>
+    <string name="picker_add_final">Last stop</string>
+    <string name="picker_stay_how_long">How long will you stay?</string>
+    <string name="picker_stay_why">What for (optional)</string>
+    <string name="picker_stay_add">Add</string>
 </resources>

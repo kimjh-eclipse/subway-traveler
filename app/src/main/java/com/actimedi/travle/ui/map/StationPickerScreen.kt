@@ -1,6 +1,13 @@
 package com.actimedi.travle.ui.map
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.TextStyle
+import com.actimedi.travle.data.TravelTimes
+import com.actimedi.travle.ui.common.durationText
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,6 +20,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -70,6 +78,15 @@ private const val PickerZoomFactor = 8f
 private const val FirstOpenZoomFactor = 4f
 
 /**
+ * 지도에서 담을 때 고르는 자리.
+ *
+ * [StopKind]와 따로 둔다. `종착`은 정거장의 성질이 아니라 **거기서 끝난다**는 뜻이라
+ * 담은 뒤 지도를 닫아야 하고, `출발`은 새 칸을 붙이는 대신 이미 있는 첫 칸을 채운다.
+ * 편집기가 이 넷을 각각 다르게 받는다.
+ */
+enum class PickKind { START, TRANSFER, STAY, FINAL }
+
+/**
  * Pick a station by tapping the map.
  *
  * Returns both the station name and the line the user tapped in the chip row, so
@@ -85,11 +102,17 @@ fun StationPickerScreen(
     /** Where to open the camera — usually the previous stop on the route. */
     focusStation: String? = null,
     /**
-     * 담기 모드. 주면 아래 칸이 `이 역으로` 대신 **출발·경유·머무름** 셋으로 바뀌고,
-     * 하나를 누를 때마다 경로에 붙인 뒤 화면을 닫지 않는다 — 지도를 보며 여러 역을
-     * 이어 담는 것이 이 모드의 전부다.
+     * 담기 모드. 주면 아래 칸이 `이 역으로` 대신 **경유·머무르기·종착**으로 바뀌고,
+     * 하나를 고를 때마다 경로에 붙인 뒤 화면을 닫지 않는다 — 지도를 보며 여러 역을
+     * 이어 담는 것이 이 모드의 전부다. 종착만은 담고 닫는다.
      */
-    onAdd: ((station: String, line: String?, kind: StopKind) -> Unit)? = null,
+    onAdd: ((
+        station: String,
+        line: String?,
+        kind: PickKind,
+        stayMinutes: Int,
+        memo: String,
+    ) -> Unit)? = null,
     /** 지금까지 담은 역. 지도에 번호로 찍는다. */
     addedStations: List<String> = emptyList(),
     /** 출발지가 아직 비었는가. 비었으면 첫 역은 출발로만 담을 수 있다. */
@@ -151,7 +174,9 @@ fun StationPickerScreen(
         modifier = modifier
             .fillMaxSize()
             .background(AmColor.SurfacePage)
-            .statusBarsPadding(),
+            .statusBarsPadding()
+            // 머무는 이유를 적을 때 키보드가 그 칸을 덮지 않게 한다.
+            .imePadding(),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp),
@@ -246,8 +271,8 @@ fun StationPickerScreen(
             onChooseLine = { chosenLine = it },
             onConfirm = { index -> onPick(network.stations[index].name, chosenLine) },
             onAdd = onAdd?.let { add ->
-                { index, kind ->
-                    add(network.stations[index].name, chosenLine, kind)
+                { index, kind, minutes, memo ->
+                    add(network.stations[index].name, chosenLine, kind, minutes, memo)
                     // 방금 담은 역을 한가운데로. 배율은 건드리지 않는다 — 이어서 담을
                     // 곳은 대개 그 근처다.
                     projected.getOrNull(index)?.let { camera.centerOn(it, camera.scale) }
@@ -270,10 +295,20 @@ private fun SelectionBar(
     chosenLine: String?,
     onChooseLine: (String?) -> Unit,
     onConfirm: (Int) -> Unit,
-    onAdd: ((Int, StopKind) -> Unit)? = null,
+    onAdd: ((Int, PickKind, Int, String) -> Unit)? = null,
     needsOrigin: Boolean = false,
     addedCount: Int = 0,
 ) {
+    // 머무르기를 고른 뒤 얼마나·왜를 정하는 중인가.
+    var isPlanningStay by remember { mutableStateOf(false) }
+    var stayMinutes by remember { mutableIntStateOf(TravelTimes.DEFAULT_STAY_MINUTES) }
+    var stayMemo by remember { mutableStateOf("") }
+    // 다른 역으로 옮기면 정하던 것은 없던 일이 된다.
+    LaunchedEffect(selected) {
+        isPlanningStay = false
+        stayMemo = ""
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -324,28 +359,50 @@ private fun SelectionBar(
         }
 
         // 담기 모드 — 어떤 자리로 담을지 고르는 순간이 곧 담는 순간이다.
+        // 다만 머무르기만은 한 번 더 묻는다: 얼마나, 그리고 왜.
         if (onAdd != null) {
             Spacer(Modifier.height(12.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (needsOrigin) {
-                    // 출발지가 비어 있으면 첫 역은 출발일 수밖에 없다. 경유·머무름을
-                    // 함께 내놓으면 고를 수 있는 것처럼 보이고, 눌러도 아무 일이 없다.
-                    KindAddButton(
-                        label = stringResource(R.string.picker_add_start),
-                        marker = { StartMarker() },
-                        modifier = Modifier.weight(1f),
-                    ) { onAdd(selected, StopKind.STAY) }
-                } else {
-                    KindAddButton(
-                        label = stringResource(R.string.picker_add_transfer),
-                        marker = { TransferMarker() },
-                        modifier = Modifier.weight(1f),
-                    ) { onAdd(selected, StopKind.TRANSFER) }
-                    KindAddButton(
-                        label = stringResource(R.string.picker_add_stay),
-                        marker = { StayMarker() },
-                        modifier = Modifier.weight(1f),
-                    ) { onAdd(selected, StopKind.STAY) }
+            if (isPlanningStay) {
+                StayForm(
+                    minutes = stayMinutes,
+                    onMinutes = { stayMinutes = it },
+                    memo = stayMemo,
+                    onMemo = { stayMemo = it },
+                    onCancel = { isPlanningStay = false },
+                    onAdd = {
+                        onAdd(selected, PickKind.STAY, stayMinutes, stayMemo.trim())
+                        isPlanningStay = false
+                        stayMinutes = TravelTimes.DEFAULT_STAY_MINUTES
+                        stayMemo = ""
+                    },
+                )
+            } else {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (needsOrigin) {
+                        // 출발지가 비어 있으면 첫 역은 출발일 수밖에 없다. 나머지를
+                        // 함께 내놓으면 고를 수 있는 것처럼 보이고, 눌러도 아무 일이 없다.
+                        KindAddButton(
+                            label = stringResource(R.string.picker_add_start),
+                            marker = { StartMarker() },
+                            modifier = Modifier.weight(1f),
+                        ) { onAdd(selected, PickKind.START, 0, "") }
+                    } else {
+                        KindAddButton(
+                            label = stringResource(R.string.picker_add_transfer),
+                            marker = { TransferMarker() },
+                            modifier = Modifier.weight(1f),
+                        ) { onAdd(selected, PickKind.TRANSFER, 0, "") }
+                        KindAddButton(
+                            label = stringResource(R.string.picker_add_stay),
+                            marker = { StayMarker() },
+                            modifier = Modifier.weight(1f),
+                        ) { isPlanningStay = true }
+                        KindAddButton(
+                            label = stringResource(R.string.picker_add_final),
+                            marker = { FinalMarker() },
+                            modifier = Modifier.weight(1f),
+                        ) { onAdd(selected, PickKind.FINAL, 0, "") }
+                    }
                 }
             }
         }
@@ -467,5 +524,132 @@ private fun StayMarker() {
         contentAlignment = Alignment.Center,
     ) {
         Box(Modifier.size(5.dp).clip(CircleShape).background(AmColor.Blue))
+    }
+}
+
+/** 머물 만한 시간. 자주 쓰는 것만 내놓고, 어긋나는 값은 편집기에서 분 단위로 고친다. */
+private val StayChoices = listOf(15, 30, 45, 60, 90, 120, 180)
+
+/**
+ * 얼마나, 그리고 왜 머무는가.
+ *
+ * 시간을 안 물으면 전부 30분으로 담기고, 지도에서 만든 하루는 실제와 어긋난 채
+ * 저장된다. 이유는 선택이다 — `점심`이라고만 적어 두어도 나중에 그 카드가 무엇을
+ * 하려던 자리였는지 알아볼 수 있다.
+ */
+@Composable
+private fun StayForm(
+    minutes: Int,
+    onMinutes: (Int) -> Unit,
+    memo: String,
+    onMemo: (String) -> Unit,
+    onCancel: () -> Unit,
+    onAdd: () -> Unit,
+) {
+    Column {
+        Text(
+            text = stringResource(R.string.picker_stay_how_long),
+            fontFamily = SuitFamily,
+            fontWeight = FontWeight.Medium,
+            fontSize = 11.sp,
+            color = RouteColor.DetailLabel,
+        )
+        Spacer(Modifier.height(6.dp))
+        Row(
+            modifier = Modifier.horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            StayChoices.forEach { choice ->
+                val isSelected = choice == minutes
+                Text(
+                    text = durationText(choice),
+                    fontFamily = SuitFamily,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.sp,
+                    color = if (isSelected) AmColor.White else AmColor.Blue,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(if (isSelected) AmColor.Blue else RouteColor.StayBadgeFill)
+                        .clickable { onMinutes(choice) }
+                        .padding(horizontal = 13.dp, vertical = 7.dp),
+                )
+            }
+        }
+        Spacer(Modifier.height(10.dp))
+        BasicTextField(
+            value = memo,
+            onValueChange = onMemo,
+            singleLine = true,
+            textStyle = TextStyle(
+                fontFamily = SuitFamily,
+                fontWeight = FontWeight.Medium,
+                fontSize = 13.sp,
+                color = AmColor.Black,
+            ),
+            cursorBrush = SolidColor(AmColor.Blue),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .background(AmColor.SurfacePage)
+                // 테두리가 없으면 적는 칸인지 안내 문구인지 알 수 없다.
+                .border(1.dp, AmColor.Line, RoundedCornerShape(12.dp))
+                .padding(horizontal = 14.dp, vertical = 12.dp),
+            decorationBox = { field ->
+                if (memo.isEmpty()) {
+                    Text(
+                        text = stringResource(R.string.picker_stay_why),
+                        fontFamily = SuitFamily,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 13.sp,
+                        color = RouteColor.StayLabel,
+                    )
+                }
+                field()
+            },
+        )
+        Spacer(Modifier.height(10.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                text = stringResource(R.string.editor_cancel),
+                fontFamily = SuitFamily,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 13.sp,
+                color = RouteColor.StayLabel,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .clickable(onClick = onCancel)
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
+            )
+            Text(
+                text = stringResource(R.string.picker_stay_add),
+                fontFamily = SuitFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = 13.sp,
+                color = AmColor.White,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(CircleShape)
+                    .background(AmColor.Blue)
+                    .clickable(onClick = onAdd)
+                    .padding(vertical = 10.dp),
+            )
+        }
+    }
+}
+
+/** 종착 — 시간표의 마지막 점. 속을 채워 여기서 끝난다는 것을 보인다. */
+@Composable
+private fun FinalMarker() {
+    Box(
+        modifier = Modifier
+            .size(14.dp)
+            .clip(CircleShape)
+            .background(AmColor.White)
+            .border(2.dp, AmColor.Navy, CircleShape),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(Modifier.size(7.dp).clip(CircleShape).background(AmColor.Navy))
     }
 }

@@ -242,4 +242,8 @@
     <string name="picker_add_stay">停留</string>
     <string name="picker_build_empty">點按車站，然後選擇出發、轉乘或停留加入行程。</string>
     <string name="picker_build_count">已加入 %1$d 處。可繼續新增，或關閉。</string>
+    <string name="picker_add_final">終點</string>
+    <string name="picker_stay_how_long">要停留多久？</string>
+    <string name="picker_stay_why">停留原因（選填）</string>
+    <string name="picker_stay_add">加入</string>
 </resources>

@@ -72,6 +72,7 @@ import androidx.compose.ui.res.stringArrayResource
 import com.actimedi.travle.ui.common.durationText
 import com.actimedi.travle.ui.common.problemText
 import com.actimedi.travle.ui.map.LineChip
+import com.actimedi.travle.ui.map.PickKind
 import com.actimedi.travle.ui.map.StationPickerScreen
 import com.actimedi.travle.ui.theme.AmColor
 import com.actimedi.travle.ui.theme.RouteColor
@@ -196,6 +197,20 @@ fun RouteEditorScreen(
         if (onlyChoice != null) applySearch(stopId, onlyChoice) else searchStopId = stopId
     }
 
+    /**
+     * 지도를 닫고 나온 자리에서 하는 일.
+     *
+     * 담는 동안에는 길찾기를 띄우지 않았다 — 두 창이 겹치면 지도가 가린다. 여기서
+     * 직결 노선이 없어 비어 있는 첫 구간만 묻는다.
+     */
+    fun finishBuilding() {
+        isBuildingOnMap = false
+        searchStopId = draft.stops
+            .drop(1)
+            .firstOrNull { it.line.isBlank() && it.name.isNotBlank() }
+            ?.id
+    }
+
     if (isBuildingOnMap) {
         // 출발지가 비어 있으면 첫 역은 출발이다. 그 자리는 이미 만들어져 있으므로
         // 새로 붙이지 않고 채운다 — 붙이면 이름 없는 첫 칸이 남는다.
@@ -204,18 +219,11 @@ fun RouteEditorScreen(
             network = network,
             initialStation = null,
             focusStation = draft.stops.lastOrNull { it.name.isNotBlank() }?.name,
-            onCancel = {
-                isBuildingOnMap = false
-                // 담는 동안에는 길찾기를 띄우지 않았다. 두 창이 겹치면 지도가 가려진다.
-                // 다 담고 나온 자리에서, 직결 노선이 없어 비어 있는 첫 구간만 묻는다.
-                searchStopId = draft.stops
-                    .drop(1)
-                    .firstOrNull { it.line.isBlank() && it.name.isNotBlank() }
-                    ?.id
-            },
+            onCancel = { finishBuilding() },
             onPick = { _, _ -> },
-            onAdd = { station, line, kind ->
-                draft = if (draft.stops.firstOrNull()?.name.isNullOrBlank()) {
+            onAdd = { station, line, kind, stayMinutes, memo ->
+                draft = if (kind == PickKind.START) {
+                    // 출발지 칸은 이미 있다. 새로 붙이면 이름 없는 첫 칸이 남는다.
                     val first = draft.stops.first()
                     draft.copy(stops = draft.stops.toMutableList().apply {
                         this[0] = first.copy(name = station, kind = StopKind.STAY)
@@ -224,17 +232,21 @@ fun RouteEditorScreen(
                     draft.copy(
                         stops = draft.stops + RouteStop(
                             name = station,
-                            kind = kind,
+                            // 종착은 정거장의 성질이 아니라 거기서 끝난다는 뜻이다.
+                            // 마지막 칸의 머무는 시간은 어차피 0으로 계산된다.
+                            kind = if (kind == PickKind.TRANSFER) StopKind.TRANSFER else StopKind.STAY,
                             line = line.orEmpty(),
                             lineIsManual = line != null,
-                            pauseMinutes = if (kind == StopKind.STAY) {
-                                TravelTimes.DEFAULT_STAY_MINUTES
-                            } else {
-                                TravelTimes.DEFAULT_TRANSFER_WAIT
+                            memo = memo,
+                            pauseMinutes = when (kind) {
+                                PickKind.STAY -> stayMinutes
+                                PickKind.TRANSFER -> TravelTimes.DEFAULT_TRANSFER_WAIT
+                                else -> 0
                             },
                         ),
                     )
                 }.withAutoLines(network)
+                if (kind == PickKind.FINAL) finishBuilding()
             },
             addedStations = draft.stops.map { it.name }.filter { it.isNotBlank() },
             needsOrigin = needsOrigin,

@@ -234,4 +234,8 @@
     <string name="picker_add_stay">滞在</string>
     <string name="picker_build_empty">駅をタップして、出発・乗換・滞在のどれかで追加します。</string>
     <string name="picker_build_count">%1$d か所を追加しました。続けるか、閉じてください。</string>
+    <string name="picker_add_final">終着</string>
+    <string name="picker_stay_how_long">どのくらい滞在しますか？</string>
+    <string name="picker_stay_why">目的（任意）</string>
+    <string name="picker_stay_add">追加</string>
 </resources>
