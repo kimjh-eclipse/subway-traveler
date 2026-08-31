@@ -228,4 +228,10 @@ The diagram\'s lines and station positions come from this. Line topology and rea
     <string name="spot_kind_shopping">Shopping</string>
     <string name="map_browse_hint">Tap a station to see its lines.</string>
     <string name="map_browse_empty">Tap a station and it will show up here.</string>
+    <string name="editor_add_from_map">Build on the map</string>
+    <string name="picker_add_start">Start</string>
+    <string name="picker_add_transfer">Change</string>
+    <string name="picker_add_stay">Stay</string>
+    <string name="picker_build_empty">Tap a station, then add it as a start, a change, or a stay.</string>
+    <string name="picker_build_count">%1$d added. Keep going, or close when you are done.</string>
 </resources>

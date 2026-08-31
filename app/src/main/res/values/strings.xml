@@ -242,4 +242,10 @@
     <string name="spot_kind_shopping">쇼핑</string>
     <string name="map_browse_hint">역을 누르면 지나는 노선을 봅니다.</string>
     <string name="map_browse_empty">역을 누르면 여기에 나옵니다.</string>
+    <string name="editor_add_from_map">지도에서 담기</string>
+    <string name="picker_add_start">출발</string>
+    <string name="picker_add_transfer">경유</string>
+    <string name="picker_add_stay">머무름</string>
+    <string name="picker_build_empty">지도에서 역을 누르고, 출발·경유·머무름 중 하나로 담습니다.</string>
+    <string name="picker_build_count">%1$d곳 담았습니다. 이어서 담거나 닫으면 됩니다.</string>
 </resources>

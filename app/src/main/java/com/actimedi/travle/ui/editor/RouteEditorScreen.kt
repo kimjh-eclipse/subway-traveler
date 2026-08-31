@@ -101,6 +101,8 @@ fun RouteEditorScreen(
     var isPickingStartTime by remember { mutableStateOf(false) }
     var pickerStopId by remember { mutableStateOf<String?>(null) }
     var searchStopId by remember { mutableStateOf<String?>(null) }
+    /** 지도를 보며 정거장을 이어 담는 중인가. */
+    var isBuildingOnMap by remember { mutableStateOf(false) }
     // 저장을 눌렀는데 막혔을 때 무엇이 막고 있는지. 고쳐지면 저절로 사라진다.
     var blocked by remember { mutableStateOf<DraftProblem?>(null) }
     // 저장을 누른 뒤 막차를 따져보는 동안, 그리고 그 결과 발이 묶이는 계획일 때.
@@ -192,6 +194,52 @@ fun RouteEditorScreen(
             else -> null
         }
         if (onlyChoice != null) applySearch(stopId, onlyChoice) else searchStopId = stopId
+    }
+
+    if (isBuildingOnMap) {
+        // 출발지가 비어 있으면 첫 역은 출발이다. 그 자리는 이미 만들어져 있으므로
+        // 새로 붙이지 않고 채운다 — 붙이면 이름 없는 첫 칸이 남는다.
+        val needsOrigin = draft.stops.firstOrNull()?.name.isNullOrBlank()
+        StationPickerScreen(
+            network = network,
+            initialStation = null,
+            focusStation = draft.stops.lastOrNull { it.name.isNotBlank() }?.name,
+            onCancel = {
+                isBuildingOnMap = false
+                // 담는 동안에는 길찾기를 띄우지 않았다. 두 창이 겹치면 지도가 가려진다.
+                // 다 담고 나온 자리에서, 직결 노선이 없어 비어 있는 첫 구간만 묻는다.
+                searchStopId = draft.stops
+                    .drop(1)
+                    .firstOrNull { it.line.isBlank() && it.name.isNotBlank() }
+                    ?.id
+            },
+            onPick = { _, _ -> },
+            onAdd = { station, line, kind ->
+                draft = if (draft.stops.firstOrNull()?.name.isNullOrBlank()) {
+                    val first = draft.stops.first()
+                    draft.copy(stops = draft.stops.toMutableList().apply {
+                        this[0] = first.copy(name = station, kind = StopKind.STAY)
+                    })
+                } else {
+                    draft.copy(
+                        stops = draft.stops + RouteStop(
+                            name = station,
+                            kind = kind,
+                            line = line.orEmpty(),
+                            lineIsManual = line != null,
+                            pauseMinutes = if (kind == StopKind.STAY) {
+                                TravelTimes.DEFAULT_STAY_MINUTES
+                            } else {
+                                TravelTimes.DEFAULT_TRANSFER_WAIT
+                            },
+                        ),
+                    )
+                }.withAutoLines(network)
+            },
+            addedStations = draft.stops.map { it.name }.filter { it.isNotBlank() },
+            needsOrigin = needsOrigin,
+        )
+        return
     }
 
     pickerStopId?.let { stopId ->
@@ -355,13 +403,17 @@ fun RouteEditorScreen(
             }
 
             item {
-                AddStopButton(
-                    onClick = {
-                        draft = draft
-                            .copy(stops = draft.stops + draft.nextStopDefault())
-                            .withAutoLines(network)
-                    },
-                )
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    AddStopButton(
+                        onClick = {
+                            draft = draft
+                                .copy(stops = draft.stops + draft.nextStopDefault())
+                                .withAutoLines(network)
+                        },
+                    )
+                    // 한 칸씩 이름을 쳐 넣는 것 말고, 지도를 보며 이어 담는 길.
+                    AddFromMapButton(onClick = { isBuildingOnMap = true })
+                }
             }
 
             if (validation.messages.isNotEmpty()) {
@@ -1096,6 +1148,29 @@ private fun AddStopButton(onClick: () -> Unit) {
             fontWeight = FontWeight.Bold,
             fontSize = 13.5.sp,
             color = AmColor.Blue,
+        )
+    }
+}
+
+@Composable
+private fun AddFromMapButton(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(18.dp))
+            .background(AmColor.White)
+            .border(1.dp, AmColor.Line, RoundedCornerShape(18.dp))
+            .clickable(onClick = onClick)
+            .padding(vertical = 15.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = stringResource(R.string.editor_add_from_map),
+            fontFamily = SuitFamily,
+            fontWeight = FontWeight.Bold,
+            fontSize = 13.5.sp,
+            color = AmColor.Navy,
         )
     }
 }

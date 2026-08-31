@@ -123,6 +123,13 @@ fun SubwayMapView(
     mapped: MappedRoute? = null,
     selectedStation: Int? = null,
     /**
+     * 이미 경로에 담은 역. 순서대로 번호를 붙여 찍는다.
+     *
+     * 지도에서 경로를 만들 때 지금까지 무엇을 담았는지 보이지 않으면 눈을 감고
+     * 찍는 것과 같다.
+     */
+    marked: List<Int> = emptyList(),
+    /**
      * 역마다 점과 이름을 찍을지. 충분히 확대했을 때만 나온다.
      *
      * 예전에는 `onStationTap != null`로 갈랐다. 누를 수 있는 화면에서만 이름이
@@ -255,6 +262,18 @@ fun SubwayMapView(
             drawCircle(AmColor.Navy, radius = dot + 2f * density, center = p)
             drawCircle(AmColor.White, radius = dot, center = p)
             if (stop.isStay) drawCircle(AmColor.Blue, radius = dot * 0.55f, center = p)
+        }
+
+        // 3b — 지도에서 담아 가는 중인 역. 번호가 곧 순서다.
+        marked.forEachIndexed { order, index ->
+            val p = camera.toScreen(projected[index] ?: return@forEachIndexed)
+            drawCircle(AmColor.Navy, radius = 8.5f * density, center = p)
+            drawCircle(AmColor.White, radius = 5f * density, center = p)
+            val text = measurer.measure(
+                "${order + 1}",
+                TextStyle(fontSize = 9.sp, fontWeight = FontWeight.Bold, color = AmColor.Navy),
+            )
+            drawText(text, topLeft = Offset(p.x - text.size.width / 2f, p.y - text.size.height / 2f))
         }
 
         // 4 — the picker's current choice.

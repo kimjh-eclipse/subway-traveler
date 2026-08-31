@@ -236,4 +236,10 @@
     <string name="spot_kind_shopping">購物</string>
     <string name="map_browse_hint">點按車站可查看經過的路線。</string>
     <string name="map_browse_empty">點按車站後會顯示在這裡。</string>
+    <string name="editor_add_from_map">在地圖上新增</string>
+    <string name="picker_add_start">出發</string>
+    <string name="picker_add_transfer">轉乘</string>
+    <string name="picker_add_stay">停留</string>
+    <string name="picker_build_empty">點按車站，然後選擇出發、轉乘或停留加入行程。</string>
+    <string name="picker_build_count">已加入 %1$d 處。可繼續新增，或關閉。</string>
 </resources>

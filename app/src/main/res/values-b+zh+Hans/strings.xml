@@ -231,4 +231,10 @@
     <string name="spot_kind_shopping">购物</string>
     <string name="map_browse_hint">点按车站可查看经过的线路。</string>
     <string name="map_browse_empty">点按车站后会显示在这里。</string>
+    <string name="editor_add_from_map">在地图上添加</string>
+    <string name="picker_add_start">出发</string>
+    <string name="picker_add_transfer">换乘</string>
+    <string name="picker_add_stay">停留</string>
+    <string name="picker_build_empty">点按车站，然后选择出发、换乘或停留加入行程。</string>
+    <string name="picker_build_count">已加入 %1$d 处。可继续添加，或关闭。</string>
 </resources>
