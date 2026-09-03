@@ -128,6 +128,11 @@ fun SubwayMapView(
      * 지도에서 경로를 만들 때 지금까지 무엇을 담았는지 보이지 않으면 눈을 감고
      * 찍는 것과 같다.
      */
+    /**
+     * 역 사이를 그려진 선을 따라 잇는 길. 도식일 때만 준다 — 지리로 그릴 때는
+     * 역끼리 직선으로 잇는 것이 맞다.
+     */
+    runs: Map<Long, List<Offset>> = emptyMap(),
     marked: List<Int> = emptyList(),
     /**
      * 역마다 점과 이름을 찍을지. 충분히 확대했을 때만 나온다.
@@ -259,7 +264,7 @@ fun SubwayMapView(
 
         // 3 — the route.
         mapped?.legs?.forEach { leg ->
-            val points = leg.stations.mapNotNull { projected[it]?.let(camera::toScreen) }
+            val points = leg.trail(projected, runs).map(camera::toScreen)
             if (leg.isStraightHop) {
                 drawDashedHop(points, leg.color, routeStroke, 7f * density)
             } else {
@@ -561,6 +566,28 @@ fun placeWaters(network: SubwayNetwork, schematic: SchematicMap): List<PlacedWat
  * 둘이 어긋나면 역이 선 위에 얹히지 않는다. 그래서 자리를 옮기는 셈을 한 군데서만
  * 한다 — 역 자리로 잡은 틀을 선에도 그대로 쓴다.
  */
+/**
+ * 역 사이를 그려진 선을 따라 잇는 길. 열쇠는 두 역의 순번이며 순서를 가리지 않는다.
+ *
+ * 자산은 `u < v` 로만 담겨 있어, 반대 방향으로 지날 때는 뒤집어 쓴다.
+ */
+fun placeRuns(network: SubwayNetwork, schematic: SchematicMap): Map<Long, List<Offset>> {
+    if (schematic.isEmpty || schematic.runs.isEmpty()) return emptyMap()
+    val raw = network.stations.indices.mapNotNull { schematic.at(it)?.let { (x, y) -> Offset(x, y) } }
+    val bounds = boundsOf(raw) ?: return emptyMap()
+    val span = max(bounds.width, bounds.height).takeIf { it > 0f } ?: return emptyMap()
+    val f = MapContentSpan / span
+
+    return schematic.runs.filter { it.isUsable }.associate { run ->
+        runKey(run.from, run.to) to run.points.chunked(2) { (x, y) ->
+            Offset((x - bounds.left) * f, (y - bounds.top) * f)
+        }
+    }
+}
+
+/** 두 역을 순서 없이 가리키는 열쇠. */
+fun runKey(a: Int, b: Int): Long = min(a, b).toLong() shl 32 or max(a, b).toLong()
+
 fun placeSegments(network: SubwayNetwork, schematic: SchematicMap): List<PlacedStroke> {
     if (schematic.isEmpty || schematic.segments.isEmpty()) return emptyList()
     val raw = network.stations.indices.mapNotNull { schematic.at(it)?.let { (x, y) -> Offset(x, y) } }

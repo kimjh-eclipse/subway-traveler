@@ -68,6 +68,10 @@ fun RouteMapScreen(
     val waters = remember(network, schematic, style) {
         if (style == MapStyle.SCHEMATIC) placeWaters(network, schematic) else emptyList()
     }
+    // 지리로 그릴 때는 역끼리 직선으로 잇는 것이 맞다 — 그 그림에는 따라갈 선이 없다.
+    val runs = remember(network, schematic, style) {
+        if (style == MapStyle.SCHEMATIC) placeRuns(network, schematic) else emptyMap()
+    }
     // 도식은 역보다 선이 더 멀리 뻗는다 — 선까지 담아야 전체 보기에서 잘리지 않는다.
     val wholeBounds = remember(projected, backdrop) {
         boundsOf(projected + backdrop.flatMap { it.points })
@@ -98,6 +102,7 @@ fun RouteMapScreen(
                 waters = waters,
                 camera = camera,
                 mapped = mapped,
+                runs = runs,
                 // 경로를 보다가 옆 역이 뭔지 궁금해지는 것은 자연스럽다.
                 labelAllStations = true,
             )

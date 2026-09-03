@@ -45,6 +45,24 @@ data class SchematicWater(
     val isUsable: Boolean get() = points.size >= 6 && colour.startsWith("#")
 }
 
+/**
+ * 역과 역 사이를, **그려진 선을 따라** 잇는 길.
+ *
+ * 경로를 얹을 때 역끼리 직선으로 이으면, 도식도가 역이 아닌 자리에서 꺾는 구간에서
+ * 굵은 경로선이 그림을 벗어나 엉뚱한 데를 가로지른다. `tools/schematic_runs.py`가
+ * 그런 구간만 골라 미리 이어 둔다 — 안전하게 이을 수 있는 것만이라, 없는 구간은
+ * 예전처럼 직선으로 둔다.
+ */
+@Serializable
+data class SchematicRun(
+    @SerialName("u") val from: Int = -1,
+    @SerialName("v") val to: Int = -1,
+    /** `[x1, y1, x2, y2, …]`. 양 끝은 두 역의 자리다. */
+    @SerialName("p") val points: List<Float> = emptyList(),
+) {
+    val isUsable: Boolean get() = from >= 0 && to >= 0 && points.size >= 6
+}
+
 @Serializable
 data class SchematicMap(
     val source: String = "",
@@ -62,6 +80,8 @@ data class SchematicMap(
      * 자리에서도 꺾이고 그 꺾임이 그림의 성격을 만든다.
      */
     @SerialName("s") val segments: List<SchematicSegment> = emptyList(),
+    /** 그려진 선을 따라 이은 역 사이 길. 꺾이는 구간에만 있다. */
+    @SerialName("r") val runs: List<SchematicRun> = emptyList(),
 ) {
     val isEmpty: Boolean get() = points.none { it != null }
 
