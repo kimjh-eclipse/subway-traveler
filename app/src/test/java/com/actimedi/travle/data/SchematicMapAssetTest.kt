@@ -76,6 +76,44 @@ class SchematicMapAssetTest {
         )
     }
 
+    /**
+     * 노선의 역 차례가 도식 자리와 어긋나면, 경로선이 **갔다가 되돌아온다**. 되돌아온
+     * 자리에는 역 표시가 없어서 — 경로가 서지 않는 역이므로 — 화면에는 이유 없이
+     * 겹친 선만 남는다.
+     *
+     * `공항철도`가 `마곡나루 → 홍대입구 → 디지털미디어시티 → 공덕` 차례였고,
+     * 이름이 같은 두 `양평`은 도식 자리가 서로 바뀌어 있었다. 열 군데가 그랬다.
+     * `tools/audit_order.py`가 찾아 고친다.
+     */
+    @Test
+    fun `노선이 왔던 길을 되짚지 않는다`() {
+        val points = schematic.points
+        val names = network.stations.map { it.name }
+        val back = mutableListOf<String>()
+        network.lines.forEach { line ->
+            line.paths.forEach { path ->
+                path.windowed(3).forEach { (a, b, c) ->
+                    val one = points.getOrNull(a)
+                    val two = points.getOrNull(b)
+                    val three = points.getOrNull(c)
+                    if (one == null || two == null || three == null) return@forEach
+                    if (one.size < 2 || two.size < 2 || three.size < 2) return@forEach
+                    val ux = two[0] - one[0]
+                    val uy = two[1] - one[1]
+                    val vx = three[0] - two[0]
+                    val vy = three[1] - two[1]
+                    val nu = kotlin.math.hypot(ux, uy)
+                    val nv = kotlin.math.hypot(vx, vy)
+                    if (nu < 1f || nv < 1f) return@forEach
+                    val cos = (ux * vx + uy * vy) / (nu * nv)
+                    // 150도 넘게 꺾이면 되짚은 것이다. 노선이 그렇게 꺾이는 일은 없다.
+                    if (cos < -0.86f) back += "${line.name}: ${names[a]} → ${names[b]} → ${names[c]}"
+                }
+            }
+        }
+        assertTrue("되짚는 곳: $back", back.isEmpty())
+    }
+
     @Test
     fun `역은 노선 위에 앉아 있다`() {
         val lines = schematic.segments.filter { it.isUsable }
