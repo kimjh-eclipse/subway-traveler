@@ -204,14 +204,17 @@ fun SubwayMapView(
         val alpha = if (mapped == null) {
             1f
         } else if (backdrop.isNotEmpty()) {
-            0.2f
+            // 경로를 얹었으면 나머지는 자리만 알려 주면 된다. 배경이 또렷하면
+            // 굵은 경로선이 그 사이에 묻혀, 어느 선이 내 길인지 한눈에 안 보인다.
+            0.12f
         } else {
             // 지리로 그릴 때는 선이 가늘어(2dp) 더 죽이면 사라진다.
-            0.25f
+            0.18f
         }
         if (backdrop.isNotEmpty()) {
             // 강이 맨 밑이다. 한강이 노선은 아니지만, 그려야 서울로 읽힌다.
-            // 노선처럼 흐리게 하지 않는다 — 원래 옅은 색이라 더 빼면 사라진다.
+            // 원래 옅은 색이라 노선만큼 빼면 사라진다. 경로를 얹었을 때만 조금 뺀다.
+            val waterAlpha = if (mapped == null) 1f else 0.4f
             waters.forEach { water ->
                 val path = Path()
                 water.outline.forEachIndexed { i, point ->
@@ -219,7 +222,7 @@ fun SubwayMapView(
                     if (i == 0) path.moveTo(at.x, at.y) else path.lineTo(at.x, at.y)
                 }
                 path.close()
-                drawPath(path, water.colour)
+                drawPath(path, water.colour.copy(alpha = water.colour.alpha * waterAlpha))
             }
             // 도식일 때는 그림에 들어 있던 선을 그대로 쓴다. 역끼리 직선으로 이으면
             // 역이 아닌 자리의 꺾임이 사라져 도식처럼 보이지 않는다.
