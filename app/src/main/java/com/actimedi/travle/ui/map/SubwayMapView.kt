@@ -190,8 +190,11 @@ fun SubwayMapView(
 
         // 1 — the whole network, faded back to context.
         // 도식은 흐리게 깔면 형태가 무너진다. 색이 자료에 들어 있어 그대로 살린다.
+        //
+        // 경로가 없으면 흐리게 할 이유가 없다 — 노선도 자체가 볼 것이다. 뒤로
+        // 물러설 대상이 없는데 물러서 있어서, 노선도만 보는 화면이 온통 뿌옜다.
         val alpha = if (mapped == null) {
-            0.75f
+            1f
         } else if (backdrop.isNotEmpty()) {
             0.5f
         } else {
@@ -392,7 +395,7 @@ private fun DrawScope.drawLabelIfVisible(
     val layout = measurer.measure(
         text = text,
         style = TextStyle(
-            fontSize = if (strong) 12.sp else 10.sp,
+            fontSize = if (strong) 12.sp else 11.sp,
             fontWeight = FontWeight.Bold,
             color = if (strong) AmColor.White else AmColor.Navy,
         ),
@@ -412,8 +415,10 @@ private fun DrawScope.drawLabelIfVisible(
     if (box.left < 0f || placed.any { it.overlaps(box) }) return
     placed += box
 
+    // 이름 뒤는 비치지 않게 채운다. 반투명이면 밑을 지나는 노선이 글자에 겹쳐
+    // 보여, 획이 많은 한자·한글에서 특히 읽기 어려웠다.
     drawRoundRect(
-        color = if (strong) AmColor.Blue else AmColor.White.copy(alpha = 0.88f),
+        color = if (strong) AmColor.Blue else AmColor.White,
         topLeft = Offset(box.left, box.top),
         size = Size(box.width, box.height),
         cornerRadius = CornerRadius(4f * density),

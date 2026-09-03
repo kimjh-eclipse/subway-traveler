@@ -123,6 +123,25 @@ fun NetworkMapScreen(
                 fontSize = 12.sp,
                 color = RouteColor.StayLabel,
             )
+            Spacer(Modifier.height(10.dp))
+            // 지도 위에 얹지 않는다. 칩이 덮고 있던 자리에 `석수`·`안양`이 있었다 —
+            // 이름을 보여 주려고 만든 화면에서 칩이 이름을 가렸다.
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                PageChip(stringResource(R.string.map_whole)) { camera.frame(wholeBounds) }
+                PageChip(
+                    if (style == MapStyle.SCHEMATIC) {
+                        stringResource(R.string.map_geographic)
+                    } else {
+                        stringResource(R.string.map_schematic)
+                    },
+                ) {
+                    style = if (style == MapStyle.SCHEMATIC) {
+                        MapStyle.GEOGRAPHIC
+                    } else {
+                        MapStyle.SCHEMATIC
+                    }
+                }
+            }
         }
         HorizontalDivider(color = AmColor.Line, thickness = 1.dp)
 
@@ -139,38 +158,17 @@ fun NetworkMapScreen(
                 // 빈 자리를 누르면 접는다. 펴 놓은 시간표를 닫을 길이 없었다.
                 onEmptyTap = { selected = null },
             )
-            Column(
-                modifier = Modifier.align(Alignment.BottomStart).padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                MapChip(stringResource(R.string.map_whole)) { camera.frame(wholeBounds) }
-                MapChip(
-                    if (style == MapStyle.SCHEMATIC) {
-                        stringResource(R.string.map_geographic)
-                    } else {
-                        stringResource(R.string.map_schematic)
-                    },
-                ) {
-                    style = if (style == MapStyle.SCHEMATIC) {
-                        MapStyle.GEOGRAPHIC
-                    } else {
-                        MapStyle.SCHEMATIC
-                    }
-                }
-            }
-            Attribution(
-                text = if (style == MapStyle.SCHEMATIC && !schematic.isEmpty) {
-                    stringResource(R.string.map_credit_schematic)
-                } else {
-                    network.source
-                },
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .fillMaxWidth(0.55f)
-                    .padding(12.dp),
-            )
         }
 
+        // 출처도 지도 밖으로. 두 줄로 흘러 도심 한복판을 가리고 있었다.
+        Attribution(
+            text = if (style == MapStyle.SCHEMATIC && !schematic.isEmpty) {
+                stringResource(R.string.map_credit_schematic)
+            } else {
+                network.source
+            },
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 6.dp),
+        )
         HorizontalDivider(color = AmColor.Line, thickness = 1.dp)
         StationBar(network = network, selected = selected)
     }
@@ -291,3 +289,24 @@ private fun WayChip(label: String, isSelected: Boolean, onClick: () -> Unit) {
     )
 }
 
+/**
+ * 지도 밖에 놓는 칩.
+ *
+ * [MapChip]은 지도 위에 얹으라고 만든 것이라 흰 바탕이다 — 흰 화면으로 내려오니
+ * 알약이 사라지고 파란 글씨만 떠 있었다. 여기서는 앱의 다른 칩과 같은 옅은 파랑을 쓴다.
+ */
+@Composable
+private fun PageChip(label: String, onClick: () -> Unit) {
+    Text(
+        text = label,
+        fontFamily = SuitFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 12.sp,
+        color = AmColor.Blue,
+        modifier = Modifier
+            .clip(CircleShape)
+            .background(RouteColor.StayBadgeFill)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 8.dp),
+    )
+}
