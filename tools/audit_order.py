@@ -16,6 +16,7 @@
 import json
 import math
 import pathlib
+from collections import Counter, defaultdict
 import sys
 
 ROOT = pathlib.Path(__file__).parent.parent
@@ -41,6 +42,90 @@ ORDER_SWAPS = {
 POINT_SWAPS = [
     ("양평", "5호선", "경의중앙선"),
 ]
+
+# 노선이 하나뿐인 역이 그 노선 선에서 이만큼 떨어져 있으면 선 위로 끌어다 놓는다.
+#
+# 환승역은 손대지 않는다. 역 표시는 하나여야 하고, 그 하나가 여러 노선의 선
+# 사이에 있는 것은 그림이 그렇게 그려졌기 때문이다 — 서울역은 다섯 노선이
+# 지나므로 어느 한 점도 다섯 선 위에 동시에 있을 수 없다. 옮겨 보면 121이
+# 120이 될 뿐이고, 대신 역 표시가 그림의 역 자리에서 벗어난다.
+#
+# 노선이 하나인 역은 이야기가 다르다. 자기 선에서 떨어져 있으면 그냥 자리가
+# 틀린 것이다. 지금은 가좌(75)와 보문(25) 둘뿐이다.
+PULL_ONTO_LINE = 25.0
+
+
+def line_colours(network, schematic, segments):
+    """노선마다 색 하나. `schematic_runs.py`와 같은 방식으로 뽑는다."""
+    points = schematic["p"]
+    votes = defaultdict(Counter)
+    for line in network["lines"]:
+        for path in line["p"]:
+            for index in path:
+                if not points[index]:
+                    continue
+                point = tuple(points[index])
+                nearest = {}
+                for segment in segments:
+                    distance = point_to(point, segment)[0]
+                    colour = segment.get("c", "")
+                    if colour not in nearest or distance < nearest[colour]:
+                        nearest[colour] = distance
+                for colour, distance in nearest.items():
+                    if distance <= 12.0:
+                        votes[line["n"]][colour] += 1
+    return {n: c.most_common(1)[0][0] for n, c in votes.items() if c}
+
+
+def point_to(point, segment):
+    """점에서 토막까지의 거리와 그 발점."""
+    (px, py), (ax, ay), (bx, by) = point, segment["a"], segment["b"]
+    dx, dy = bx - ax, by - ay
+    length = dx * dx + dy * dy
+    if length == 0:
+        return math.dist(point, (ax, ay)), (ax, ay)
+    t = max(0.0, min(1.0, ((px - ax) * dx + (py - ay) * dy) / length))
+    foot = (ax + t * dx, ay + t * dy)
+    return math.dist(point, foot), foot
+
+
+def pull_singles(network, schematic):
+    """노선이 하나인 역을 그 노선 선 위로 끌어다 놓는다."""
+    segments = [s for s in schematic["s"] if s.get("a") and s.get("b")]
+    colours = line_colours(network, schematic, segments)
+    by_colour = defaultdict(list)
+    for segment in segments:
+        by_colour[segment.get("c", "")].append(segment)
+
+    serves = defaultdict(set)
+    for line in network["lines"]:
+        colour = colours.get(line["n"])
+        if not colour:
+            continue
+        for path in line["p"]:
+            for index in path:
+                if schematic["p"][index]:
+                    serves[index].add((line["n"], colour))
+
+    moved = []
+    twins = Counter(s["n"] for s in network["stations"])
+    for index, lines in serves.items():
+        if len(lines) != 1:
+            continue
+        # 이름이 같은 역이 둘 이상이면 손대지 않는다. 자리가 뒤바뀐 것인지
+        # 자리가 틀린 것인지 여기서는 가릴 수 없다 — 양평을 1000이나 옮겼다.
+        if twins[network["stations"][index]["n"]] > 1:
+            continue
+        (name, colour), = lines
+        point = tuple(schematic["p"][index])
+        distance, foot = min(
+            (point_to(point, s) for s in by_colour[colour]), key=lambda x: x[0]
+        )
+        if distance <= PULL_ONTO_LINE:
+            continue
+        schematic["p"][index] = [round(foot[0], 1), round(foot[1], 1)]
+        moved.append((network["stations"][index]["n"], name, distance))
+    return moved
 
 
 def reversals(network, schematic):
@@ -80,14 +165,21 @@ def main():
             print("\n고치려면 --fix 를 붙인다.")
         return
 
+    # 맞바꿈은 **되짚음이 줄어들 때만** 한다. 조건 없이 바꾸면 도구를 두 번
+    # 돌리는 순간 고친 것이 되돌아간다 — 실제로 그렇게 자산을 망가뜨렸다.
     for line in network["lines"]:
         for first, second in ORDER_SWAPS.get(line["n"], []):
             for path in line["p"]:
                 spots = {names[i]: k for k, i in enumerate(path)}
-                if first in spots and second in spots:
-                    one, two = spots[first], spots[second]
-                    path[one], path[two] = path[two], path[one]
+                if first not in spots or second not in spots:
+                    continue
+                one, two = spots[first], spots[second]
+                before = len(reversals(network, schematic))
+                path[one], path[two] = path[two], path[one]
+                if len(reversals(network, schematic)) < before:
                     print(f"차례를 바꿨다 · {line['n']}: {first} ↔ {second}")
+                else:
+                    path[one], path[two] = path[two], path[one]
 
     for name, one_line, other_line in POINT_SWAPS:
         pair = [i for i, n in enumerate(names) if n == name]
@@ -97,8 +189,15 @@ def main():
             print(f"자리를 못 바꿨다 · {name}: 두 역을 못 가렸다")
             continue
         points = schematic["p"]
+        before = len(reversals(network, schematic))
         points[one], points[other] = points[other], points[one]
-        print(f"도식 자리를 바꿨다 · {name}: {one_line} ↔ {other_line}")
+        if len(reversals(network, schematic)) < before:
+            print(f"도식 자리를 바꿨다 · {name}: {one_line} ↔ {other_line}")
+        else:
+            points[one], points[other] = points[other], points[one]
+
+    for station, line, distance in pull_singles(network, schematic):
+        print(f"선 위로 옮겼다 · {station}({line}): {distance:.0f} 떨어져 있었다")
 
     NETWORK.write_text(
         json.dumps(network, ensure_ascii=False, separators=(",", ":")), encoding="utf-8"
