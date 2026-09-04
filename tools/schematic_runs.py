@@ -215,9 +215,17 @@ def main():
             left.append((stray_of(points[u], points[v]), u, v))
             continue
         # 붙이는 거리를 넉넉히 잡은 탓에 길의 양 끝이 역에서 조금 떨어져 있다.
-        # 그대로 두면 역 앞에서 선이 꺾여 보인다 — 끝은 역 자리로 되돌린다.
-        best[0] = tuple(points[u])
-        best[-1] = tuple(points[v])
+        # 끝점을 역 자리로 **바꿔치면** 역에서 그 다음 점까지 비스듬히 질러가,
+        # 꺾이는 자리가 밀린다(6호선 연신내 쪽이 53만큼 밀렸다). 바꾸지 말고
+        # 앞뒤에 덧붙인다 — 역에서 선까지 짧게 이어 붙는 모양이 된다.
+        if math.dist(best[0], tuple(points[u])) > 1.0:
+            best.insert(0, tuple(points[u]))
+        else:
+            best[0] = tuple(points[u])
+        if math.dist(best[-1], tuple(points[v])) > 1.0:
+            best.append(tuple(points[v]))
+        else:
+            best[-1] = tuple(points[v])
         runs.append({"u": u, "v": v, "p": [round(c, 1) for pt in best for c in pt]})
 
     schematic["r"] = runs
