@@ -1,0 +1,59 @@
+이 폴더의 자료는 앱 코드(Apache-2.0)와 라이선스가 다르다.
+The data in this folder is licensed separately from the app code (Apache-2.0).
+
+================================================================================
+subway_map.json · station_names.json · hotspots.json
+================================================================================
+
+© OpenStreetMap contributors — Open Database License (ODbL) 1.0
+https://opendatacommons.org/licenses/odbl/1-0/
+
+OpenStreetMap에서 캐낸 뒤 가공한 파생 데이터베이스다. ODbL에 따라 이 파일들은
+같은 라이선스(ODbL 1.0)로 공개된다. 만든 도구는 저장소의 `tools/`에 있다.
+
+  subway_map.json    노선망 — 역 자리, 노선 갈래, 실측 역간 소요시간
+  station_names.json 역 이름의 영어·일본어·중국어 표기
+                     (중국어 라벨 일부는 Wikidata, CC0)
+  hotspots.json      역마다 가 볼 만한 곳
+                     (일부 이름은 손으로 적었다 — tools/hotspots.py의 MANUAL_NAMES)
+
+Derived from OpenStreetMap and reworked. Under ODbL these files are released under
+the same licence. The tools that build them are in `tools/`.
+
+station_names.json also carries Chinese labels from Wikidata (CC0 1.0).
+
+--------------------------------------------------------------------------------
+station_names.json 에 들어간 것 중 아래는 출처가 다르다
+--------------------------------------------------------------------------------
+
+일부 역의 영문 표기는 국어의 로마자 표기법에 맞춰 손으로 고쳤다
+(tools/station_names.py 의 ENGLISH_OVERRIDES).
+
+================================================================================
+schematic_map.json
+================================================================================
+
+서울교통공사 「수도권 지하철 노선도」 — 공공누리 제1유형 (출처표시)
+Seoul Metro "Seoul Metropolitan Subway Map" — KOGL Type 1 (attribution)
+https://www.kogl.or.kr/info/license.do
+
+공공누리 제1유형은 출처를 표시하면 상업적 이용과 변형이 모두 허용된다. 원본 PDF에서
+선과 역 자리를 캐내 정규화한 것이며, 도구는 `tools/seoul_schematic.py`,
+`tools/schematic_runs.py`, `tools/audit_order.py` 다.
+
+앱 안에서는 지도 화면 아래와 `설정 > 도식 노선도` 항목에 출처를 표시한다.
+
+================================================================================
+measured times (subway_map.json 안의 `t`)
+================================================================================
+
+서울교통공사 「역간 거리 및 소요시간」 — 공공누리 제1유형 (출처표시)
+
+1~8호선 264개 구간만 실측값이고, 나머지 노선은 역당 1분 32초 평균으로 메운다.
+
+================================================================================
+글꼴 (app/src/main/res/font)
+================================================================================
+
+SUIT, SUITE — SIL Open Font License 1.1
+https://sunn.us/suit/ · https://sunn.us/suite/

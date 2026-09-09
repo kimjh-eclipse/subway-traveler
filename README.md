@@ -209,3 +209,11 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 - **폰트** — SUIT, SUITE는 **SIL Open Font License 1.1**로 배포되어 앱에 동봉할 수 있다.
 
 출처는 앱 안 **설정 탭**에도 표시된다 — 라이선스가 출처 표시를 요구하기 때문이다.
+
+## 라이선스
+
+앱 코드는 Apache-2.0(`LICENSE`). **자산은 라이선스가 다르다** — 노선망·역 이름표·
+가 볼 곳은 OpenStreetMap 파생(ODbL 1.0), 도식 노선도는 서울교통공사(공공누리 1유형)
+파생이다. 자산별 출처와 조건은 `app/src/main/assets/LICENSE`에 적어 두었다.
+
+구글 플레이 배포 준비 상태는 `docs/PLAY_RELEASE.md`.
