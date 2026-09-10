@@ -241,4 +241,16 @@ The diagram\'s lines and station positions come from this. Line topology and rea
     <string name="board_chip">Board</string>
     <string name="board_chip_at">Board at %1$s</string>
     <string name="timetable_day">for %1$s</string>
+    <string name="intro_skip">Skip</string>
+    <string name="intro_next">Next</string>
+    <string name="intro_start">Start</string>
+    <string name="intro_again">Show the intro again</string>
+    <string name="intro_title_1">Plan a day on the subway</string>
+    <string name="intro_body_1">Say where you stop and how long you stay — the times work themselves out.</string>
+    <string name="intro_title_2">Build it on the map</string>
+    <string name="intro_body_2">You do not need the Korean station names. Tap the map and pick start, change, stay or last stop.</string>
+    <string name="intro_title_3">Match real train times</string>
+    <string name="intro_body_3">Recalculate the plan against the timetable, and see whether it misses the last train.</string>
+    <string name="intro_title_4">The whole map, any time</string>
+    <string name="intro_body_4">All 654 stations with their names. Tap a station and a line to read its timetable for the day.</string>
 </resources>

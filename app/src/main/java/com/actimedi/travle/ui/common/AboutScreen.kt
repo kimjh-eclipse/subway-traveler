@@ -1,5 +1,7 @@
 package com.actimedi.travle.ui.common
 
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -34,7 +36,7 @@ import com.actimedi.travle.ui.theme.SuiteFamily
  * 드러나지 않아, 설정 탭이 그 자리를 맡는다.
  */
 @Composable
-fun AboutScreen(modifier: Modifier = Modifier) {
+fun AboutScreen(modifier: Modifier = Modifier, onShowIntro: (() -> Unit)? = null) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -52,6 +54,24 @@ fun AboutScreen(modifier: Modifier = Modifier) {
         )
         Spacer(Modifier.height(20.dp))
 
+        // 안내는 한 번만 나온다. 다시 보고 싶을 자리는 여기뿐이다.
+        onShowIntro?.let { show ->
+            Text(
+                text = stringResource(R.string.intro_again),
+                fontFamily = SuitFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = 13.5.sp,
+                color = AmColor.Blue,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(RouteColor.StayBadgeFill)
+                    .clickable(onClick = show)
+                    .padding(vertical = 15.dp),
+                textAlign = TextAlign.Center,
+            )
+            Spacer(Modifier.height(10.dp))
+        }
         SourceCard(
             title = stringResource(R.string.about_network_title),
             body = stringResource(R.string.about_network_body),

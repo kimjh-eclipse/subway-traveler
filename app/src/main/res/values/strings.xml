@@ -255,4 +255,16 @@
     <string name="board_chip">승차</string>
     <string name="board_chip_at">%1$s에서 승차</string>
     <string name="timetable_day">%1$s 기준</string>
+    <string name="intro_skip">건너뛰기</string>
+    <string name="intro_next">다음</string>
+    <string name="intro_start">시작하기</string>
+    <string name="intro_again">안내 다시 보기</string>
+    <string name="intro_title_1">지하철로 하루를 짭니다</string>
+    <string name="intro_body_1">어디에 들르고 얼마나 머물지 정하면 시각은 알아서 계산됩니다.</string>
+    <string name="intro_title_2">지도에서 담습니다</string>
+    <string name="intro_body_2">역 이름을 몰라도 됩니다. 지도를 눌러 출발·경유·머무름·종착을 고르면 경로가 만들어집니다.</string>
+    <string name="intro_title_3">실제 열차 시각에 맞춥니다</string>
+    <string name="intro_body_3">시간표에 맞춰 일정을 다시 계산하고, 이 일정으로 막차를 놓치는지 미리 봅니다.</string>
+    <string name="intro_title_4">노선도는 언제든</string>
+    <string name="intro_body_4">654개 역을 이름과 함께 봅니다. 역과 노선을 누르면 그 역의 하루치 시간표가 나옵니다.</string>
 </resources>

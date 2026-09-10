@@ -50,6 +50,9 @@ import com.actimedi.travle.data.toDraft
 import com.actimedi.travle.ui.common.AboutScreen
 import com.actimedi.travle.ui.editor.RouteEditorScreen
 import com.actimedi.travle.ui.history.HistoryScreen
+import com.actimedi.travle.data.Onboarding
+import com.actimedi.travle.ui.onboarding.OnboardingScreen
+import androidx.compose.ui.platform.LocalContext
 import com.actimedi.travle.ui.map.NetworkMapScreen
 import com.actimedi.travle.ui.map.RouteMapScreen
 import com.actimedi.travle.ui.route.NewRouteButton
@@ -109,6 +112,17 @@ fun TravleApp(viewModel: TravleViewModel = viewModel()) {
     /** Id of the route being edited; null means the editor is creating a new one. */
     var editingRouteId by rememberSaveable { mutableStateOf<String?>(null) }
     var isMapOpen by rememberSaveable { mutableStateOf(false) }
+    // 처음 켠 사람에게 한 번. 설정에서 다시 부를 수 있다.
+    val context = LocalContext.current
+    var showIntro by rememberSaveable { mutableStateOf(!Onboarding.hasSeen(context)) }
+
+    if (showIntro) {
+        OnboardingScreen(onDone = {
+            Onboarding.markSeen(context)
+            showIntro = false
+        })
+        return
+    }
 
     if (isEditorOpen) {
         val editing = editingRouteId?.let { id -> viewModel.routes.firstOrNull { it.id == id } }
@@ -206,7 +220,7 @@ fun TravleApp(viewModel: TravleViewModel = viewModel()) {
                     },
                 )
 
-                TravleTab.SETTINGS -> AboutScreen()
+                TravleTab.SETTINGS -> AboutScreen(onShowIntro = { showIntro = true })
             }
         }
         BottomNav(selected = tab, onSelect = { tab = it })

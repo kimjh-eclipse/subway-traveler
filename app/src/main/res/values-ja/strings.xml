@@ -241,4 +241,16 @@
     <string name="board_chip">乗車</string>
     <string name="board_chip_at">%1$sで乗車</string>
     <string name="timetable_day">%1$s基準</string>
+    <string name="intro_skip">スキップ</string>
+    <string name="intro_next">次へ</string>
+    <string name="intro_start">はじめる</string>
+    <string name="intro_again">案内をもう一度見る</string>
+    <string name="intro_title_1">地下鉄で一日の行程を組む</string>
+    <string name="intro_body_1">どこに寄ってどれだけ滞在するかを決めれば、時刻は自動で計算されます。</string>
+    <string name="intro_title_2">地図から組み立てる</string>
+    <string name="intro_body_2">駅名を知らなくても大丈夫。地図をタップして出発・乗換・滞在・終着を選ぶだけです。</string>
+    <string name="intro_title_3">実際の列車時刻に合わせる</string>
+    <string name="intro_body_3">時刻表に合わせて計算し直し、この行程で終電を逃さないか先に確かめます。</string>
+    <string name="intro_title_4">路線図はいつでも</string>
+    <string name="intro_body_4">654駅を駅名つきで見られます。駅と路線をタップすると、その駅の一日分の時刻表が出ます。</string>
 </resources>

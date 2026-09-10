@@ -244,4 +244,16 @@
     <string name="board_chip">乘车</string>
     <string name="board_chip_at">在%1$s乘车</string>
     <string name="timetable_day">以%1$s为准</string>
+    <string name="intro_skip">跳过</string>
+    <string name="intro_next">下一步</string>
+    <string name="intro_start">开始</string>
+    <string name="intro_again">再看一次介绍</string>
+    <string name="intro_title_1">用地铁规划一天</string>
+    <string name="intro_body_1">决定去哪里停留、停留多久，时间会自动算好。</string>
+    <string name="intro_title_2">在地图上组建行程</string>
+    <string name="intro_body_2">不用知道韩文站名。点按地图，选择出发、换乘、停留或终点即可。</string>
+    <string name="intro_title_3">对齐真实列车时刻</string>
+    <string name="intro_body_3">按时刻表重新计算行程，并提前查看是否会错过末班车。</string>
+    <string name="intro_title_4">随时查看线路图</string>
+    <string name="intro_body_4">654 个车站连站名一起看。点按车站和线路，即可读到该站当天的时刻表。</string>
 </resources>

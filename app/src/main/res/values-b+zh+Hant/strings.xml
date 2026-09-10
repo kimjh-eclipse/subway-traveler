@@ -249,4 +249,16 @@
     <string name="board_chip">乘車</string>
     <string name="board_chip_at">在%1$s乘車</string>
     <string name="timetable_day">以%1$s為準</string>
+    <string name="intro_skip">略過</string>
+    <string name="intro_next">下一步</string>
+    <string name="intro_start">開始</string>
+    <string name="intro_again">再看一次介紹</string>
+    <string name="intro_title_1">用地鐵規劃一天</string>
+    <string name="intro_body_1">決定去哪裡停留、停留多久，時間會自動算好。</string>
+    <string name="intro_title_2">在地圖上組建行程</string>
+    <string name="intro_body_2">不用知道韓文站名。點按地圖，選擇出發、轉乘、停留或終點即可。</string>
+    <string name="intro_title_3">對齊真實列車時刻</string>
+    <string name="intro_body_3">按時刻表重新計算行程，並提前查看是否會錯過末班車。</string>
+    <string name="intro_title_4">隨時查看線路圖</string>
+    <string name="intro_body_4">654 個車站連站名一起看。點按車站和路線，即可讀到該站當天的時刻表。</string>
 </resources>
