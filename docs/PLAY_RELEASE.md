@@ -21,7 +21,7 @@
 | 키 유출 | 인증키를 로그로 찍는 코드 없음 (`grep` 확인) |
 | 런처 아이콘 | adaptive(`anydpi-v26`) + `monochrome` (테마 아이콘 지원). `minSdk 26`이라 레거시 PNG 불필요 |
 | 스토어 아이콘 | 512×512 32비트 PNG 생성 — `~/Downloads/play-지하철여행자/icon-512.png` |
-| 스크린샷 | 1080×2400 5장 — `~/Downloads/play-지하철여행자/screenshots-ko/` |
+| 스크린샷 | 1080×2400 · 한국어 5장 · 영어 5장 — `~/Downloads/play-지하철여행자/screenshots-{ko,en}/` |
 
 ---
 
@@ -198,10 +198,19 @@ $ANDROID_HOME/build-tools/36.0.0/apksigner verify --print-certs \
 - `icon-512.png` — 스토어 아이콘 512×512, 32비트 PNG
 - `feature-graphic-1024x500.png` — 기능 그래픽
 - `screenshots-ko/` — 1080×2400 다섯 장 (경로 · 노선도 · 시간표 · 가 볼 만한 곳 · 경로 지도)
+- `screenshots-en/` — 같은 다섯 화면의 영어판. 역 이름·노선 이름·시간표까지 영문으로 나온다
 - `app-release.aab` — 플레이에 올리는 것
 
 ## 7. 아직 만들지 않은 것
 
-- **영어·일본어·중국어 스크린샷** — 한국어만 담았다. 로케일별로 올리는 편이 낫다.
-  앱 안에서 언어를 바꿔(`adb shell cmd locale set-app-locales`) 같은 화면을 다시 담으면 된다.
+- **일본어·중국어 스크린샷** — 한국어·영어만 담았다. 나머지는 같은 방법으로 담으면 된다.
+
+  ```bash
+  adb shell cmd locale set-app-locales com.actimedi.travle --locales ja-JP
+  ```
+
 - **7인치/10인치 태블릿 스크린샷** — 태블릿을 지원 기기로 둘 경우 필요.
+
+한 가지 알아 둘 것: 스크린샷 속 경로 제목(`교동마을 → 서울 한 바퀴 → 교동마을`)은
+사용자가 지은 이름이라 언어를 바꿔도 한국어 그대로다. 영어 스토어에 올릴 것이라면
+영어 제목의 경로를 하나 만들어 담는 편이 낫다.
