@@ -54,6 +54,7 @@ import androidx.compose.ui.res.stringResource
 import com.actimedi.travle.R
 import com.actimedi.travle.data.ClockTime
 import com.actimedi.travle.data.RouteDraft
+import com.actimedi.travle.data.DayOfWeekToken
 import com.actimedi.travle.data.DayType
 import com.actimedi.travle.data.DraftProblem
 import com.actimedi.travle.data.RouteStop
@@ -1041,10 +1042,13 @@ private fun DayOfWeekPicker(selected: String, onSelect: (String) -> Unit) {
             modifier = Modifier.horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            stringArrayResource(R.array.days_of_week).forEach { day ->
-                val isSelected = selected == day
+            // 보이는 것은 로케일의 이름, 저장하는 것은 언어 없는 값이다.
+            val names = stringArrayResource(R.array.days_of_week)
+            DayOfWeekToken.ALL.forEachIndexed { index, day ->
+                val name = names.getOrElse(index) { day }
+                val isSelected = DayOfWeekToken.canonical(selected) == day
                 Text(
-                    text = day.first().toString(),
+                    text = name.first().toString(),
                     fontFamily = SuitFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 13.sp,

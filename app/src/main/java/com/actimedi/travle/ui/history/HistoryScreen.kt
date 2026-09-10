@@ -38,6 +38,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.actimedi.travle.R
+import com.actimedi.travle.ui.common.dayLabel
 import com.actimedi.travle.data.Route
 import com.actimedi.travle.data.formatClockSpan
 import com.actimedi.travle.data.summarize
@@ -233,7 +234,7 @@ private fun HistoryCard(
                     route.endTime.format(),
                     formatClockSpan(summary.totalMinutes),
                 ),
-                route.dayOfWeek.takeIf { it.isNotBlank() },
+                dayLabel(route.dayOfWeek).takeIf { it.isNotBlank() },
             ).joinToString(" · "),
             fontFamily = SuitFamily,
             fontWeight = FontWeight.SemiBold,

@@ -1,5 +1,52 @@
 package com.actimedi.travle.data
 
+/**
+ * 저장하는 요일. **언어와 무관한 값**이다.
+ *
+ * 화면에 보이는 이름(`토요일`·`Saturday`·`土曜日`)은 로케일마다 다르므로 저장하면
+ * 안 된다 — 저장된 경로를 다른 언어로 열면 읽을 수 없고, 요일 판정도 깨진다.
+ */
+object DayOfWeekToken {
+    const val MONDAY = "MON"
+    const val SATURDAY = "SAT"
+    const val SUNDAY = "SUN"
+
+    /** 월요일부터. `R.array.days_of_week`와 같은 차례다. */
+    val ALL = listOf(MONDAY, "TUE", "WED", "THU", "FRI", SATURDAY, SUNDAY)
+
+    // 옛 경로가 들고 있는 문구들. 지우지 못한다 — 이미 저장된 자료다.
+    //
+    // 언어마다 요일이 어디에 붙는지가 다르다. 한국어·일본어는 **첫 글자**
+    // (`토요일`, `土曜日`), 영어는 앞 세 글자(`Saturday`), 중국어는 **마지막 글자**
+    // (`星期六`)다. 순서를 잘못 잡아 `토요일`의 끝 `일`을 먼저 보고 일요일로 읽은
+    // 적이 있다 — 한국어 요일은 모두 `일`로 끝난다.
+    private val FIRST = mapOf(
+        "월" to MONDAY, "화" to "TUE", "수" to "WED", "목" to "THU",
+        "금" to "FRI", "토" to SATURDAY, "일" to SUNDAY,
+        "月" to MONDAY, "火" to "TUE", "水" to "WED", "木" to "THU",
+        "金" to "FRI", "土" to SATURDAY, "日" to SUNDAY,
+    )
+    private val ENGLISH = mapOf(
+        "mon" to MONDAY, "tue" to "TUE", "wed" to "WED", "thu" to "THU",
+        "fri" to "FRI", "sat" to SATURDAY, "sun" to SUNDAY,
+    )
+    private val CHINESE = mapOf(
+        "一" to MONDAY, "二" to "TUE", "三" to "WED", "四" to "THU",
+        "五" to "FRI", "六" to SATURDAY, "日" to SUNDAY, "天" to SUNDAY,
+    )
+
+    /** 무엇이 들어오든 [ALL]의 값 하나로. 못 알아보면 빈 문자열. */
+    fun canonical(raw: String): String {
+        val value = raw.trim()
+        if (value.isEmpty()) return ""
+        if (value in ALL) return value
+        FIRST[value.take(1)]?.let { return it }
+        ENGLISH[value.take(3).lowercase()]?.let { return it }
+        CHINESE[value.takeLast(1)]?.let { return it }
+        return ""
+    }
+}
+
 /** 시간표는 요일 종류로 갈린다. */
 enum class DayType {
     WEEKDAY,
@@ -8,10 +55,18 @@ enum class DayType {
     ;
 
     companion object {
-        /** 경로에 적힌 요일 문구로 판정한다. 비어 있으면 평일로 본다. */
-        fun of(dayOfWeek: String): DayType = when {
-            dayOfWeek.startsWith("토") -> SATURDAY
-            dayOfWeek.startsWith("일") -> HOLIDAY
+        /**
+         * 경로에 적힌 요일로 판정한다. 비어 있으면 평일로 본다.
+         *
+         * 예전에는 **화면에 보이던 문구를 그대로** 저장했다. 그래서 영어로 쓰는
+         * 사람이 토요일을 고르면 `Saturday`가 저장되고, 여기서는 `토`로만 가려
+         * **평일 시간표**를 썼다 — 막차 확인까지 함께 틀어졌다. 일본어·중국어도
+         * 마찬가지였다. 이제는 [DayOfWeekToken]으로 저장하고, 옛 경로를 위해
+         * 다섯 언어의 문구도 함께 알아본다.
+         */
+        fun of(dayOfWeek: String): DayType = when (DayOfWeekToken.canonical(dayOfWeek)) {
+            DayOfWeekToken.SATURDAY -> SATURDAY
+            DayOfWeekToken.SUNDAY -> HOLIDAY
             else -> WEEKDAY
         }
 

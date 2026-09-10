@@ -66,6 +66,7 @@ import com.actimedi.travle.data.SeoulOneDayRoute
 import com.actimedi.travle.data.FareEstimate
 import com.actimedi.travle.data.SubwayNetwork
 import com.actimedi.travle.ui.common.wonText
+import com.actimedi.travle.ui.common.dayLabel
 import com.actimedi.travle.ui.common.stationLabel
 import com.actimedi.travle.ui.common.lineLabel
 import com.actimedi.travle.data.estimateFare
@@ -412,7 +413,7 @@ private fun ExpandedHeaderContent(
                 color = AmColor.White.copy(alpha = 0.85f),
             )
             Text(
-                text = dayOfWeek,
+                text = dayLabel(dayOfWeek),
                 fontFamily = SuitFamily,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 12.sp,

@@ -102,8 +102,13 @@ fun lineColorFor(line: String): Color {
         name.contains("9호선") -> LineColor.Line9
         name.contains("경의중앙") -> LineColor.Gyeongui
         name.contains("경춘") -> LineColor.Gyeongchun
+        // 영어로 적은 것도 알아본다. 편집기의 영어 힌트가 `Bus 26-2, on foot`을
+        // 치라고 해 놓고 색은 한국어만 보고 있었다 — 그대로 치면 회색이 됐다.
         name.contains("버스") || name.contains("번") -> LineColor.Bus
+        name.contains("bus", ignoreCase = true) -> LineColor.Bus
         name.contains("도보") || name.contains("걷") -> LineColor.Walk
+        name.contains("walk", ignoreCase = true) || name.contains("foot", ignoreCase = true) ->
+            LineColor.Walk
         else -> LineColor.Unknown
     }
 }
