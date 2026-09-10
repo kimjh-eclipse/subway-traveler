@@ -9,7 +9,6 @@ import androidx.lifecycle.viewModelScope
 import com.actimedi.travle.data.Route
 import com.actimedi.travle.data.RouteDraft
 import com.actimedi.travle.data.RouteStore
-import com.actimedi.travle.data.SeoulOneDayRoute
 import com.actimedi.travle.data.SubwayNetwork
 import com.actimedi.travle.data.SubwayNetworkLoader
 import com.actimedi.travle.data.toRoute
@@ -55,13 +54,18 @@ class TravleViewModel(application: Application) : AndroidViewModel(application) 
             }
         }
         viewModelScope.launch {
+            // 처음 켠 사람에게는 아무 경로도 넣지 않는다.
+            //
+            // 예전에는 `앱이 비어 보이지 않게` 예시 경로를 하나 저장해 두었다.
+            // 그런데 그것은 시안에서 옮겨 온 **누군가의 하루**였다 — 교동마을에서
+            // 출발해 `신당동 떡볶이`를 먹는 일정이, 그것도 하드코딩된 한국어로.
+            // 처음 켠 외국인 여행자가 읽을 수 없는 남의 일정을 자기 기록에 담긴
+            // 채로 보게 되고, 지우기 전에는 없앨 수도 없었다.
+            //
+            // 빈 화면에는 무엇을 하면 되는지 적혀 있다(`EmptyRouteScreen`).
+            // 볼 것이 필요하면 노선도 탭이 654개 역을 들고 기다린다.
             val stored = withContext(Dispatchers.IO) { store.load() }
-            val initial = stored.ifEmpty {
-                listOf(SeoulOneDayRoute).also { seed ->
-                    withContext(Dispatchers.IO) { store.save(seed) }
-                }
-            }
-            routes = initial.sortedByDescending { it.createdAt }
+            routes = stored.sortedByDescending { it.createdAt }
             selectedRouteId = routes.firstOrNull()?.id
             isLoading = false
         }

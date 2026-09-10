@@ -140,14 +140,20 @@ fun TravleApp(viewModel: TravleViewModel = viewModel()) {
         return
     }
 
-    // Only the 노선 tab puts a dark gradient behind the status bar; the other two
-    // are white surfaces and need dark status-bar icons to stay legible.
+    // 상태바 아이콘 색은 **그 아래 무엇이 깔리는가**로 정한다.
+    //
+    // 짙은 남색 머리글을 까는 것은 경로가 있을 때의 노선 탭뿐이다. 예전에는
+    // `tab != ROUTE`로만 갈랐는데, 첫 실행에 예시 경로를 넣어 두어 노선 탭이 늘
+    // 짙은 머리글을 갖고 있었기 때문이다. 그 예시를 걷어내자 **처음 켠 사람이 보는
+    // 첫 화면**이 흰 바탕이 되었고, 흰 아이콘이 흰 바탕에 얹혀 시계도 배터리도
+    // 사라졌다.
+    val hasDarkHeader = tab == TravleTab.ROUTE && viewModel.selectedRoute != null
     val view = LocalView.current
     if (!view.isInEditMode) {
         val window = (view.context as Activity).window
         SideEffect {
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars =
-                tab != TravleTab.ROUTE
+                !hasDarkHeader
         }
     }
 
