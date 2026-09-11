@@ -56,6 +56,8 @@ def tidy_chinese(text):
     if not text:
         return None
     text = text.strip()
+    # `屯田站 (京畿道)` 처럼 같은 이름을 가르려고 붙인 꼬리표는 화면에 쓸 것이 아니다.
+    text = re.sub(r"\s*[（(][^）)]*[）)]\s*$", "", text).strip()
     if len(text) > 1 and text.endswith(("站", "驛", "驿")):
         text = text[:-1]
     return text or None
